@@ -1,0 +1,22 @@
+{
+  "name": "Dent-O-Facial Clinic",
+  "short_name": "Dent-O-Facial",
+  "description": "Book appointments, access medical records, and stay updated with Dent-O-Facial Clinic.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FCFAED",
+  "theme_color": "#D4AF37",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/apple-icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

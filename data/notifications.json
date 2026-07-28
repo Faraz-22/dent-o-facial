@@ -1,0 +1,18 @@
+[
+  {
+    "id": "1785260846054",
+    "title": "New Appointment",
+    "message": "priya booked an appointment for General Consultation at Purnea Clinic.",
+    "type": "Appointment",
+    "read": true,
+    "createdAt": "2026-07-28T17:47:26.054Z"
+  },
+  {
+    "id": "1785260846065",
+    "title": "New Lead",
+    "message": "Lead captured from Appointment Form: priya",
+    "type": "Lead",
+    "read": true,
+    "createdAt": "2026-07-28T17:47:26.065Z"
+  }
+]

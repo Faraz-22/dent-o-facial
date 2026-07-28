@@ -1,0 +1,20 @@
+[
+  {
+    "id": "1785265034492",
+    "patientEmail": "priya@example.com",
+    "type": "prescription",
+    "fileUrl": "/uploads/1785265033204-Screenshot_2025-11-17_195248.png",
+    "notes": "",
+    "date": "2026-07-28",
+    "createdAt": "2026-07-28T18:57:14.492Z"
+  },
+  {
+    "id": "1785265711681",
+    "patientEmail": "priya@example.com",
+    "type": "xray",
+    "fileUrl": "/uploads/1785265710443-Screenshot_2025-11-15_231103.png",
+    "notes": "",
+    "date": "2026-07-28",
+    "createdAt": "2026-07-28T19:08:31.681Z"
+  }
+]

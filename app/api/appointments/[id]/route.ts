@@ -1,0 +1,22 @@
+import { NextResponse } from 'next/server'
+import { getAppointments, saveAppointment } from '@/lib/db'
+
+export async function PATCH(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  try {
+    const data = await request.json()
+    const appointments = getAppointments()
+    const index = appointments.findIndex(a => a.id === params.id)
+    
+    if (index === -1) {
+      return NextResponse.json({ error: 'Appointment not found' }, { status: 404 })
+    }
+    
+    const updated = { ...appointments[index], ...data }
+    saveAppointment(updated)
+    
+    return NextResponse.json({ success: true, appointment: updated })
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to update appointment' }, { status: 500 })
+  }
+}

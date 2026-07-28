@@ -1,0 +1,87 @@
+import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
+import { ADMIN_PASSWORD } from '@/lib/content'
+import fs from 'fs'
+import path from 'path'
+import { connectToDatabase } from '@/lib/mongodb'
+import { User as UserModel } from '@/lib/models'
+
+const USERS_FILE = path.join(process.cwd(), 'data', 'users.json')
+
+interface User {
+  name: string
+  email: string
+  password?: string
+}
+
+function readUsers(): User[] {
+  try {
+    const raw = fs.readFileSync(USERS_FILE, 'utf-8')
+    return JSON.parse(raw) as User[]
+  } catch {
+    return []
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json()
+    const password = body.password
+    const email = body.email || ''
+
+    // 1. Check Admin Credentials
+    if (password === ADMIN_PASSWORD && (email === 'admin@dentofacial.com' || email === '' || email === 'admin')) {
+      const cookieStore = await cookies()
+      cookieStore.set('admin-auth', 'true', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+        path: '/',
+      })
+      cookieStore.delete('user-auth')
+      return NextResponse.json({ success: true, role: 'admin', name: 'Admin' })
+    }
+
+    // 2. Check User Credentials
+    if (email) {
+      let matchedUser = null;
+      try {
+        await connectToDatabase()
+        matchedUser = await UserModel.findOne({ 
+          email: { $regex: new RegExp(`^${email}$`, 'i') },
+          password 
+        });
+      } catch (dbErr) {
+        console.warn('MongoDB connection failed, falling back to JSON', dbErr)
+        const users = readUsers()
+        matchedUser = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password)
+      }
+
+      if (matchedUser) {
+        const cookieStore = await cookies()
+        const userData = { name: matchedUser.name, email: matchedUser.email }
+        cookieStore.set('user-auth', JSON.stringify(userData), {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 60 * 60 * 24 * 7, // 7 days
+          path: '/',
+        })
+        cookieStore.delete('admin-auth')
+        return NextResponse.json({ success: true, role: 'user', name: matchedUser.name })
+      }
+    }
+
+    return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
+  } catch {
+    return NextResponse.json({ error: 'Auth failed' }, { status: 500 })
+  }
+}
+
+export async function DELETE() {
+  const cookieStore = await cookies()
+  cookieStore.delete('admin-auth')
+  cookieStore.delete('user-auth')
+  return NextResponse.json({ success: true })
+}

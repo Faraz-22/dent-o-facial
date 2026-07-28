@@ -1,0 +1,14 @@
+[
+  {
+    "type": "booking_submitted",
+    "treatment": "General Consultation",
+    "userEmail": "priya@example.com",
+    "timestamp": "2026-07-28T17:47:26.228Z"
+  },
+  {
+    "type": "whatsapp_click",
+    "method": "booking_success",
+    "userEmail": "priya@example.com",
+    "timestamp": "2026-07-28T17:47:30.212Z"
+  }
+]

@@ -1,0 +1,15 @@
+[
+  {
+    "id": "1785260846053",
+    "patientName": "priya",
+    "phone": "+916201231060",
+    "email": "priya@example.com",
+    "clinic": "Purnea Clinic",
+    "treatment": "General Consultation",
+    "preferredDate": "2026-07-30",
+    "preferredTime": "Afternoon (1PM - 4PM)",
+    "message": "no",
+    "status": "New",
+    "createdAt": "2026-07-28T17:47:26.053Z"
+  }
+]

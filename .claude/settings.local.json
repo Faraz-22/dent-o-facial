@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm start:*)",
+      "Bash(curl -s http://localhost:3000/admin -o /dev/null -w \"Admin: %{http_code}\\\\n\")",
+      "Bash(curl -s http://localhost:3000/admin/dashboard -o /dev/null -w \"Dashboard: %{http_code}\\\\n\")",
+      "Bash(curl -s http://localhost:3000 -o /dev/null -w \"Site: %{http_code}\\\\n\")"
+    ]
+  }
+}

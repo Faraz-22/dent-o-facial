@@ -1,0 +1,237 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ivory: #F8F7F4;
+  --gold: #D6B98C;
+  --gold-dark: #B8956A;
+  --gold-light: #E8D4B0;
+  --charcoal: #1C1C1C;
+  --charcoal-light: #3A3A3A;
+  --charcoal-muted: #6B6B6B;
+  --cream: #F0EDE6;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--ivory);
+  color: var(--charcoal);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Gold divider line */
+.gold-line {
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  margin: 0 auto;
+}
+
+.gold-line-left {
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+}
+
+/* Luxury card style */
+.luxury-card {
+  background: white;
+  border: 1px solid rgba(214, 185, 140, 0.2);
+  box-shadow: 0 4px 40px rgba(28, 28, 28, 0.06);
+  transition: all 0.4s ease;
+}
+
+.luxury-card:hover {
+  box-shadow: 0 8px 60px rgba(28, 28, 28, 0.12);
+  transform: translateY(-4px);
+}
+
+/* Gold button */
+.btn-gold {
+  background: linear-gradient(135deg, #D6B98C 0%, #C4A478 100%);
+  color: #1C1C1C;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-gold:hover {
+  background: linear-gradient(135deg, #C4A478 0%, #B8956A 100%);
+  box-shadow: 0 8px 30px rgba(214, 185, 140, 0.4);
+  transform: translateY(-2px);
+}
+
+/* Outline button */
+.btn-outline {
+  border: 1.5px solid var(--charcoal);
+  color: var(--charcoal);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease;
+  background: transparent;
+  cursor: pointer;
+  background-size: 200% 200%;
+  animation: gradientFlow 15s ease infinite;
+}
+
+/* Google Translate Overrides */
+.goog-te-banner-frame.skiptranslate { display: none !important; }
+body { top: 0px !important; }
+#google_translate_element { display: none !important; }
+
+.btn-outline:hover {
+  background: var(--charcoal);
+  color: var(--ivory);
+  transform: translateY(-2px);
+}
+
+/* Section title styling */
+.section-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-dark);
+}
+
+/* Noise texture overlay */
+.noise-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+/* WhatsApp floating button */
+.whatsapp-float {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+  width: 56px;
+  height: 56px;
+  background: #25D366;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+  transition: all 0.3s ease;
+}
+
+.whatsapp-float:hover {
+  transform: scale(1.1);
+  box-shadow: 0 8px 30px rgba(37, 211, 102, 0.5);
+}
+
+/* Phone floating button */
+.phone-float {
+  position: fixed;
+  bottom: 92px;
+  right: 24px;
+  z-index: 1000;
+  width: 56px;
+  height: 56px;
+  background: var(--charcoal);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(28, 28, 28, 0.3);
+  transition: all 0.3s ease;
+}
+
+.phone-float:hover {
+  transform: scale(1.1);
+  background: var(--gold-dark);
+}
+
+/* Before/After slider */
+.before-after-container {
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+
+.before-after-slider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: white;
+  cursor: ew-resize;
+  z-index: 10;
+}
+
+.before-after-handle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--ivory);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--gold);
+  border-radius: 4px;
+}
+
+/* Animation utilities */
+.opacity-0 { opacity: 0; }
+.animate-fade-up {
+  animation: fadeUp 0.7s ease-out forwards;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Testimonial stars */
+.star-gold { color: var(--gold); }
+
+/* Treatment tag */
+.treatment-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  background: rgba(214, 185, 140, 0.15);
+  border: 1px solid rgba(214, 185, 140, 0.4);
+  border-radius: 100px;
+  font-size: 0.75rem;
+  color: var(--gold-dark);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}

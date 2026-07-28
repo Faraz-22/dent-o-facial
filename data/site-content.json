@@ -1,0 +1,433 @@
+{
+  "hero": {
+    "label": "Premium Medical Care ",
+    "headline": "Dent-O-Facial",
+    "subHeadline": "in Purnea",
+    "description": "Experience world-class skin and dental treatments with Dr. Hadi Raza. Advanced technology, personalized care, and transformative results — right here in Bihar.",
+    "stats": {
+      "patients": "500+",
+      "rating": "4.9",
+      "locations": "2"
+    },
+    "whatsappNumber": "7488404161",
+    "whatsappMessage": "Hello, I want to book an appointment.",
+    "logoUrl": "/uploads/1785267564530-Screenshot_2026-07-20_205709.png"
+  },
+  "doctor": {
+    "name": "Dr. Hadi Raza",
+    "title": "Dermatology & Dental Surgery Specialist",
+    "shortBio": "Dr. Hadi Raza brings a rare combination of expertise in both dermatology and dental surgery, offering comprehensive facial aesthetic care under one roof. With 3–5 years of dedicated clinical experience, he has transformed hundreds of lives across Purnea and Banmankhi.",
+    "longBio": "Growing up in Bihar, Dr. Hadi Raza witnessed firsthand how limited access to quality dermatological and dental care affected the confidence and wellbeing of people in his community. Skin conditions went untreated. Smiles were left unrepaired. That early experience planted the seed for a lifelong mission.\n\nAfter completing his MBBS, Dr. Raza pursued advanced specialized training in dermatology and dental surgery, studying the intersection of science and aesthetics that defines modern facial medicine. He trained under leading practitioners and immersed himself in the latest laser technologies, cosmetic procedures, and restorative dental techniques.\n\nReturning to Bihar, he established Dent-O-Facial with a singular vision: to bring premium, world-class skin and dental care to Purnea and Banmankhi — without requiring patients to travel to distant metros.",
+    "quote": "My goal is simple: when a patient walks out of my clinic, they should feel more confident, more beautiful, and completely taken care of.",
+    "credentials": [
+      {
+        "icon": "GraduationCap",
+        "label": "MBBS — Certified Physician"
+      },
+      {
+        "icon": "Award",
+        "label": "Specialist in Dermatology & Aesthetics"
+      },
+      {
+        "icon": "Award",
+        "label": "Advanced Dental Surgery Training"
+      },
+      {
+        "icon": "Heart",
+        "label": "Patient-Centered Care Philosophy"
+      }
+    ],
+    "aboutCredentials": [
+      {
+        "icon": "GraduationCap",
+        "title": "MBBS",
+        "desc": "Certified medical degree with focus on skin and dental sciences"
+      },
+      {
+        "icon": "Award",
+        "title": "Dermatology Specialist",
+        "desc": "Advanced training in cosmetic dermatology and laser treatments"
+      },
+      {
+        "icon": "Award",
+        "title": "Dental Surgery",
+        "desc": "Specialized in aesthetic dental procedures and oral surgery"
+      },
+      {
+        "icon": "Stethoscope",
+        "title": "3–5 Years Experience",
+        "desc": "Hands-on clinical experience across Purnea and Banmankhi"
+      }
+    ],
+    "values": [
+      {
+        "icon": "Heart",
+        "title": "Patient-First Philosophy",
+        "desc": "Every decision is made with the patient's comfort, safety, and long-term wellbeing as the top priority."
+      },
+      {
+        "icon": "Star",
+        "title": "Excellence in Results",
+        "desc": "We combine clinical precision with an artistic eye to deliver outcomes that exceed expectations."
+      },
+      {
+        "icon": "Users",
+        "title": "Accessible Luxury",
+        "desc": "Premium care shouldn't be out of reach. We bring world-class treatments to Bihar at accessible costs."
+      }
+    ]
+  },
+  "locations": [
+    {
+      "id": "purnea",
+      "name": "Purnea Clinic",
+      "address": "Main Road, Purnea, Bihar 854301",
+      "phone": "+91 6201231060",
+      "hours": "Mon–Sat: 10am – 7pm",
+      "hoursDetail": "Monday – Saturday: 10:00 AM – 7:00 PM",
+      "mapUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d57912.31!2d87.4753!3d25.7771!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39ef5a4b7f5c2a1d%3A0x0!2sPurnea%2C+Bihar!5e0!3m2!1sen!2sin!4v1620000000000!5m2!1sen!2sin",
+      "primary": true
+    },
+    {
+      "id": "banmankhi",
+      "name": "Banmankhi Clinic",
+      "address": "Station Road, Banmankhi, Bihar 854202",
+      "phone": "+91 7488404161",
+      "hours": "Tue, Thu, Sat: 11am – 5pm",
+      "hoursDetail": "Tuesday, Thursday, Saturday: 11:00 AM – 5:00 PM",
+      "mapUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d28953.12!2d87.1906!3d25.8927!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39ef5b0000000001%3A0x0!2sBanmankhi%2C+Bihar!5e0!3m2!1sen!2sin!4v1620000000001!5m2!1sen!2sin",
+      "primary": false
+    }
+  ],
+  "treatments": {
+    "dermatology": [
+      {
+        "id": "acne-treatment",
+        "name": "Acne Treatment",
+        "shortDesc": "Comprehensive acne management using medical-grade protocols, chemical peels, and advanced topical therapies.",
+        "duration": "4–8 weeks course",
+        "benefits": [
+          "Clears active breakouts",
+          "Prevents scarring",
+          "Balances oil production",
+          "Restores confidence"
+        ],
+        "tag": "Most Popular",
+        "images": [
+          "/uploads/1785258965953-2025_Predator_OLED_Default_3840x2400.jpg"
+        ]
+      },
+      {
+        "id": "pigmentation-treatment",
+        "name": "Pigmentation Treatment",
+        "shortDesc": "Targeted solutions for uneven skin tone, melasma, sun spots, and post-inflammatory hyperpigmentation.",
+        "duration": "6–10 sessions",
+        "benefits": [
+          "Even skin tone",
+          "Reduced dark spots",
+          "Brightened complexion",
+          "Long-lasting results"
+        ],
+        "tag": "",
+        "images": [
+          "/uploads/1785259015440-Screenshot_2026-07-20_205709.png"
+        ]
+      },
+      {
+        "id": "chemical-peels",
+        "name": "Chemical Peels",
+        "shortDesc": "Medical-grade peels ranging from superficial to deep for skin renewal, texture improvement, and radiance.",
+        "duration": "45–60 min per session",
+        "benefits": [
+          "Renewed skin surface",
+          "Reduced fine lines",
+          "Improved texture",
+          "Glow restoration"
+        ],
+        "tag": "",
+        "images": [
+          "/uploads/1785259022224-Screenshot_2025-11-15_231027.png"
+        ]
+      },
+      {
+        "id": "laser-therapy",
+        "name": "Laser Therapy",
+        "shortDesc": "Advanced laser treatments for pigmentation, hair removal, skin resurfacing, and rejuvenation.",
+        "duration": "30–60 min per session",
+        "benefits": [
+          "Precise targeting",
+          "Minimal downtime",
+          "Lasting results",
+          "Multiple applications"
+        ],
+        "tag": "Advanced",
+        "images": []
+      },
+      {
+        "id": "skin-rejuvenation",
+        "name": "Skin Rejuvenation",
+        "shortDesc": "Holistic skin renewal combining hydration therapies, microneedling, and collagen-stimulating treatments.",
+        "duration": "60–90 min",
+        "benefits": [
+          "Youthful glow",
+          "Improved elasticity",
+          "Reduced wrinkles",
+          "Hydrated skin"
+        ],
+        "tag": "Signature",
+        "images": []
+      }
+    ],
+    "dental": [
+      {
+        "id": "teeth-whitening",
+        "name": "Teeth Whitening",
+        "shortDesc": "Professional-grade whitening treatments for dramatically brighter teeth in a single session.",
+        "duration": "60–90 min",
+        "benefits": [
+          "Up to 8 shades lighter",
+          "Safe & painless",
+          "Immediate results",
+          "Long-lasting"
+        ],
+        "tag": "Popular",
+        "images": []
+      },
+      {
+        "id": "smile-design",
+        "name": "Smile Design",
+        "shortDesc": "Comprehensive smile makeovers combining veneers, whitening, contouring, and alignment for a perfect smile.",
+        "duration": "2–4 appointments",
+        "benefits": [
+          "Customized plan",
+          "Natural aesthetics",
+          "Boost confidence",
+          "Durable results"
+        ],
+        "tag": "Signature",
+        "images": []
+      },
+      {
+        "id": "dental-implants",
+        "name": "Dental Implants",
+        "shortDesc": "Permanent tooth replacement solutions that look, feel, and function exactly like your natural teeth.",
+        "duration": "3–6 months total",
+        "benefits": [
+          "Permanent solution",
+          "Natural look & feel",
+          "Bone preservation",
+          "Easy maintenance"
+        ],
+        "tag": "",
+        "images": []
+      },
+      {
+        "id": "root-canal",
+        "name": "Root Canal Treatment",
+        "shortDesc": "Pain-free root canal procedures using modern techniques to save damaged teeth and eliminate pain.",
+        "duration": "1–2 sessions",
+        "benefits": [
+          "Eliminates pain",
+          "Saves natural tooth",
+          "Quick recovery",
+          "Comfortable procedure"
+        ],
+        "tag": "",
+        "images": []
+      },
+      {
+        "id": "braces",
+        "name": "Braces & Aligners",
+        "shortDesc": "Traditional braces and clear aligner options for straighter teeth and corrected bite alignment.",
+        "duration": "12–24 months",
+        "benefits": [
+          "Straighter teeth",
+          "Better bite",
+          "Improved hygiene",
+          "Clear aligner option"
+        ],
+        "tag": "",
+        "images": []
+      }
+    ]
+  },
+  "testimonials": [
+    {
+      "id": "1",
+      "name": "Priya Sharma",
+      "location": "Purnea",
+      "treatment": "Acne Treatment",
+      "rating": 5,
+      "text": "Dr. Hadi Raza completely transformed my skin and confidence."
+    },
+    {
+      "id": "2",
+      "name": "Rahul Verma",
+      "location": "Banmankhi",
+      "treatment": "Teeth Whitening",
+      "rating": 5,
+      "text": "Professional service and amazing results. Highly recommend!"
+    }
+  ],
+  "blog": [
+    {
+      "slug": "best-acne-treatments-purnea",
+      "title": "Best Acne Treatments Available in Purnea",
+      "excerpt": "Acne affects millions and can deeply impact confidence. Discover the most effective, medically-proven treatments for acne that are now available right here in Purnea, Bihar.",
+      "category": "Dermatology",
+      "date": "Jan 15, 2025",
+      "readTime": "5 min read",
+      "featured": true,
+      "imageUrl": "/uploads/1785259127941-Screenshot_2026-05-22_104246.png"
+    },
+    {
+      "slug": "benefits-teeth-whitening",
+      "title": "7 Benefits of Professional Teeth Whitening",
+      "excerpt": "Over-the-counter whitening products rarely deliver. Find out why professional teeth whitening by a dental specialist delivers safer, faster, and more lasting results.",
+      "category": "Dental",
+      "date": "Jan 8, 2025",
+      "readTime": "4 min read",
+      "featured": true
+    },
+    {
+      "slug": "daily-skincare-routine-india",
+      "title": "The Perfect Daily Skincare Routine for Indian Skin",
+      "excerpt": "Indian skin has unique characteristics and challenges. Dr. Hadi Raza shares a dermatologist-approved daily skincare routine tailored for Indian climate and skin types.",
+      "category": "Dermatology",
+      "date": "Dec 28, 2024",
+      "readTime": "6 min read",
+      "featured": false
+    },
+    {
+      "slug": "dental-hygiene-tips",
+      "title": "10 Dental Hygiene Tips for a Healthier Smile",
+      "excerpt": "Good dental hygiene is the foundation of a beautiful smile. Learn the essential habits and tips that dentists actually recommend for maintaining optimal oral health.",
+      "category": "Dental",
+      "date": "Dec 20, 2024",
+      "readTime": "5 min read",
+      "featured": false
+    },
+    {
+      "slug": "laser-vs-chemical-peels",
+      "title": "Laser Therapy vs Chemical Peels: Which is Right for You?",
+      "excerpt": "Both laser therapy and chemical peels can dramatically improve skin quality, but they work differently. Dr. Raza explains which option is best suited to your skin goals.",
+      "category": "Dermatology",
+      "date": "Dec 12, 2024",
+      "readTime": "7 min read",
+      "featured": false
+    },
+    {
+      "slug": "smile-design-what-to-expect",
+      "title": "What to Expect During Your Smile Design Consultation",
+      "excerpt": "Considering a smile makeover? Here's a complete guide to what happens during a smile design consultation — from digital planning to the final stunning result.",
+      "category": "Dental",
+      "date": "Dec 5, 2024",
+      "readTime": "5 min read",
+      "featured": false
+    }
+  ],
+  "faq": [
+    {
+      "id": "1",
+      "q": "How do I book an appointment?",
+      "a": "You can book via WhatsApp (click the floating button) or call us directly at +91 98765 43210. We respond to WhatsApp messages within minutes during clinic hours."
+    },
+    {
+      "id": "2",
+      "q": "Are initial consultations free?",
+      "a": "Yes, we offer free initial consultations for new patients. Dr. Raza will assess your needs and recommend a personalized treatment plan."
+    },
+    {
+      "id": "3",
+      "q": "Which clinic should I visit?",
+      "a": "Both clinics offer the same quality of care. Choose based on your location. Purnea clinic operates Mon–Sat and Banmankhi operates Tue, Thu, Sat."
+    },
+    {
+      "id": "4",
+      "q": "Do you offer EMI or payment plans?",
+      "a": "Yes, we offer flexible EMI options for most procedures. Please discuss with our team at the time of consultation."
+    }
+  ],
+  "cta": {
+    "headline": "Book Your Consultation",
+    "subHeadline": "Take the first step toward your transformation. Consult with Dr. Hadi Raza and discover what premium dermatology and dental care can do for you.",
+    "whatsappNumber": "7488404161",
+    "whatsappMessage": "Hello, I would like to book a consultation with Dr. Hadi Raza.",
+    "phoneNumber": "+91 7488404161",
+    "trustIndicators": [
+      "Free Initial Consultation",
+      "Personalized Treatment Plans",
+      "EMI Available",
+      "2 Clinic Locations"
+    ],
+    "treatmentBookingMessage": "mujhe treat kr do janab"
+  },
+  "results": {
+    "dermatology": [
+      {
+        "id": "1",
+        "label": "Acne Clearance",
+        "duration": "8 weeks",
+        "note": "Patient A — Purnea",
+        "beforeImage": "/uploads/1785259473410-Screenshot_2025-11-15_231027.png",
+        "afterImage": "/uploads/1785259477933-Screenshot_2025-11-15_231103.png"
+      },
+      {
+        "id": "2",
+        "label": "Pigmentation Treatment",
+        "duration": "6 sessions",
+        "note": "Patient B — Banmankhi",
+        "beforeImage": "",
+        "afterImage": ""
+      },
+      {
+        "id": "3",
+        "label": "Skin Rejuvenation",
+        "duration": "3 sessions",
+        "note": "Patient C — Purnea",
+        "beforeImage": "",
+        "afterImage": ""
+      },
+      {
+        "id": "4",
+        "label": "Laser Therapy Results",
+        "duration": "4 sessions",
+        "note": "Patient D — Purnea",
+        "beforeImage": "",
+        "afterImage": ""
+      }
+    ],
+    "dental": [
+      {
+        "id": "5",
+        "label": "Smile Design Makeover",
+        "duration": "3 appointments",
+        "note": "Patient E — Banmankhi",
+        "beforeImage": "",
+        "afterImage": ""
+      },
+      {
+        "id": "6",
+        "label": "Teeth Whitening",
+        "duration": "1 session",
+        "note": "Patient F — Purnea",
+        "beforeImage": "",
+        "afterImage": ""
+      },
+      {
+        "id": "7",
+        "label": "Dental Implants",
+        "duration": "4 months",
+        "note": "Patient G — Purnea",
+        "beforeImage": "",
+        "afterImage": ""
+      }
+    ]
+  },
+  "images": {
+    "doctorImage": "/uploads/1785257739206-openart-image_gmww8-oW_1772864254810_raw.png",
+    "aboutImage": "/uploads/1785257781947-openart-image_gmww8-oW_1772864254810_raw.png",
+    "clinicImage": "/uploads/1785257883603-Designing_A_Doctor_s_Clinic__1_.webp",
+    "heroImages": []
+  }
+}
