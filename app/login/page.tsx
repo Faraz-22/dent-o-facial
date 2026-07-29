@@ -268,23 +268,6 @@ function LoginContent() {
             </button>
           </form>
         </div>
-
-        {/* Demo profiles help info */}
-        <div className="mt-8 p-5 bg-cream/50 border border-gold/10 rounded-2xl text-center text-xs text-charcoal-muted leading-relaxed font-inter font-light">
-          <p className="font-semibold text-charcoal mb-1">Demo Access Credentials</p>
-          <div className="grid grid-cols-2 gap-3 mt-2 text-left">
-            <div>
-              <p className="text-gold-dark font-medium">Administrator</p>
-              <p>Email: <code className="bg-white/80 px-1 py-0.5 rounded text-[10px]">admin@dentofacial.com</code></p>
-              <p>Pass: <code className="bg-white/80 px-1 py-0.5 rounded text-[10px]">dentofacial2024</code></p>
-            </div>
-            <div>
-              <p className="text-gold-dark font-medium">Demo Patient</p>
-              <p>Email: <code className="bg-white/80 px-1 py-0.5 rounded text-[10px]">priya@example.com</code></p>
-              <p>Pass: <code className="bg-white/80 px-1 py-0.5 rounded text-[10px]">patient123</code></p>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   )

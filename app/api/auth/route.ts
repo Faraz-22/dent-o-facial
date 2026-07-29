@@ -1,27 +1,8 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import fs from 'fs'
-import path from 'path'
 import bcrypt from 'bcryptjs'
 import { connectToDatabase } from '@/lib/mongodb'
 import { User as UserModel } from '@/lib/models'
-
-const USERS_FILE = path.join(process.cwd(), 'data', 'users.json')
-
-interface User {
-  name: string
-  email: string
-  password?: string
-}
-
-function readUsers(): User[] {
-  try {
-    const raw = fs.readFileSync(USERS_FILE, 'utf-8')
-    return JSON.parse(raw) as User[]
-  } catch {
-    return []
-  }
-}
 
 export async function POST(request: Request) {
   try {
@@ -32,6 +13,7 @@ export async function POST(request: Request) {
     const adminPassword = process.env.ADMIN_PASSWORD
 
     // 1. Check Admin Credentials
+    // In production, ADMIN_PASSWORD should be set as an env var.
     if (adminPassword && password === adminPassword && (email.toLowerCase() === adminEmail.toLowerCase() || email === 'admin')) {
       const cookieStore = await cookies()
       cookieStore.set('admin-auth', 'true', {
@@ -60,20 +42,13 @@ export async function POST(request: Request) {
           isMatch = bcrypt.compareSync(password, matchedUser.password)
         }
       } catch (dbErr) {
-        console.warn('MongoDB connection failed, falling back to JSON', dbErr)
-        const users = readUsers()
-        matchedUser = users.find(u => u.email.toLowerCase() === email.toLowerCase())
-        if (matchedUser && matchedUser.password) {
-          // In fallback mode, handle both bcrypt and plaintext for older accounts during migration
-          isMatch = matchedUser.password.startsWith('$2a$') 
-            ? bcrypt.compareSync(password, matchedUser.password)
-            : matchedUser.password === password;
-        }
+        console.error('MongoDB connection failed during login', dbErr)
+        return NextResponse.json({ error: 'Database unavailable' }, { status: 500 })
       }
 
       if (matchedUser && isMatch) {
         const cookieStore = await cookies()
-        const userData = { name: matchedUser.name, email: matchedUser.email }
+        const userData = { name: matchedUser.name, email: matchedUser.email, id: matchedUser._id.toString() }
         cookieStore.set('user-auth', JSON.stringify(userData), {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',

@@ -52,16 +52,8 @@ export async function POST(request: Request) {
         registeredAt: new Date()
       })
     } catch (dbErr) {
-      console.warn('MongoDB connection failed in register, falling back to JSON', dbErr)
-      const users = readUsers()
-      const exists = users.some(u => u.email.toLowerCase() === email.toLowerCase())
-      if (exists) {
-        return NextResponse.json({ error: 'Email already registered' }, { status: 400 })
-      }
-      
-      const newUser: User = { name, email, password: hashedPassword, registeredAt: new Date().toISOString() }
-      users.push(newUser)
-      writeUsers(users)
+      console.error('MongoDB connection failed in register', dbErr)
+      return NextResponse.json({ error: 'Internal server error. Registration failed.' }, { status: 500 })
     }
 
     // Log them in immediately

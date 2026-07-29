@@ -75,6 +75,7 @@ export function PatientsCRM() {
       const compressedFile = await compressImage(file)
       const formData = new FormData()
       formData.append('file', compressedFile)
+      formData.append('purpose', 'private')
       const res = await fetch('/api/upload', { method: 'POST', body: formData })
       if (!res.ok) throw new Error('Upload failed')
       const result = await res.json()

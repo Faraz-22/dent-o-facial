@@ -86,11 +86,85 @@ function Field({ label, value, onChange, multiline, placeholder }: {
 // ─── Section Editors ─────────────────────────────────────────────────────────
 
 function TestimonialsEditor({ data, onChange }: { data: Testimonial[]; onChange: (v: Testimonial[]) => void }) {
+  const [pending, setPending] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    const fetchPending = async () => {
+      try {
+        setLoading(true)
+        const res = await fetch('/api/testimonials')
+        const all = await res.json()
+        if (Array.isArray(all)) {
+          setPending(all.filter(t => t.status === 'Pending'))
+        }
+      } catch (e) {
+        console.error(e)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchPending()
+  }, [])
+
+  const moderate = async (id: string, status: 'Approved' | 'Rejected') => {
+    try {
+      const res = await fetch('/api/testimonials', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status })
+      })
+      if (res.ok) {
+        setPending(prev => prev.filter(t => t.id !== id))
+        if (status === 'Approved') {
+          // If approved, trigger a refetch of the main content so it shows in the live list below
+          // The easiest way is to let the user refresh, or we can fetch it manually, 
+          // but they can also see it on the live site.
+          alert('Testimonial Approved and published to live site!')
+        }
+      }
+    } catch (e) {
+      alert('Failed to moderate testimonial')
+    }
+  }
+
   if (!Array.isArray(data)) return <p className="text-gray-500 text-sm p-4">No data.</p>
   const update = (id: string, field: keyof Testimonial, value: string | number) =>
     onChange(data.map(t => t.id === id ? { ...t, [field]: value } : t))
   return (
-    <div className="space-y-4">
+    <div className="space-y-8">
+      {/* Pending Moderation Queue */}
+      {pending.length > 0 && (
+        <div className="space-y-4">
+          <h3 className="text-sm font-bold text-amber-400 uppercase tracking-widest flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" /> Pending User Reviews ({pending.length})
+          </h3>
+          {pending.map((t) => (
+            <div key={t.id} className="p-5 rounded-2xl bg-[#2a1b1b] border border-red-900/30 space-y-3">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="font-semibold text-white">{t.patientName}</p>
+                  <p className="text-xs text-gray-400">{t.email} • {t.treatment || 'General'}</p>
+                </div>
+                <div className="flex gap-1">
+                  {[...Array(t.rating)].map((_, i) => (
+                    <Star key={i} size={14} className="text-amber-400 fill-amber-400" />
+                  ))}
+                </div>
+              </div>
+              <p className="text-sm text-gray-300 italic">"{t.review}"</p>
+              <div className="flex gap-3 pt-3 border-t border-gray-800">
+                <button onClick={() => moderate(t.id, 'Approved')} className="text-xs font-semibold bg-green-500/20 text-green-400 px-4 py-2 rounded-lg hover:bg-green-500/30 transition">Approve & Publish</button>
+                <button onClick={() => moderate(t.id, 'Rejected')} className="text-xs font-semibold bg-red-500/20 text-red-400 px-4 py-2 rounded-lg hover:bg-red-500/30 transition">Reject</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Live Testimonials */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Live Testimonials</h3>
       {data.map((t, i) => (
         <div key={t.id} className="p-5 rounded-2xl bg-[#1a1a2e] border border-gray-800 space-y-4">
           <div className="flex items-center justify-between">
@@ -117,8 +191,9 @@ function TestimonialsEditor({ data, onChange }: { data: Testimonial[]; onChange:
       ))}
       <button onClick={() => onChange([...data, { id: Date.now().toString(), name: '', location: '', treatment: '', rating: 5, text: '' }])}
         className="flex items-center gap-2 px-4 py-3 rounded-xl border border-dashed border-gray-700 text-gray-500 hover:text-white hover:border-gray-500 transition text-sm w-full justify-center">
-        <Plus size={14} /> Add Testimonial
+        <Plus size={14} /> Add Manual Testimonial
       </button>
+      </div>
     </div>
   )
 }
@@ -1299,11 +1374,6 @@ export default function AdminShell() {
             )}
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            {saveStatus === 'error' && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-900/50 border border-red-700 text-red-300 text-xs">
-                <X size={11} /> {saveError}
-              </div>
-            )}
             {saveStatus === 'saved' && (
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-900/50 border border-green-700 text-green-300 text-xs">
                 <Check size={11} /> Saved!
@@ -1325,6 +1395,17 @@ export default function AdminShell() {
             )}
           </div>
         </header>
+
+        {/* Global Error Toast */}
+        {saveStatus === 'error' && (
+          <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-4 rounded-xl shadow-2xl bg-red-950 border-2 border-red-600 text-red-200 animate-in slide-in-from-bottom-5">
+            <X size={20} className="text-red-500" /> 
+            <div>
+              <p className="font-bold text-sm">Save Failed</p>
+              <p className="text-xs opacity-90">{saveError}</p>
+            </div>
+          </div>
+        )}
 
         {/* Content — scrollable */}
         <div className="flex-1 overflow-y-auto p-6">

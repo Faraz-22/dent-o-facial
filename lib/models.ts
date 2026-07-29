@@ -24,11 +24,17 @@ const AppointmentSchema = new mongoose.Schema({
 
 const RecordSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
+  userId: { type: String }, // Stable user id (optional for now to not break existing)
   patientEmail: { type: String, required: true },
   type: { type: String, required: true }, // Prescription, Report, Scan, Other
+  title: { type: String },
   date: { type: String, required: true },
   fileUrl: { type: String, required: true },
+  storageKey: { type: String },
+  mimeType: { type: String },
+  size: { type: Number },
   notes: { type: String },
+  uploadedBy: { type: String },
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -64,6 +70,7 @@ const AnalyticsSchema = new mongoose.Schema({
 
 const SiteContentSchema = new mongoose.Schema({
   id: { type: String, default: 'main' },
+  schemaVersion: { type: Number, default: 1 },
   hero: { type: mongoose.Schema.Types.Mixed },
   doctor: { type: mongoose.Schema.Types.Mixed },
   locations: { type: mongoose.Schema.Types.Mixed },
@@ -74,8 +81,10 @@ const SiteContentSchema = new mongoose.Schema({
   cta: { type: mongoose.Schema.Types.Mixed },
   images: { type: mongoose.Schema.Types.Mixed },
   results: { type: mongoose.Schema.Types.Mixed },
-  translations: { type: mongoose.Schema.Types.Mixed }
-}, { strict: false });
+  translations: { type: mongoose.Schema.Types.Mixed },
+  updatedAt: { type: Date, default: Date.now },
+  updatedBy: { type: String }
+});
 
 const AftercareSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
@@ -85,7 +94,14 @@ const AftercareSchema = new mongoose.Schema({
 
 const ImageSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
-  dataUri: { type: String, required: true },
+  url: { type: String }, // Cloudinary URL
+  storageKey: { type: String }, // Cloudinary public_id
+  dataUri: { type: String }, // Keep for legacy fallback
+  originalName: { type: String },
+  mimeType: { type: String },
+  size: { type: Number },
+  uploadedBy: { type: String },
+  purpose: { type: String, default: 'public' }, // 'public' or 'private'
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -97,7 +113,9 @@ const UserTestimonialSchema = new mongoose.Schema({
   rating: { type: Number, required: true, min: 1, max: 5 },
   review: { type: String, required: true },
   treatment: { type: String },
-  status: { type: String, default: 'Approved' },
+  status: { type: String, default: 'Pending' }, // Pending, Approved, Rejected, Published
+  adminNote: { type: String },
+  publishedAt: { type: Date },
   createdAt: { type: Date, default: Date.now }
 });
 

@@ -22,23 +22,15 @@ export async function PUT(request: Request, { params }: { params: Promise<{ sect
       await connectToDatabase()
       
       // Update or create main document
-      // strict: false ensures Mongoose never silently strips fields,
-      // even if the model was cached from an older schema
+      // We rely on the explicitly defined schema fields (hero, doctor, etc) in models.ts
       await SiteContent.findOneAndUpdate(
         { id: 'main' },
         { $set: { [section]: data } },
-        { upsert: true, new: true, strict: false }
+        { upsert: true, new: true, strict: true }
       )
     } catch (dbErr) {
-      console.warn('MongoDB connection failed for content PUT, falling back to JSON', dbErr)
-      try {
-        const content = readContent()
-        ;(content as Record<string, any>)[section] = data
-        writeContent(content)
-      } catch (fsErr) {
-        console.error('Failed to write to local JSON fallback', fsErr)
-        return NextResponse.json({ error: 'Failed to update content (DB and Fallback both failed)' }, { status: 500 })
-      }
+      console.error('MongoDB connection failed for content PUT', dbErr)
+      return NextResponse.json({ error: 'Database unavailable. Changes were not saved.' }, { status: 500 })
     }
 
     return NextResponse.json({ success: true, section, data })
