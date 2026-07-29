@@ -1284,7 +1284,7 @@ export default function AdminShell() {
                 <Check size={11} /> Saved!
               </div>
             )}
-            {section !== 'dashboard' && section !== 'users' && section !== 'analytics' && (
+            {['hero', 'testimonials', 'treatments', 'doctor', 'locations', 'blog', 'faq', 'cta', 'results', 'images', 'translations'].includes(section) && (
               <button
                 onClick={handleSave}
                 disabled={saveStatus === 'saving'}

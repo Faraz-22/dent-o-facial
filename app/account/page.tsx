@@ -189,7 +189,7 @@ export default function PatientDashboard() {
                         </div>
                       )}
                     </div>
-                    <a href={record.fileUrl} target="_blank" rel="noopener noreferrer" className="btn-outline px-6 py-2.5 rounded-full text-xs font-medium shrink-0 whitespace-nowrap">
+                    <a href={`/api/records/${record.id}`} target="_blank" rel="noopener noreferrer" className="btn-outline px-6 py-2.5 rounded-full text-xs font-medium shrink-0 whitespace-nowrap">
                       View Document
                     </a>
                   </div>
