@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+import { connectToDatabase } from '@/lib/mongodb'
+import { ImageModel } from '@/lib/models'
+import crypto from 'crypto'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,8 +33,17 @@ export async function POST(request: Request) {
     const base64Data = buffer.toString('base64')
     const dataUri = `data:${mimeType};base64,${base64Data}`
 
-    // Return the base64 string directly so it can be saved to MongoDB
-    return NextResponse.json({ url: dataUri })
+    await connectToDatabase()
+    
+    // Save to database
+    const id = crypto.randomUUID()
+    await ImageModel.create({
+      id,
+      dataUri
+    })
+
+    // Return the image endpoint instead of the full string
+    return NextResponse.json({ url: `/api/image/${id}` })
     
   } catch (err) {
     console.error('File upload failed:', err)

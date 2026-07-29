@@ -81,6 +81,12 @@ const AftercareSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 
+const ImageSchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  dataUri: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now }
+});
+
 export const User = mongoose.models.User || mongoose.model('User', UserSchema);
 export const Appointment = mongoose.models.Appointment || mongoose.model('Appointment', AppointmentSchema);
 export const RecordModel = mongoose.models.Record || mongoose.model('Record', RecordSchema);
@@ -89,3 +95,4 @@ export const Notification = mongoose.models.Notification || mongoose.model('Noti
 export const Analytics = mongoose.models.Analytics || mongoose.model('Analytics', AnalyticsSchema);
 export const SiteContent = mongoose.models.SiteContent || mongoose.model('SiteContent', SiteContentSchema);
 export const Aftercare = mongoose.models.Aftercare || mongoose.model('Aftercare', AftercareSchema);
+export const ImageModel = mongoose.models.Image || mongoose.model('Image', ImageSchema);
