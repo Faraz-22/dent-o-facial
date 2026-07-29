@@ -13,7 +13,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ sect
 
     const { section } = await params
     const { data } = await request.json()
-    const validSections = ['hero', 'doctor', 'locations', 'treatments', 'testimonials', 'blog', 'faq', 'cta', 'results', 'images']
+    const validSections = ['hero', 'doctor', 'locations', 'treatments', 'testimonials', 'blog', 'faq', 'cta', 'results', 'images', 'translations']
     if (!validSections.includes(section)) {
       return NextResponse.json({ error: 'Invalid section' }, { status: 400 })
     }
@@ -22,10 +22,12 @@ export async function PUT(request: Request, { params }: { params: Promise<{ sect
       await connectToDatabase()
       
       // Update or create main document
+      // strict: false ensures Mongoose never silently strips fields,
+      // even if the model was cached from an older schema
       await SiteContent.findOneAndUpdate(
         { id: 'main' },
         { $set: { [section]: data } },
-        { upsert: true, new: true }
+        { upsert: true, new: true, strict: false }
       )
     } catch (dbErr) {
       console.warn('MongoDB connection failed for content PUT, falling back to JSON', dbErr)

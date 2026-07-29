@@ -75,7 +75,7 @@ const SiteContentSchema = new mongoose.Schema({
   images: { type: mongoose.Schema.Types.Mixed },
   results: { type: mongoose.Schema.Types.Mixed },
   translations: { type: mongoose.Schema.Types.Mixed }
-});
+}, { strict: false });
 
 const AftercareSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
