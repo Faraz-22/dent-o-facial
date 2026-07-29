@@ -137,7 +137,7 @@ export default function HeroSection() {
                 </div>
               </div>
 
-              <div className="absolute -left-8 top-8 luxury-card rounded-2xl p-4 w-48">
+              <div className="absolute -left-8 top-8 z-20 luxury-card rounded-2xl p-4 w-48">
                 <div className="flex items-center gap-2 mb-2">
                   <Award size={16} className="text-gold" />
                   <span className="text-xs font-semibold text-charcoal">Certified</span>
@@ -147,7 +147,7 @@ export default function HeroSection() {
                 </p>
               </div>
 
-              <div className="absolute -right-4 bottom-16 luxury-card rounded-2xl p-4 w-44">
+              <div className="absolute -right-4 bottom-16 z-20 luxury-card rounded-2xl p-4 w-44">
                 <div className="flex items-center gap-2 mb-2">
                   <MapPin size={14} className="text-gold" />
                   <span className="text-xs font-semibold text-charcoal">Locations</span>
