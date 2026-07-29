@@ -54,9 +54,31 @@ const NotificationSchema = new mongoose.Schema({
 });
 
 const AnalyticsSchema = new mongoose.Schema({
-  date: { type: String, required: true }, // YYYY-MM-DD
-  visitors: { type: Number, default: 0 },
-  pageViews: { type: Number, default: 0 }
+  type: { type: String, required: true },
+  page: { type: String },
+  treatment: { type: String },
+  method: { type: String },
+  userEmail: { type: String },
+  timestamp: { type: Date, default: Date.now }
+});
+
+const SiteContentSchema = new mongoose.Schema({
+  id: { type: String, default: 'main' },
+  hero: { type: mongoose.Schema.Types.Mixed },
+  doctor: { type: mongoose.Schema.Types.Mixed },
+  locations: { type: mongoose.Schema.Types.Mixed },
+  treatments: { type: mongoose.Schema.Types.Mixed },
+  testimonials: { type: mongoose.Schema.Types.Mixed },
+  blog: { type: mongoose.Schema.Types.Mixed },
+  faq: { type: mongoose.Schema.Types.Mixed },
+  cta: { type: mongoose.Schema.Types.Mixed },
+  images: { type: mongoose.Schema.Types.Mixed }
+});
+
+const AftercareSchema = new mongoose.Schema({
+  email: { type: String, required: true, unique: true },
+  aftercareText: { type: String, default: '' },
+  updatedAt: { type: Date, default: Date.now }
 });
 
 export const User = mongoose.models.User || mongoose.model('User', UserSchema);
@@ -65,3 +87,5 @@ export const RecordModel = mongoose.models.Record || mongoose.model('Record', Re
 export const Lead = mongoose.models.Lead || mongoose.model('Lead', LeadSchema);
 export const Notification = mongoose.models.Notification || mongoose.model('Notification', NotificationSchema);
 export const Analytics = mongoose.models.Analytics || mongoose.model('Analytics', AnalyticsSchema);
+export const SiteContent = mongoose.models.SiteContent || mongoose.model('SiteContent', SiteContentSchema);
+export const Aftercare = mongoose.models.Aftercare || mongoose.model('Aftercare', AftercareSchema);

@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import fs from 'fs'
 import path from 'path'
+import { connectToDatabase } from '@/lib/mongodb'
+import { Analytics, User as UserModel } from '@/lib/models'
 
 export const dynamic = 'force-dynamic'
 
@@ -51,21 +53,31 @@ export async function POST(request: Request) {
       }
     } catch { /* ignore */ }
 
-    const event: AnalyticsEvent = {
-      type,
-      ...(page && { page }),
-      ...(treatment && { treatment }),
-      ...(method && { method }),
-      ...(userEmail && { userEmail }),
-      timestamp: new Date().toISOString(),
+    try {
+      await connectToDatabase()
+      await Analytics.create({
+        type,
+        ...(page && { page }),
+        ...(treatment && { treatment }),
+        ...(method && { method }),
+        ...(userEmail && { userEmail }),
+        timestamp: new Date()
+      })
+    } catch (dbErr) {
+      console.warn('MongoDB connection failed in analytics POST, falling back to JSON', dbErr)
+      const event: AnalyticsEvent = {
+        type,
+        ...(page && { page }),
+        ...(treatment && { treatment }),
+        ...(method && { method }),
+        ...(userEmail && { userEmail }),
+        timestamp: new Date().toISOString(),
+      }
+      const events = readEvents()
+      events.push(event)
+      const trimmed = events.length > MAX_EVENTS ? events.slice(-MAX_EVENTS) : events
+      writeEvents(trimmed)
     }
-
-    const events = readEvents()
-    events.push(event)
-
-    // Trim old events if over cap
-    const trimmed = events.length > MAX_EVENTS ? events.slice(-MAX_EVENTS) : events
-    writeEvents(trimmed)
 
     return NextResponse.json({ ok: true })
   } catch {
@@ -81,15 +93,23 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const events = readEvents()
-
-  // Also load users for registration timeline
+  let events: AnalyticsEvent[] = []
   let users: { name: string; email: string; registeredAt?: string }[] = []
+
   try {
-    const usersFile = path.join(process.cwd(), 'data', 'users.json')
-    const raw = fs.readFileSync(usersFile, 'utf-8')
-    users = JSON.parse(raw).map(({ password, ...rest }: { password?: string; name: string; email: string; registeredAt?: string }) => rest)
-  } catch { /* ignore */ }
+    await connectToDatabase()
+    events = await Analytics.find().sort({ timestamp: -1 }).limit(MAX_EVENTS).lean()
+    const dbUsers = await UserModel.find({}, { name: 1, email: 1, registeredAt: 1 }).lean()
+    users = dbUsers.map(u => ({ name: u.name, email: u.email, registeredAt: u.registeredAt?.toISOString() }))
+  } catch (dbErr) {
+    console.warn('MongoDB connection failed in analytics GET, falling back to JSON', dbErr)
+    events = readEvents()
+    try {
+      const usersFile = path.join(process.cwd(), 'data', 'users.json')
+      const raw = fs.readFileSync(usersFile, 'utf-8')
+      users = JSON.parse(raw).map(({ password, ...rest }: { password?: string; name: string; email: string; registeredAt?: string }) => rest)
+    } catch { /* ignore */ }
+  }
 
   return NextResponse.json({ events, users })
 }

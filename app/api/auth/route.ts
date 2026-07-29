@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { ADMIN_PASSWORD } from '@/lib/content'
 import fs from 'fs'
 import path from 'path'
+import bcrypt from 'bcryptjs'
 import { connectToDatabase } from '@/lib/mongodb'
 import { User as UserModel } from '@/lib/models'
 
@@ -28,9 +28,11 @@ export async function POST(request: Request) {
     const body = await request.json()
     const password = body.password
     const email = body.email || ''
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@dentofacial.com'
+    const adminPassword = process.env.ADMIN_PASSWORD
 
     // 1. Check Admin Credentials
-    if (password === ADMIN_PASSWORD && (email === 'admin@dentofacial.com' || email === '' || email === 'admin')) {
+    if (adminPassword && password === adminPassword && (email.toLowerCase() === adminEmail.toLowerCase() || email === 'admin')) {
       const cookieStore = await cookies()
       cookieStore.set('admin-auth', 'true', {
         httpOnly: true,
@@ -46,19 +48,30 @@ export async function POST(request: Request) {
     // 2. Check User Credentials
     if (email) {
       let matchedUser = null;
+      let isMatch = false;
+
       try {
         await connectToDatabase()
         matchedUser = await UserModel.findOne({ 
-          email: { $regex: new RegExp(`^${email}$`, 'i') },
-          password 
+          email: { $regex: new RegExp(`^${email}$`, 'i') }
         });
+        
+        if (matchedUser && matchedUser.password) {
+          isMatch = bcrypt.compareSync(password, matchedUser.password)
+        }
       } catch (dbErr) {
         console.warn('MongoDB connection failed, falling back to JSON', dbErr)
         const users = readUsers()
-        matchedUser = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password)
+        matchedUser = users.find(u => u.email.toLowerCase() === email.toLowerCase())
+        if (matchedUser && matchedUser.password) {
+          // In fallback mode, handle both bcrypt and plaintext for older accounts during migration
+          isMatch = matchedUser.password.startsWith('$2a$') 
+            ? bcrypt.compareSync(password, matchedUser.password)
+            : matchedUser.password === password;
+        }
       }
 
-      if (matchedUser) {
+      if (matchedUser && isMatch) {
         const cookieStore = await cookies()
         const userData = { name: matchedUser.name, email: matchedUser.email }
         cookieStore.set('user-auth', JSON.stringify(userData), {
@@ -74,7 +87,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
-  } catch {
+  } catch (error) {
+    console.error('Auth error:', error)
     return NextResponse.json({ error: 'Auth failed' }, { status: 500 })
   }
 }

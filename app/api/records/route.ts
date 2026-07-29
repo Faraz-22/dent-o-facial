@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { promises as fs } from 'fs'
 import path from 'path'
 import { cookies } from 'next/headers'
+import { connectToDatabase } from '@/lib/mongodb'
+import { RecordModel } from '@/lib/models'
 
 const RECORDS_FILE = path.join(process.cwd(), 'data/records.json')
 
@@ -31,15 +33,25 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const data = await fs.readFile(RECORDS_FILE, 'utf-8')
-    const records = JSON.parse(data)
-    
-    if (email) {
-      const filtered = records.filter((r: any) => r.patientEmail === email)
-      return NextResponse.json(filtered)
+    try {
+      await connectToDatabase()
+      const query = email ? { patientEmail: email } : {}
+      const records = await RecordModel.find(query).sort({ createdAt: -1 }).lean()
+      return NextResponse.json(records)
+    } catch (dbErr) {
+      console.warn('MongoDB failed for records GET, falling back to JSON', dbErr)
+      let data = '[]'
+      try {
+        data = await fs.readFile(RECORDS_FILE, 'utf-8')
+      } catch (e) {}
+      const records = JSON.parse(data)
+      
+      if (email) {
+        const filtered = records.filter((r: any) => r.patientEmail === email)
+        return NextResponse.json(filtered)
+      }
+      return NextResponse.json(records)
     }
-    
-    return NextResponse.json(records)
   } catch (error) {
     return NextResponse.json([])
   }
@@ -60,28 +72,52 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    let records = []
+    const id = Date.now().toString()
+    
     try {
-      const data = await fs.readFile(RECORDS_FILE, 'utf-8')
-      records = JSON.parse(data)
-    } catch (e) {
-      records = []
+      await connectToDatabase()
+      const newRecord = await RecordModel.create({
+        id,
+        patientEmail,
+        type, // 'prescription' or 'record'
+        fileUrl,
+        notes,
+        date: date || new Date().toISOString(),
+        createdAt: new Date()
+      })
+      return NextResponse.json({ success: true, record: newRecord })
+    } catch (dbErr) {
+      console.warn('MongoDB failed for records POST, falling back to JSON', dbErr)
+      
+      let records = []
+      try {
+        const data = await fs.readFile(RECORDS_FILE, 'utf-8')
+        records = JSON.parse(data)
+      } catch (e) {
+        records = []
+      }
+
+      const newRecord = {
+        id,
+        patientEmail,
+        type,
+        fileUrl,
+        notes,
+        date: date || new Date().toISOString(),
+        createdAt: new Date().toISOString()
+      }
+
+      records.push(newRecord)
+      
+      try {
+        await fs.writeFile(RECORDS_FILE, JSON.stringify(records, null, 2))
+      } catch (fsErr) {
+        console.error('Failed to save record to FS', fsErr)
+        return NextResponse.json({ error: 'Failed to create record (Read-only FS)' }, { status: 500 })
+      }
+
+      return NextResponse.json({ success: true, record: newRecord })
     }
-
-    const newRecord = {
-      id: Date.now().toString(),
-      patientEmail,
-      type, // 'prescription' or 'record'
-      fileUrl,
-      notes,
-      date: date || new Date().toISOString(),
-      createdAt: new Date().toISOString()
-    }
-
-    records.push(newRecord)
-    await fs.writeFile(RECORDS_FILE, JSON.stringify(records, null, 2))
-
-    return NextResponse.json({ success: true, record: newRecord })
   } catch (error) {
     console.error('Record POST Error:', error)
     return NextResponse.json({ error: 'Failed to create record' }, { status: 500 })
@@ -100,25 +136,33 @@ export async function DELETE(request: Request) {
     const id = searchParams.get('id')
 
     if (!id) {
-      return NextResponse.json({ error: 'Missing record id' }, { status: 400 })
+      return NextResponse.json({ error: 'ID is required' }, { status: 400 })
     }
 
-    let records = []
     try {
-      const data = await fs.readFile(RECORDS_FILE, 'utf-8')
-      records = JSON.parse(data)
-    } catch (e) {
-      return NextResponse.json({ error: 'Failed to read records' }, { status: 500 })
-    }
+      await connectToDatabase()
+      await RecordModel.findOneAndDelete({ id })
+      return NextResponse.json({ success: true })
+    } catch (dbErr) {
+      console.warn('MongoDB failed for records DELETE, falling back to JSON', dbErr)
+      let records = []
+      try {
+        const data = await fs.readFile(RECORDS_FILE, 'utf-8')
+        records = JSON.parse(data)
+      } catch (e) {
+        return NextResponse.json({ error: 'Failed to read records' }, { status: 500 })
+      }
 
-    const updatedRecords = records.filter((r: any) => r.id !== id)
-    
-    if (records.length === updatedRecords.length) {
-      return NextResponse.json({ error: 'Record not found' }, { status: 404 })
+      records = records.filter((r: any) => r.id !== id)
+      
+      try {
+        await fs.writeFile(RECORDS_FILE, JSON.stringify(records, null, 2))
+      } catch (fsErr) {
+        return NextResponse.json({ error: 'Failed to delete record (Read-only FS)' }, { status: 500 })
+      }
+      
+      return NextResponse.json({ success: true })
     }
-
-    await fs.writeFile(RECORDS_FILE, JSON.stringify(updatedRecords, null, 2))
-    return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to delete record' }, { status: 500 })
   }

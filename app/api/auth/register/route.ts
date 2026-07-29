@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import fs from 'fs'
 import path from 'path'
+import bcrypt from 'bcryptjs'
+import { connectToDatabase } from '@/lib/mongodb'
+import { User as UserModel } from '@/lib/models'
 
 const USERS_FILE = path.join(process.cwd(), 'data', 'users.json')
 
@@ -32,22 +35,38 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing name, email, or password' }, { status: 400 })
     }
 
-    const users = readUsers()
-    
-    // Check if email already registered
-    const exists = users.some(u => u.email.toLowerCase() === email.toLowerCase())
-    if (exists) {
-      return NextResponse.json({ error: 'Email already registered' }, { status: 400 })
-    }
+    const hashedPassword = bcrypt.hashSync(password, 10)
 
-    // Add new user
-    const newUser: User = { name, email, password, registeredAt: new Date().toISOString() }
-    users.push(newUser)
-    writeUsers(users)
+    try {
+      await connectToDatabase()
+      
+      const existingUser = await UserModel.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } })
+      if (existingUser) {
+        return NextResponse.json({ error: 'Email already registered' }, { status: 400 })
+      }
+
+      await UserModel.create({
+        name,
+        email,
+        password: hashedPassword,
+        registeredAt: new Date()
+      })
+    } catch (dbErr) {
+      console.warn('MongoDB connection failed in register, falling back to JSON', dbErr)
+      const users = readUsers()
+      const exists = users.some(u => u.email.toLowerCase() === email.toLowerCase())
+      if (exists) {
+        return NextResponse.json({ error: 'Email already registered' }, { status: 400 })
+      }
+      
+      const newUser: User = { name, email, password: hashedPassword, registeredAt: new Date().toISOString() }
+      users.push(newUser)
+      writeUsers(users)
+    }
 
     // Log them in immediately
     const cookieStore = await cookies()
-    const userData = { name: newUser.name, email: newUser.email }
+    const userData = { name, email }
     cookieStore.set('user-auth', JSON.stringify(userData), {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -59,8 +78,9 @@ export async function POST(request: Request) {
     // Clear admin session if exists
     cookieStore.delete('admin-auth')
 
-    return NextResponse.json({ success: true, role: 'user', name: newUser.name })
-  } catch {
+    return NextResponse.json({ success: true, role: 'user', name })
+  } catch (error) {
+    console.error('Registration error:', error)
     return NextResponse.json({ error: 'Registration failed' }, { status: 500 })
   }
 }

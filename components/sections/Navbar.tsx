@@ -29,9 +29,9 @@ export default function Navbar({
 }: NavbarProps) {
   const { data } = useSiteContent()
   const cta = data?.cta as Record<string, unknown> | undefined
-  const whatsappNumber = cta?.whatsappNumber as string || (data?.hero as any)?.whatsappNumber || '917488404161'
+  const whatsappNumber = cta?.whatsappNumber as string || ''
   const whatsappMessage = cta?.whatsappMessage as string || 'Hello, I would like to book an appointment.'
-  const phoneNumber = cta?.phoneNumber as string || '+91 98765 43210'
+  const phoneNumber = cta?.phoneNumber as string || ''
   const heroData = data?.hero as Record<string, unknown> | undefined
   const logoUrl = heroData?.logoUrl as string | undefined
 
@@ -84,13 +84,16 @@ export default function Navbar({
 
           {/* CTA */}
           <div className="hidden lg:flex items-center gap-4">
-            <a
-              href={`tel:${phoneNumber.replace(/\s/g, '')}`}
-              className="flex items-center gap-2 text-sm text-charcoal-muted hover:text-gold-dark transition-colors"
-            >
-              <Phone size={14} />
-              <span className="font-medium">{phoneNumber}</span>
-            </a>
+            {phoneNumber && (
+              <a
+                href={`tel:${phoneNumber.replace(/\s/g, '')}`}
+                className="flex items-center justify-center w-8 h-8 rounded-full bg-gold/10 text-gold-dark hover:bg-gold hover:text-white transition-colors"
+                aria-label="Call Dent-O-Facial"
+                title={`Call ${phoneNumber}`}
+              >
+                <Phone size={14} />
+              </a>
+            )}
             {isLoggedInAdmin && (
               <Link
                 href="/admin/dashboard"
