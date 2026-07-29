@@ -89,6 +89,18 @@ const ImageSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
+const UserTestimonialSchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  patientName: { type: String, required: true },
+  email: { type: String, required: true },
+  avatar: { type: String },
+  rating: { type: Number, required: true, min: 1, max: 5 },
+  review: { type: String, required: true },
+  treatment: { type: String },
+  status: { type: String, default: 'Approved' },
+  createdAt: { type: Date, default: Date.now }
+});
+
 export const User = mongoose.models.User || mongoose.model('User', UserSchema);
 export const Appointment = mongoose.models.Appointment || mongoose.model('Appointment', AppointmentSchema);
 export const RecordModel = mongoose.models.Record || mongoose.model('Record', RecordSchema);
@@ -98,3 +110,4 @@ export const Analytics = mongoose.models.Analytics || mongoose.model('Analytics'
 export const SiteContent = mongoose.models.SiteContent || mongoose.model('SiteContent', SiteContentSchema);
 export const Aftercare = mongoose.models.Aftercare || mongoose.model('Aftercare', AftercareSchema);
 export const ImageModel = mongoose.models.Image || mongoose.model('Image', ImageSchema);
+export const UserTestimonial = mongoose.models.UserTestimonial || mongoose.model('UserTestimonial', UserTestimonialSchema);

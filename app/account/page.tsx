@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Calendar, User, Clock, MapPin, Sparkles, LogOut, FileText, Phone, MessageCircle } from 'lucide-react'
+import { Calendar, User, Clock, MapPin, Sparkles, LogOut, FileText, Phone, MessageCircle, Star } from 'lucide-react'
 import { useLanguage } from '@/components/providers/LanguageProvider'
 import { useSiteContent } from '@/hooks/useSiteContent'
 
@@ -19,6 +19,12 @@ export default function PatientDashboard() {
   const [aftercare, setAftercare] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  
+  const [reviewRating, setReviewRating] = useState(5)
+  const [reviewText, setReviewText] = useState('')
+  const [reviewTreatment, setReviewTreatment] = useState('')
+  const [reviewStatus, setReviewStatus] = useState<'idle' | 'submitting' | 'success'>('idle')
+
   const { t } = useLanguage()
 
   useEffect(() => {
@@ -78,6 +84,33 @@ export default function PatientDashboard() {
       alert('Failed to upload avatar.')
     } finally {
       setUploadingAvatar(false)
+    }
+  }
+
+  const handleSubmitTestimonial = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!reviewText.trim()) return
+    setReviewStatus('submitting')
+    try {
+      const res = await fetch('/api/testimonials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar,
+          rating: reviewRating,
+          review: reviewText,
+          treatment: reviewTreatment
+        })
+      })
+      if (!res.ok) throw new Error('Failed to submit')
+      setReviewStatus('success')
+      setReviewText('')
+      setTimeout(() => setReviewStatus('idle'), 5000)
+    } catch {
+      alert('Failed to submit testimonial. Please try again.')
+      setReviewStatus('idle')
     }
   }
 
@@ -258,6 +291,68 @@ export default function PatientDashboard() {
                 {aftercare || "Stay hydrated, avoid direct sun exposure immediately after skin treatments, and follow any specific guidelines provided by Dr. Hadi Raza."}
               </p>
             </div>
+
+            <div className="bg-white p-6 rounded-2xl border border-cream shadow-sm">
+              <h3 className="font-playfair text-xl text-charcoal mb-4 flex items-center gap-2">
+                <Star size={18} className="text-gold" fill="currentColor" /> Share Your Experience
+              </h3>
+              {reviewStatus === 'success' ? (
+                <div className="text-center py-6">
+                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Star size={20} className="text-green-600" fill="currentColor" />
+                  </div>
+                  <p className="text-sm font-medium text-charcoal">Thank you for your review!</p>
+                  <p className="text-xs text-charcoal-muted mt-1">Your testimonial is now live on our site.</p>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmitTestimonial} className="space-y-4">
+                  <div>
+                    <label className="text-xs font-semibold text-charcoal-muted uppercase tracking-widest block mb-2">Rating</label>
+                    <div className="flex items-center gap-1">
+                      {[1, 2, 3, 4, 5].map(star => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setReviewRating(star)}
+                          className="focus:outline-none transition-transform hover:scale-110"
+                        >
+                          <Star size={24} className={star <= reviewRating ? 'text-amber-400' : 'text-gray-300'} fill={star <= reviewRating ? 'currentColor' : 'none'} />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-charcoal-muted uppercase tracking-widest block mb-1">Treatment (Optional)</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Acne Treatment"
+                      className="w-full px-4 py-2 border border-cream rounded-xl text-sm focus:border-gold focus:ring-1 focus:ring-gold outline-none transition"
+                      value={reviewTreatment}
+                      onChange={e => setReviewTreatment(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-charcoal-muted uppercase tracking-widest block mb-1">Your Review</label>
+                    <textarea
+                      required
+                      rows={3}
+                      placeholder="Tell us about your experience..."
+                      className="w-full px-4 py-3 border border-cream rounded-xl text-sm focus:border-gold focus:ring-1 focus:ring-gold outline-none transition resize-none"
+                      value={reviewText}
+                      onChange={e => setReviewText(e.target.value)}
+                    ></textarea>
+                  </div>
+                  <button 
+                    type="submit" 
+                    disabled={reviewStatus === 'submitting'}
+                    className="w-full btn-gold py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2"
+                  >
+                    {reviewStatus === 'submitting' ? 'Submitting...' : 'Post Testimonial'}
+                  </button>
+                </form>
+              )}
+            </div>
+
           </div>
         </div>
       </div>
