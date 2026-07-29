@@ -512,107 +512,118 @@ function CtaEditor({ data, onChange }: { data: Record<string, unknown>; onChange
   )
 }
 
-function ResultsEditor({ data, onChange }: { data: ResultsData; onChange: (v: ResultsData) => void }) {
-  if (!data) return <p className="text-gray-500 text-sm p-4">No data.</p>
-  const CategoryList = ({ cat, items }: { cat: 'dermatology' | 'dental'; items: ResultsItem[] }) => {
-    const [uploading, setUploading] = useState<{ id: string; side: 'before' | 'after' } | null>(null)
-    
-    const update = (id: string, field: keyof ResultsItem, value: any) =>
-      onChange({ ...data, [cat]: items.map(t => t.id === id ? { ...t, [field]: value } : t) })
+const CategoryList = ({ 
+  cat, 
+  items, 
+  data, 
+  onChange 
+}: { 
+  cat: 'dermatology' | 'dental'; 
+  items: ResultsItem[];
+  data: ResultsData;
+  onChange: (v: ResultsData) => void;
+}) => {
+  const [uploading, setUploading] = useState<{ id: string; side: 'before' | 'after' } | null>(null)
+  
+  const update = (id: string, field: keyof ResultsItem, value: any) =>
+    onChange({ ...data, [cat]: items.map(t => t.id === id ? { ...t, [field]: value } : t) })
 
-    const onFileChange = async (id: string, side: 'before' | 'after', file: File | undefined) => {
-      if (!file) return
-      setUploading({ id, side })
-      try {
-        const compressedFile = await compressImage(file)
-        const formData = new FormData()
-        formData.append('file', compressedFile)
-        
-        const res = await fetch('/api/upload', { method: 'POST', body: formData })
-        if (!res.ok) throw new Error('Upload failed')
-        const result = await res.json()
-        update(id, side === 'before' ? 'beforeImage' : 'afterImage', result.url)
-      } catch {
-        alert('Failed to upload image.')
-      } finally {
-        setUploading(null)
-      }
+  const onFileChange = async (id: string, side: 'before' | 'after', file: File | undefined) => {
+    if (!file) return
+    setUploading({ id, side })
+    try {
+      const compressedFile = await compressImage(file)
+      const formData = new FormData()
+      formData.append('file', compressedFile)
+      
+      const res = await fetch('/api/upload', { method: 'POST', body: formData })
+      if (!res.ok) throw new Error('Upload failed')
+      const result = await res.json()
+      update(id, side === 'before' ? 'beforeImage' : 'afterImage', result.url)
+    } catch {
+      alert('Failed to upload image.')
+    } finally {
+      setUploading(null)
     }
+  }
 
-    return (
-      <div className="space-y-3">
-        <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full ${cat === 'dermatology' ? 'bg-blue-900/50 text-blue-300' : 'bg-green-900/50 text-green-300'}`}>
-          {cat === 'dermatology' ? 'Dermatology' : 'Dental'}
-        </span>
-        {(items || []).map((r) => (
-          <div key={r.id} className="p-4 rounded-xl bg-[#1a1a2e] border border-gray-800 space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-300">{r.label || 'New Result'}</span>
-              <button onClick={() => onChange({ ...data, [cat]: items.filter(t => t.id !== r.id) })}
-                className="text-gray-500 hover:text-red-400 transition"><Trash2 size={14} /></button>
+  return (
+    <div className="space-y-3">
+      <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full ${cat === 'dermatology' ? 'bg-blue-900/50 text-blue-300' : 'bg-green-900/50 text-green-300'}`}>
+        {cat === 'dermatology' ? 'Dermatology' : 'Dental'}
+      </span>
+      {(items || []).map((r) => (
+        <div key={r.id} className="p-4 rounded-xl bg-[#1a1a2e] border border-gray-800 space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-300">{r.label || 'New Result'}</span>
+            <button onClick={() => onChange({ ...data, [cat]: items.filter(t => t.id !== r.id) })}
+              className="text-gray-500 hover:text-red-400 transition"><Trash2 size={14} /></button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <Field label="Label" value={r.label} onChange={v => update(r.id, 'label', v)} />
+            <Field label="Duration" value={r.duration} onChange={v => update(r.id, 'duration', v)} />
+            <Field label="Note" value={r.note} onChange={v => update(r.id, 'note', v)} />
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-gray-800">
+            {/* Before Image */}
+            <div className="space-y-2">
+              <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wide">Before Image</label>
+              <input 
+                type="file" 
+                accept="image/*"
+                onChange={(e) => onFileChange(r.id, 'before', e.target.files?.[0])}
+                disabled={uploading?.id === r.id && uploading.side === 'before'}
+                className="w-full text-sm text-gray-400 file:mr-4 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-amber-900/30 file:text-amber-400 hover:file:bg-amber-900/50 transition cursor-pointer"
+              />
+              {uploading?.id === r.id && uploading.side === 'before' && <span className="text-xs text-amber-500 block animate-pulse">Uploading...</span>}
+              {r.beforeImage && (
+                <div className="relative w-full h-24 rounded-lg overflow-hidden border border-gray-700 mt-2">
+                  <img src={r.beforeImage} alt="Before" className="w-full h-full object-cover" />
+                  <button onClick={() => update(r.id, 'beforeImage', '')} className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 hover:opacity-100 transition">
+                    <Trash2 size={14} className="text-red-400" />
+                  </button>
+                </div>
+              )}
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <Field label="Label" value={r.label} onChange={v => update(r.id, 'label', v)} />
-              <Field label="Duration" value={r.duration} onChange={v => update(r.id, 'duration', v)} />
-              <Field label="Note" value={r.note} onChange={v => update(r.id, 'note', v)} />
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-gray-800">
-              {/* Before Image */}
-              <div className="space-y-2">
-                <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wide">Before Image</label>
-                <input 
-                  type="file" 
-                  accept="image/*"
-                  onChange={(e) => onFileChange(r.id, 'before', e.target.files?.[0])}
-                  disabled={uploading?.id === r.id && uploading.side === 'before'}
-                  className="w-full text-sm text-gray-400 file:mr-4 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-amber-900/30 file:text-amber-400 hover:file:bg-amber-900/50 transition cursor-pointer"
-                />
-                {uploading?.id === r.id && uploading.side === 'before' && <span className="text-xs text-amber-500 block animate-pulse">Uploading...</span>}
-                {r.beforeImage && (
-                  <div className="relative w-full h-24 rounded-lg overflow-hidden border border-gray-700 mt-2">
-                    <img src={r.beforeImage} alt="Before" className="w-full h-full object-cover" />
-                    <button onClick={() => update(r.id, 'beforeImage', '')} className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 hover:opacity-100 transition">
-                      <Trash2 size={14} className="text-red-400" />
-                    </button>
-                  </div>
-                )}
-              </div>
 
-              {/* After Image */}
-              <div className="space-y-2">
-                <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wide">After Image</label>
-                <input 
-                  type="file" 
-                  accept="image/*"
-                  onChange={(e) => onFileChange(r.id, 'after', e.target.files?.[0])}
-                  disabled={uploading?.id === r.id && uploading.side === 'after'}
-                  className="w-full text-sm text-gray-400 file:mr-4 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-amber-900/30 file:text-amber-400 hover:file:bg-amber-900/50 transition cursor-pointer"
-                />
-                {uploading?.id === r.id && uploading.side === 'after' && <span className="text-xs text-amber-500 block animate-pulse">Uploading...</span>}
-                {r.afterImage && (
-                  <div className="relative w-full h-24 rounded-lg overflow-hidden border border-gray-700 mt-2">
-                    <img src={r.afterImage} alt="After" className="w-full h-full object-cover" />
-                    <button onClick={() => update(r.id, 'afterImage', '')} className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 hover:opacity-100 transition">
-                      <Trash2 size={14} className="text-red-400" />
-                    </button>
-                  </div>
-                )}
-              </div>
+            {/* After Image */}
+            <div className="space-y-2">
+              <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wide">After Image</label>
+              <input 
+                type="file" 
+                accept="image/*"
+                onChange={(e) => onFileChange(r.id, 'after', e.target.files?.[0])}
+                disabled={uploading?.id === r.id && uploading.side === 'after'}
+                className="w-full text-sm text-gray-400 file:mr-4 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-amber-900/30 file:text-amber-400 hover:file:bg-amber-900/50 transition cursor-pointer"
+              />
+              {uploading?.id === r.id && uploading.side === 'after' && <span className="text-xs text-amber-500 block animate-pulse">Uploading...</span>}
+              {r.afterImage && (
+                <div className="relative w-full h-24 rounded-lg overflow-hidden border border-gray-700 mt-2">
+                  <img src={r.afterImage} alt="After" className="w-full h-full object-cover" />
+                  <button onClick={() => update(r.id, 'afterImage', '')} className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 hover:opacity-100 transition">
+                    <Trash2 size={14} className="text-red-400" />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
-        ))}
-        <button onClick={() => onChange({ ...data, [cat]: [...(items || []), { id: Date.now().toString(), label: '', duration: '', note: '' }] })}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-dashed border-gray-700 text-gray-500 hover:text-white hover:border-gray-500 transition text-sm w-full justify-center">
-          <Plus size={13} /> Add Result
-        </button>
-      </div>
-    )
-  }
+        </div>
+      ))}
+      <button onClick={() => onChange({ ...data, [cat]: [...(items || []), { id: Date.now().toString(), label: '', duration: '', note: '' }] })}
+        className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-dashed border-gray-700 text-gray-500 hover:text-white hover:border-gray-500 transition text-sm w-full justify-center">
+        <Plus size={13} /> Add Result
+      </button>
+    </div>
+  )
+}
+
+function ResultsEditor({ data, onChange }: { data: ResultsData; onChange: (v: ResultsData) => void }) {
+  if (!data) return <p className="text-gray-500 text-sm p-4">No data.</p>
   return (
     <div className="space-y-6">
-      <CategoryList cat="dermatology" items={data.dermatology} />
-      <CategoryList cat="dental" items={data.dental} />
+      <CategoryList cat="dermatology" items={data.dermatology} data={data} onChange={onChange} />
+      <CategoryList cat="dental" items={data.dental} data={data} onChange={onChange} />
     </div>
   )
 }
