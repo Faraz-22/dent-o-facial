@@ -6,6 +6,7 @@ export function PatientsCRM() {
   const [appointments, setAppointments] = useState<any[]>([])
   const [records, setRecords] = useState<any[]>([])
   const [aftercare, setAftercare] = useState<Record<string, string>>({})
+  const [draftAftercare, setDraftAftercare] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [dateFilter, setDateFilter] = useState('')
@@ -305,7 +306,8 @@ export function PatientsCRM() {
                       </h4>
                       <div className="relative">
                         <textarea
-                          defaultValue={aftercare[patient.email] || ''}
+                          value={draftAftercare[patient.email] ?? aftercare[patient.email] ?? ''}
+                          onChange={(e) => setDraftAftercare(prev => ({ ...prev, [patient.email]: e.target.value }))}
                           onBlur={(e) => saveAftercare(patient.email, e.target.value)}
                           placeholder="Type personalized aftercare instructions here. These will appear on the patient's dashboard..."
                           className="w-full px-4 py-3 rounded-xl bg-[#12122a] border border-gray-800 text-sm text-white focus:outline-none focus:border-amber-500 resize-none h-32 pr-10"
@@ -316,9 +318,18 @@ export function PatientsCRM() {
                           {saveStatus[patient.email] === 'error' && <X size={16} className="text-red-500" />}
                         </div>
                       </div>
-                      <p className="text-[10px] text-gray-500 mt-1 flex items-center gap-1">
-                        Changes are saved automatically when you click outside the text box.
-                      </p>
+                      <div className="flex items-center justify-between mt-2">
+                        <p className="text-[10px] text-gray-500 flex items-center gap-1">
+                          Auto-saves when you click outside, or click Save.
+                        </p>
+                        <button
+                          onClick={() => saveAftercare(patient.email, draftAftercare[patient.email] ?? aftercare[patient.email] ?? '')}
+                          disabled={saveStatus[patient.email] === 'saving'}
+                          className="px-4 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white text-xs font-semibold transition"
+                        >
+                          {saveStatus[patient.email] === 'saving' ? 'Saving...' : 'Save Instructions'}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

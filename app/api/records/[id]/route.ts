@@ -29,14 +29,22 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       
       // If it's a base64 data URI, parse it and return as binary response
       if (fileUrl.startsWith('data:')) {
-        const matches = fileUrl.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/)
+        const matches = fileUrl.match(/^data:([A-Za-z0-9-+\/.]+);base64,(.+)$/)
         if (matches && matches.length === 3) {
           const contentType = matches[1]
           const buffer = Buffer.from(matches[2], 'base64')
+          
+          // Use appropriate extension based on content type
+          let ext = ''
+          if (contentType.includes('pdf')) ext = '.pdf'
+          else if (contentType.includes('png')) ext = '.png'
+          else if (contentType.includes('jpeg') || contentType.includes('jpg')) ext = '.jpg'
+          else if (contentType.includes('word')) ext = '.docx'
+          
           return new NextResponse(buffer, {
             headers: {
               'Content-Type': contentType,
-              'Content-Disposition': `inline; filename="record-${id}"`
+              'Content-Disposition': `inline; filename="record-${id}${ext}"`
             }
           })
         }
