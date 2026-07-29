@@ -72,7 +72,9 @@ const SiteContentSchema = new mongoose.Schema({
   blog: { type: mongoose.Schema.Types.Mixed },
   faq: { type: mongoose.Schema.Types.Mixed },
   cta: { type: mongoose.Schema.Types.Mixed },
-  images: { type: mongoose.Schema.Types.Mixed }
+  images: { type: mongoose.Schema.Types.Mixed },
+  results: { type: mongoose.Schema.Types.Mixed },
+  translations: { type: mongoose.Schema.Types.Mixed }
 });
 
 const AftercareSchema = new mongoose.Schema({
