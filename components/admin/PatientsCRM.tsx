@@ -16,6 +16,7 @@ export function PatientsCRM() {
   const [uploadModal, setUploadModal] = useState<{ isOpen: boolean; email: string }>({ isOpen: false, email: '' })
   const [uploadForm, setUploadForm] = useState({ type: 'prescription', fileUrl: '', notes: '', date: new Date().toISOString().split('T')[0] })
   const [saveStatus, setSaveStatus] = useState<Record<string, 'saving' | 'saved' | 'error'>>({})
+  const [recordSaveStatus, setRecordSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
 
   useEffect(() => {
     Promise.all([
@@ -118,6 +119,7 @@ export function PatientsCRM() {
       return
     }
 
+    setRecordSaveStatus('saving')
     try {
       const res = await fetch('/api/records', {
         method: 'POST',
@@ -131,13 +133,19 @@ export function PatientsCRM() {
       if (res.ok) {
         const data = await res.json()
         setRecords([...records, data.record])
-        setUploadModal({ isOpen: false, email: '' })
-        setUploadForm({ type: 'prescription', fileUrl: '', notes: '', date: new Date().toISOString().split('T')[0] })
+        setRecordSaveStatus('saved')
+        setTimeout(() => {
+          setUploadModal({ isOpen: false, email: '' })
+          setUploadForm({ type: 'prescription', fileUrl: '', notes: '', date: new Date().toISOString().split('T')[0] })
+          setRecordSaveStatus('idle')
+        }, 1500)
       } else {
-        alert('Failed to save record.')
+        setRecordSaveStatus('error')
+        setTimeout(() => setRecordSaveStatus('idle'), 3000)
       }
     } catch (e) {
-      alert('Failed to save record.')
+      setRecordSaveStatus('error')
+      setTimeout(() => setRecordSaveStatus('idle'), 3000)
     }
   }
 
@@ -405,7 +413,16 @@ export function PatientsCRM() {
 
               <div className="pt-4 flex gap-3">
                 <button type="button" onClick={() => setUploadModal({ isOpen: false, email: '' })} className="flex-1 py-3 rounded-xl border border-gray-700 text-sm font-semibold text-gray-300 hover:bg-gray-800 transition">Cancel</button>
-                <button type="submit" disabled={!uploadForm.fileUrl || !!uploading} className="flex-1 py-3 rounded-xl bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white text-sm font-bold transition">Save Record</button>
+                <button 
+                  type="submit" 
+                  disabled={!uploadForm.fileUrl || !!uploading || recordSaveStatus === 'saving' || recordSaveStatus === 'saved'} 
+                  className={`flex-1 py-3 rounded-xl disabled:opacity-50 text-white text-sm font-bold transition flex items-center justify-center gap-2
+                    ${recordSaveStatus === 'saved' ? 'bg-green-600 hover:bg-green-500' : 'bg-amber-600 hover:bg-amber-500'}`}
+                >
+                  {recordSaveStatus === 'saving' && 'Saving...'}
+                  {recordSaveStatus === 'saved' && <><Check size={16} /> Saved!</>}
+                  {recordSaveStatus !== 'saving' && recordSaveStatus !== 'saved' && 'Save Record'}
+                </button>
               </div>
             </form>
           </div>
