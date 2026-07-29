@@ -14,6 +14,7 @@ import { AppointmentsEditor } from './AppointmentsEditor'
 import { LeadsEditor } from './LeadsEditor'
 import { NotificationsViewer } from './NotificationsViewer'
 import { PatientsCRM } from './PatientsCRM'
+import { compressImage } from '@/lib/imageUtils'
 
 // ─── Section metadata ─────────────────────────────────────────────────────────
 const SECTIONS = [
@@ -135,9 +136,10 @@ function TreatmentsEditor({ data, onChange }: { data: { dermatology: Treatment[]
     const onFileChange = async (id: string, file: File | undefined) => {
       if (!file) return
       setUploading(id)
-      const formData = new FormData()
-      formData.append('file', file)
       try {
+        const compressedFile = await compressImage(file)
+        const formData = new FormData()
+        formData.append('file', compressedFile)
         const res = await fetch('/api/upload', { method: 'POST', body: formData })
         if (!res.ok) throw new Error('Upload failed')
         const result = await res.json()
@@ -262,9 +264,11 @@ function BlogEditor({ data, onChange }: { data: BlogPost[]; onChange: (v: BlogPo
   const onFileChange = async (slug: string, file: File | undefined) => {
     if (!file) return
     setUploading(slug)
-    const formData = new FormData()
-    formData.append('file', file)
     try {
+      const compressedFile = await compressImage(file)
+      const formData = new FormData()
+      formData.append('file', compressedFile)
+      
       const res = await fetch('/api/upload', { method: 'POST', body: formData })
       if (!res.ok) throw new Error('Upload failed')
       const result = await res.json()
@@ -360,9 +364,10 @@ function HeroEditor({ data, onChange }: { data: Record<string, unknown>; onChang
   const handleLogoUpload = async (file: File | undefined) => {
     if (!file) return
     setUploading(true)
-    const formData = new FormData()
-    formData.append('file', file)
     try {
+      const compressedFile = await compressImage(file)
+      const formData = new FormData()
+      formData.append('file', compressedFile)
       const res = await fetch('/api/upload', { method: 'POST', body: formData })
       if (!res.ok) throw new Error('Upload failed')
       const result = await res.json()
@@ -518,9 +523,11 @@ function ResultsEditor({ data, onChange }: { data: ResultsData; onChange: (v: Re
     const onFileChange = async (id: string, side: 'before' | 'after', file: File | undefined) => {
       if (!file) return
       setUploading({ id, side })
-      const formData = new FormData()
-      formData.append('file', file)
       try {
+        const compressedFile = await compressImage(file)
+        const formData = new FormData()
+        formData.append('file', compressedFile)
+        
         const res = await fetch('/api/upload', { method: 'POST', body: formData })
         if (!res.ok) throw new Error('Upload failed')
         const result = await res.json()
@@ -737,9 +744,10 @@ function ImagesEditor({ data, onChange }: { data: Record<string, any>; onChange:
   const onFileChange = async (key: string, file: File | undefined, isArray: boolean) => {
     if (!file) return
     setUploading(key)
-    const formData = new FormData()
-    formData.append('file', file)
     try {
+      const compressedFile = await compressImage(file)
+      const formData = new FormData()
+      formData.append('file', compressedFile)
       const res = await fetch('/api/upload', { method: 'POST', body: formData })
       if (!res.ok) throw new Error('Upload failed')
       const result = await res.json()

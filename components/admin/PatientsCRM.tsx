@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Search, Filter, Calendar, FileText, Upload, Plus, X, Check, Eye, Trash2 } from 'lucide-react'
+import { Search, Filter, Calendar, FileText, Upload, Plus, X, Check, Eye, Trash2, RefreshCw } from 'lucide-react'
+import { compressImage } from '@/lib/imageUtils'
 
 export function PatientsCRM() {
   const [patients, setPatients] = useState<any[]>([])
@@ -70,9 +71,10 @@ export function PatientsCRM() {
     if (!file) return
     setUploading({ email: uploadModal.email })
     
-    const formData = new FormData()
-    formData.append('file', file)
     try {
+      const compressedFile = await compressImage(file)
+      const formData = new FormData()
+      formData.append('file', compressedFile)
       const res = await fetch('/api/upload', { method: 'POST', body: formData })
       if (!res.ok) throw new Error('Upload failed')
       const result = await res.json()
