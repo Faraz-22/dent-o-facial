@@ -14,6 +14,7 @@ export function PatientsCRM() {
   const [selectedPatient, setSelectedPatient] = useState<any>(null)
   const [uploadModal, setUploadModal] = useState<{ isOpen: boolean; email: string }>({ isOpen: false, email: '' })
   const [uploadForm, setUploadForm] = useState({ type: 'prescription', fileUrl: '', notes: '', date: new Date().toISOString().split('T')[0] })
+  const [saveStatus, setSaveStatus] = useState<Record<string, 'saving' | 'saved' | 'error'>>({})
 
   useEffect(() => {
     Promise.all([
@@ -82,6 +83,9 @@ export function PatientsCRM() {
   }
 
   const saveAftercare = async (email: string, text: string) => {
+    if (aftercare[email] === text) return // No changes
+
+    setSaveStatus(prev => ({ ...prev, [email]: 'saving' }))
     try {
       const res = await fetch('/api/aftercare', {
         method: 'POST',
@@ -90,12 +94,19 @@ export function PatientsCRM() {
       })
       if (res.ok) {
         setAftercare(prev => ({ ...prev, [email]: text }))
-        alert('Aftercare instructions saved.')
+        setSaveStatus(prev => ({ ...prev, [email]: 'saved' }))
+        setTimeout(() => {
+          setSaveStatus(prev => {
+            const next = { ...prev }
+            delete next[email]
+            return next
+          })
+        }, 2000)
       } else {
-        alert('Failed to save aftercare.')
+        setSaveStatus(prev => ({ ...prev, [email]: 'error' }))
       }
     } catch (e) {
-      alert('Failed to save aftercare.')
+      setSaveStatus(prev => ({ ...prev, [email]: 'error' }))
     }
   }
 
@@ -268,7 +279,7 @@ export function PatientsCRM() {
                               </div>
                               {r.notes && <p className="text-xs text-gray-400 mb-2">{r.notes}</p>}
                               <div className="flex items-center justify-between mt-2">
-                                <a href={r.fileUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs text-amber-500 hover:text-amber-400 transition">
+                                <a href={`/api/records/${r.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs text-amber-500 hover:text-amber-400 transition">
                                   <Eye size={12} /> View Document
                                 </a>
                                 <button 
@@ -292,13 +303,22 @@ export function PatientsCRM() {
                         <FileText size={14} className="text-amber-500" />
                         Custom Aftercare Instructions
                       </h4>
-                      <textarea
-                        defaultValue={aftercare[patient.email] || ''}
-                        onBlur={(e) => saveAftercare(patient.email, e.target.value)}
-                        placeholder="Type personalized aftercare instructions here. These will appear on the patient's dashboard..."
-                        className="w-full px-4 py-3 rounded-xl bg-[#12122a] border border-gray-800 text-sm text-white focus:outline-none focus:border-amber-500 resize-none h-32"
-                      />
-                      <p className="text-[10px] text-gray-500 mt-1">Changes are saved automatically when you click outside the text box.</p>
+                      <div className="relative">
+                        <textarea
+                          defaultValue={aftercare[patient.email] || ''}
+                          onBlur={(e) => saveAftercare(patient.email, e.target.value)}
+                          placeholder="Type personalized aftercare instructions here. These will appear on the patient's dashboard..."
+                          className="w-full px-4 py-3 rounded-xl bg-[#12122a] border border-gray-800 text-sm text-white focus:outline-none focus:border-amber-500 resize-none h-32 pr-10"
+                        />
+                        <div className="absolute right-3 top-3">
+                          {saveStatus[patient.email] === 'saving' && <span className="text-xs text-amber-500 animate-pulse">Saving...</span>}
+                          {saveStatus[patient.email] === 'saved' && <Check size={16} className="text-green-500" />}
+                          {saveStatus[patient.email] === 'error' && <X size={16} className="text-red-500" />}
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-gray-500 mt-1 flex items-center gap-1">
+                        Changes are saved automatically when you click outside the text box.
+                      </p>
                     </div>
                   </div>
                 </div>

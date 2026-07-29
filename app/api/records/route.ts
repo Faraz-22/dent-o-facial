@@ -36,7 +36,8 @@ export async function GET(request: Request) {
     try {
       await connectToDatabase()
       const query = email ? { patientEmail: email } : {}
-      const records = await RecordModel.find(query).sort({ createdAt: -1 }).lean()
+      // Exclude fileUrl from the list to prevent Vercel 4.5MB payload limit errors
+      const records = await RecordModel.find(query).select('-fileUrl').sort({ createdAt: -1 }).lean()
       return NextResponse.json(records)
     } catch (dbErr) {
       console.warn('MongoDB failed for records GET, falling back to JSON', dbErr)
@@ -45,7 +46,7 @@ export async function GET(request: Request) {
         data = await fs.readFile(RECORDS_FILE, 'utf-8')
       } catch (e) {}
       const records = JSON.parse(data)
-      
+            
       if (email) {
         const filtered = records.filter((r: any) => r.patientEmail === email)
         return NextResponse.json(filtered)
