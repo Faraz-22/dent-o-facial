@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { Eye, EyeOff } from 'lucide-react'
 import { useLanguage } from '@/components/providers/LanguageProvider'
 
 type LoginResult = {
@@ -21,7 +22,8 @@ export default function LoginPage() {
 }
 
 function LoginContent() {
-  const [isRegister, setIsRegister] = useState(false)
+  const [view, setView] = useState<'login' | 'register' | 'forgot' | 'reset'>('login')
+  const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
@@ -44,7 +46,13 @@ function LoginContent() {
         }
       })
       .catch(() => { setCheckingAuth(false) })
-  }, [router])
+      
+    // Check if we are in reset mode
+    if (searchParams.get('reset')) {
+      setView('reset')
+      setCheckingAuth(false) // Bypass check auth to allow reset
+    }
+  }, [router, searchParams])
 
   // Automatic redirect effect
   useEffect(() => {
@@ -66,8 +74,42 @@ function LoginContent() {
     setLoading(true)
     setError('')
     try {
-      const endpoint = isRegister ? '/api/auth/register' : '/api/auth'
-      const payload = isRegister ? { name, email, password } : { email, password }
+      if (view === 'forgot') {
+        const res = await fetch('/api/auth/forgot-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        })
+        if (res.ok) {
+          setError('If that email exists, we have sent a reset link to it. Please check your inbox.')
+        } else {
+          setError('Failed to process request.')
+        }
+        setLoading(false)
+        return
+      }
+
+      if (view === 'reset') {
+        const token = searchParams.get('reset')
+        const res = await fetch('/api/auth/reset-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token, newPassword: password }),
+        })
+        const data = await res.json()
+        if (res.ok) {
+          setError('Password reset successful! You can now log in.')
+          setView('login')
+          setPassword('')
+        } else {
+          setError(data.error || 'Failed to reset password.')
+        }
+        setLoading(false)
+        return
+      }
+
+      const endpoint = view === 'register' ? '/api/auth/register' : '/api/auth'
+      const payload = view === 'register' ? { name, email, password } : { email, password }
       
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -182,34 +224,46 @@ function LoginContent() {
             </span>
           </Link>
           <p className="text-charcoal-muted text-sm mt-4 font-inter font-light">
-            {isRegister ? 'Join our luxury dermatology and dental family' : 'Sign in to access your appointments and records.'}
+            {view === 'register' ? 'Join our luxury dermatology and dental family' : 
+             view === 'forgot' ? 'Enter your email to receive a password reset link.' :
+             view === 'reset' ? 'Enter your new password below.' :
+             'Sign in to access your appointments and records.'}
           </p>
         </div>
 
         {/* Card */}
         <div className="bg-white border border-gold/15 rounded-3xl p-8 shadow-xl">
           {/* Tabs */}
-          <div className="flex border-b border-cream-dark mb-6">
-            <button
-              onClick={() => { setIsRegister(false); setError(''); }}
-              className={`flex-1 pb-3 text-sm font-medium tracking-wide border-b-2 transition-all ${
-                !isRegister ? 'border-gold text-charcoal' : 'border-transparent text-charcoal-muted hover:text-charcoal'
-              }`}
-            >
-              {t('auth.signin')}
-            </button>
-            <button
-              onClick={() => { setIsRegister(true); setError(''); }}
-              className={`flex-1 pb-3 text-sm font-medium tracking-wide border-b-2 transition-all ${
-                isRegister ? 'border-gold text-charcoal' : 'border-transparent text-charcoal-muted hover:text-charcoal'
-              }`}
-            >
-              {t('auth.create')}
-            </button>
-          </div>
+          {(view === 'login' || view === 'register') && (
+            <div className="flex border-b border-cream-dark mb-6">
+              <button
+                onClick={() => { setView('login'); setError(''); }}
+                className={`flex-1 pb-3 text-sm font-medium tracking-wide border-b-2 transition-all ${
+                  view === 'login' ? 'border-gold text-charcoal' : 'border-transparent text-charcoal-muted hover:text-charcoal'
+                }`}
+              >
+                {t('auth.signin')}
+              </button>
+              <button
+                onClick={() => { setView('register'); setError(''); }}
+                className={`flex-1 pb-3 text-sm font-medium tracking-wide border-b-2 transition-all ${
+                  view === 'register' ? 'border-gold text-charcoal' : 'border-transparent text-charcoal-muted hover:text-charcoal'
+                }`}
+              >
+                {t('auth.create')}
+              </button>
+            </div>
+          )}
+          {(view === 'forgot' || view === 'reset') && (
+            <div className="flex border-b border-cream-dark mb-6">
+              <div className="flex-1 pb-3 text-sm font-medium tracking-wide border-b-2 border-gold text-charcoal text-center">
+                {view === 'forgot' ? 'Reset Password' : 'Set New Password'}
+              </div>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {isRegister && (
+            {view === 'register' && (
               <div>
                 <label className="block text-xs font-semibold text-charcoal-muted uppercase tracking-wider mb-2">
                   Full Name
@@ -225,33 +279,54 @@ function LoginContent() {
               </div>
             )}
 
-            <div>
-              <label className="block text-xs font-semibold text-charcoal-muted uppercase tracking-wider mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="email@example.com"
-                className="w-full px-4 py-3 rounded-xl bg-ivory border border-gold/10 text-charcoal placeholder-charcoal-muted/50 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold text-sm transition"
-                required
-              />
-            </div>
+            {view !== 'reset' && (
+              <div>
+                <label className="block text-xs font-semibold text-charcoal-muted uppercase tracking-wider mb-2">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="email@example.com"
+                  className="w-full px-4 py-3 rounded-xl bg-ivory border border-gold/10 text-charcoal placeholder-charcoal-muted/50 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold text-sm transition"
+                  required
+                />
+              </div>
+            )}
 
-            <div>
-              <label className="block text-xs font-semibold text-charcoal-muted uppercase tracking-wider mb-2">
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full px-4 py-3 rounded-xl bg-ivory border border-gold/10 text-charcoal placeholder-charcoal-muted/50 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold text-sm transition"
-                required
-              />
-            </div>
+            {view !== 'forgot' && (
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-xs font-semibold text-charcoal-muted uppercase tracking-wider">
+                    {view === 'reset' ? 'New Password' : 'Password'}
+                  </label>
+                  {view === 'login' && (
+                    <button type="button" onClick={() => { setView('forgot'); setError(''); }} className="text-xs text-gold-dark hover:text-gold transition">
+                      Forgot Password?
+                    </button>
+                  )}
+                </div>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full px-4 py-3 rounded-xl bg-ivory border border-gold/10 text-charcoal placeholder-charcoal-muted/50 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold text-sm transition pr-12"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                    aria-label="Toggle password visibility"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+            )}
 
             {error && (
               <div className="px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-inter">
@@ -264,8 +339,22 @@ function LoginContent() {
               disabled={loading}
               className="w-full mt-6 py-3.5 px-6 rounded-xl bg-charcoal hover:bg-black text-white font-medium text-sm tracking-widest uppercase transition disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {loading ? 'Processing...' : isRegister ? t('auth.create') : t('auth.signin')}
+              {loading ? 'Processing...' : 
+               view === 'register' ? t('auth.create') : 
+               view === 'forgot' ? 'Send Reset Link' :
+               view === 'reset' ? 'Update Password' :
+               t('auth.signin')}
             </button>
+            
+            {view === 'forgot' && (
+              <button
+                type="button"
+                onClick={() => { setView('login'); setError(''); }}
+                className="w-full mt-3 py-3.5 px-6 rounded-xl border border-gray-200 hover:bg-gray-50 text-charcoal font-medium text-sm tracking-widest uppercase transition"
+              >
+                Back to Login
+              </button>
+            )}
           </form>
         </div>
       </div>
