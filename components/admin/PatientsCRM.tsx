@@ -325,9 +325,14 @@ export function PatientsCRM() {
                         <button
                           onClick={() => saveAftercare(patient.email, draftAftercare[patient.email] ?? aftercare[patient.email] ?? '')}
                           disabled={saveStatus[patient.email] === 'saving'}
-                          className="px-4 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white text-xs font-semibold transition"
+                          className={`px-4 py-1.5 rounded-lg disabled:opacity-50 text-white text-xs font-semibold transition flex items-center gap-1.5
+                            ${saveStatus[patient.email] === 'saved' 
+                              ? 'bg-green-600 hover:bg-green-500' 
+                              : 'bg-amber-600 hover:bg-amber-500'}`}
                         >
-                          {saveStatus[patient.email] === 'saving' ? 'Saving...' : 'Save Instructions'}
+                          {saveStatus[patient.email] === 'saving' && 'Saving...'}
+                          {saveStatus[patient.email] === 'saved' && <><Check size={14} /> Saved!</>}
+                          {saveStatus[patient.email] !== 'saving' && saveStatus[patient.email] !== 'saved' && 'Save Instructions'}
                         </button>
                       </div>
                     </div>
