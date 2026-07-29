@@ -1132,6 +1132,7 @@ export default function AdminShell() {
   useEffect(() => { sectionRef.current = section }, [section])
 
   const [content, setContent] = useState<Record<string, unknown> | null>(null)
+  const [stats, setStats] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
   const [localData, setLocalData] = useState<unknown>(null)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
@@ -1141,13 +1142,16 @@ export default function AdminShell() {
   const currentSection = SECTIONS.find(s => s.key === section) || SECTIONS[0]
   const SectionIcon = currentSection.icon
 
-  // Fetch content
+  // Fetch content and stats
   useEffect(() => {
-    fetch('/api/content', { cache: 'no-store' })
-      .then(r => r.json())
-      .then(data => {
-        setContent(data)
-        setLocalData(data[section] ?? null)
+    Promise.all([
+      fetch('/api/content', { cache: 'no-store' }).then(r => r.json()),
+      fetch('/api/stats', { cache: 'no-store' }).then(r => r.json()).catch(() => ({}))
+    ])
+      .then(([contentData, statsData]) => {
+        setContent(contentData)
+        setLocalData(contentData[section] ?? null)
+        if (!statsData.error) setStats(statsData)
         setLoading(false)
       })
       .catch(() => setLoading(false))
@@ -1216,6 +1220,8 @@ export default function AdminShell() {
     blog: (content?.blog as BlogPost[] || []).length,
     locations: (content?.locations as Location[] || []).length,
     faq: (content?.faq as Faq[] || []).length,
+    translations: Object.keys(content?.translations || {}).length,
+    images: Object.keys(content?.images || {}).length,
   }
 
   const cardColors = ['from-blue-600 to-blue-700','from-green-600 to-green-700','from-purple-600 to-purple-700','from-red-600 to-red-700','from-amber-600 to-amber-700','from-teal-600 to-teal-700','from-pink-600 to-pink-700','from-indigo-600 to-indigo-700','from-orange-600 to-orange-700']
@@ -1342,14 +1348,14 @@ export default function AdminShell() {
                     { label:'Hero Section', count: 1, icon: Eye, section:'hero', color: cardColors[6] },
                     { label:'CTA & Contact', count: 1, icon: Settings, section:'cta', color: cardColors[7] },
                     { label:'Results Gallery', count: 1, icon: Star, section:'results', color: cardColors[8] },
-                    { label:'Manual Translations', count: '—', icon: Globe, section:'translations', color: 'from-blue-800 to-blue-900' },
-                    { label:'Image Manager', count: '—', icon: ImageIcon, section:'images', color: 'from-rose-600 to-rose-700' },
-                    { label:'Registered Users', count: '—', icon: Users, section:'users', color: 'from-cyan-600 to-cyan-700' },
-                    { label:'Patient Records', count: '—', icon: FileText, section:'patient-records', color: 'from-blue-600 to-blue-700' },
-                    { label:'Appointments', count: '—', icon: Calendar, section:'appointments', color: 'from-emerald-600 to-emerald-700' },
-                    { label:'Leads CRM', count: '—', icon: Users, section:'leads', color: 'from-fuchsia-600 to-fuchsia-700' },
-                    { label:'Notifications', count: '—', icon: Bell, section:'notifications', color: 'from-sky-600 to-sky-700' },
-                    { label:'Analytics', count: '—', icon: BarChart3, section:'analytics', color: 'from-violet-600 to-violet-700' },
+                    { label:'Manual Translations', count: counts.translations || 0, icon: Globe, section:'translations', color: 'from-blue-800 to-blue-900' },
+                    { label:'Image Manager', count: counts.images || 0, icon: ImageIcon, section:'images', color: 'from-rose-600 to-rose-700' },
+                    { label:'Registered Users', count: stats.users ?? '—', icon: Users, section:'users', color: 'from-cyan-600 to-cyan-700' },
+                    { label:'Patient Records', count: stats.records ?? '—', icon: FileText, section:'patient-records', color: 'from-blue-600 to-blue-700' },
+                    { label:'Appointments', count: stats.appointments ?? '—', icon: Calendar, section:'appointments', color: 'from-emerald-600 to-emerald-700' },
+                    { label:'Leads CRM', count: stats.leads ?? '—', icon: Users, section:'leads', color: 'from-fuchsia-600 to-fuchsia-700' },
+                    { label:'Notifications', count: stats.notifications ?? '—', icon: Bell, section:'notifications', color: 'from-sky-600 to-sky-700' },
+                    { label:'Analytics', count: stats.analytics ?? '—', icon: BarChart3, section:'analytics', color: 'from-violet-600 to-violet-700' },
                   ].map(card => (
                     <Link key={card.label} href={`/admin/dashboard?section=${card.section}`}
                       className={`p-5 rounded-2xl bg-gradient-to-br ${card.color} hover:opacity-85 transition group block`}>
