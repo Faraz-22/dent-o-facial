@@ -32,6 +32,11 @@ export async function POST(request: Request) {
     if (purpose === 'public' && !isAdmin) {
       return NextResponse.json({ error: 'Only admins can upload public media' }, { status: 403 })
     }
+    
+    // Only users/admins can upload avatars
+    if (purpose === 'avatar' && !isAdmin && !isUser) {
+      return NextResponse.json({ error: 'Unauthorized avatar upload' }, { status: 403 })
+    }
 
     // Convert File to Buffer
     const arrayBuffer = await file.arrayBuffer()
