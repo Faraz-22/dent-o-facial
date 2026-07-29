@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import fs from 'fs'
-import path from 'path'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,31 +22,17 @@ export async function POST(request: Request) {
     // Convert File to Buffer
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
+    
+    // Determine mime type from file type or fallback to jpeg
+    const mimeType = file.type || 'image/jpeg'
+    
+    // Create a base64 Data URI string
+    const base64Data = buffer.toString('base64')
+    const dataUri = `data:${mimeType};base64,${base64Data}`
 
-    // Sanitize filename to prevent path traversal and ensure uniqueness
-    const originalName = file.name || 'image.jpg'
-    const sanitizedName = originalName.replace(/[^a-zA-Z0-9.-]/g, '_')
-    const timestamp = Date.now()
-    const uniqueFilename = `${timestamp}-${sanitizedName}`
-
-    try {
-      // Ensure the uploads directory exists
-      const uploadsDir = path.join(process.cwd(), 'public', 'uploads')
-      if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir, { recursive: true })
-      }
-
-      // Write file
-      const filePath = path.join(uploadsDir, uniqueFilename)
-      fs.writeFileSync(filePath, buffer)
-
-      // Return the public URL
-      return NextResponse.json({ url: `/uploads/${uniqueFilename}` })
-    } catch (fsErr) {
-      console.warn('File system write failed (likely on Vercel). Returning mock URL.', fsErr)
-      // Return a mock placeholder URL if we can't write to the file system (e.g. on Vercel)
-      return NextResponse.json({ url: `https://via.placeholder.com/800x600?text=${encodeURIComponent(sanitizedName)}` })
-    }
+    // Return the base64 string directly so it can be saved to MongoDB
+    return NextResponse.json({ url: dataUri })
+    
   } catch (err) {
     console.error('File upload failed:', err)
     return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 })
