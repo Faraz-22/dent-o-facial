@@ -21,15 +21,6 @@ export default function LocationSection() {
 
   const defaultLocations: Location[] = [
     {
-      id: 'purnea',
-      name: 'Purnea Clinic',
-      address: 'Main Road, Purnea, Bihar 854301',
-      phone: '+91 98765 43210',
-      hours: 'Mon–Sat: 10am – 7pm',
-      mapUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d57912.31!2d87.4753!3d25.7771!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39ef5a4b7f5c2a1d%3A0x0!2sPurnea%2C%20Bihar!5e0!3m2!1sen!2sin!4v1620000000000!5m2!1sen!2sin',
-      primary: true,
-    },
-    {
       id: 'banmankhi',
       name: 'Banmankhi Clinic',
       address: 'Station Road, Banmankhi, Bihar 854202',
@@ -37,6 +28,15 @@ export default function LocationSection() {
       hours: 'Tue, Thu, Sat: 11am – 5pm',
       mapUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d28953.12!2d87.1906!3d25.8927!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39ef5b0000000001%3A0x0!2sBanmankhi%2C%20Bihar!5e0!3m2!1sen!2sin!4v1620000000001!5m2!1sen!2sin',
       primary: false,
+    },
+    {
+      id: 'purnea',
+      name: 'Purnea Clinic',
+      address: 'Main Road, Purnea, Bihar 854301',
+      phone: '+91 98765 43210',
+      hours: 'Mon–Sat: 10am – 7pm',
+      mapUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d57912.31!2d87.4753!3d25.7771!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39ef5a4b7f5c2a1d%3A0x0!2sPurnea%2C%20Bihar!5e0!3m2!1sen!2sin!4v1620000000000!5m2!1sen!2sin',
+      primary: true,
     },
   ]
 
