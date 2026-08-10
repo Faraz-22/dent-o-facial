@@ -66,7 +66,7 @@ export default function Navbar({
               <span className="text-[9px] md:text-[10px] text-gold-dark tracking-[0.25em] uppercase font-inter font-bold leading-tight">
                 Dr. Hadi Raza
               </span>
-              <span className="text-[9px] md:text-[10px] text-charcoal-muted tracking-[0.25em] uppercase font-inter font-medium leading-tight mt-0.5">
+              <span className="text-[9px] md:text-[10px] text-gold-dark tracking-[0.25em] uppercase font-inter font-bold leading-tight mt-0.5">
                 Dr. Nahid Raza
               </span>
             </div>
