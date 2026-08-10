@@ -12,7 +12,9 @@ async function getTreatment(slug: string) {
     const data = JSON.parse(raw)
     const allTreatments = [
       ...(data.treatments?.dermatology || []),
-      ...(data.treatments?.dental || [])
+      ...(data.treatments?.dental || []),
+      ...(data.treatments?.orthodontics || []),
+      ...(data.treatments?.facialTrauma || [])
     ]
     return allTreatments.find(t => t.id === slug)
   } catch (err) {
