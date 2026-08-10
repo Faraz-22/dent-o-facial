@@ -198,9 +198,9 @@ function TestimonialsEditor({ data, onChange }: { data: Testimonial[]; onChange:
   )
 }
 
-function TreatmentsEditor({ data, onChange }: { data: { dermatology: Treatment[]; dental: Treatment[] }; onChange: (v: typeof data) => void }) {
+function TreatmentsEditor({ data, onChange }: { data: { dermatology: Treatment[]; dental: Treatment[]; orthodontics?: Treatment[]; facialTrauma?: Treatment[] }; onChange: (v: typeof data) => void }) {
   if (!data) return <p className="text-gray-500 text-sm p-4">No data.</p>
-  const CategoryList = ({ cat, items }: { cat: 'dermatology' | 'dental'; items: Treatment[] }) => {
+  const CategoryList = ({ cat, items, label, colorClass }: { cat: 'dermatology' | 'dental' | 'orthodontics' | 'facialTrauma'; items: Treatment[]; label: string; colorClass: string }) => {
     const update = (id: string, field: keyof Treatment, value: any) =>
       onChange({ ...data, [cat]: items.map(t => t.id === id ? { ...t, [field]: value } : t) })
     const remove = (id: string) => onChange({ ...data, [cat]: items.filter(t => t.id !== id) })
@@ -233,8 +233,8 @@ function TreatmentsEditor({ data, onChange }: { data: { dermatology: Treatment[]
     }
     return (
       <div className="space-y-3">
-        <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full ${cat === 'dermatology' ? 'bg-blue-900/50 text-blue-300' : 'bg-green-900/50 text-green-300'}`}>
-          {cat === 'dermatology' ? 'Dermatology' : 'Dental'}
+        <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full ${colorClass}`}>
+          {label}
         </span>
         {(items || []).map((t) => (
           <div key={t.id} className="p-5 rounded-2xl bg-[#1a1a2e] border border-gray-800 space-y-4">
@@ -293,8 +293,10 @@ function TreatmentsEditor({ data, onChange }: { data: { dermatology: Treatment[]
   }
   return (
     <div className="space-y-6">
-      <CategoryList cat="dermatology" items={data.dermatology} />
-      <CategoryList cat="dental" items={data.dental} />
+      <CategoryList cat="dermatology" items={data.dermatology || []} label="Dermatology" colorClass="bg-blue-900/50 text-blue-300" />
+      <CategoryList cat="dental" items={data.dental || []} label="Dental" colorClass="bg-green-900/50 text-green-300" />
+      <CategoryList cat="orthodontics" items={data.orthodontics || []} label="Orthodontics" colorClass="bg-purple-900/50 text-purple-300" />
+      <CategoryList cat="facialTrauma" items={data.facialTrauma || []} label="Facial Trauma" colorClass="bg-orange-900/50 text-orange-300" />
     </div>
   )
 }
@@ -1312,7 +1314,7 @@ export default function AdminShell() {
   // ── Dashboard home cards ──
   const counts = {
     testimonials: (content?.testimonials as Testimonial[] || []).length,
-    treatments: ((content?.treatments as {dermatology:Treatment[];dental:Treatment[]})?.dermatology?.length || 0) + ((content?.treatments as {dermatology:Treatment[];dental:Treatment[]})?.dental?.length || 0),
+    treatments: ((content?.treatments as any)?.dermatology?.length || 0) + ((content?.treatments as any)?.dental?.length || 0) + ((content?.treatments as any)?.orthodontics?.length || 0) + ((content?.treatments as any)?.facialTrauma?.length || 0),
     blog: (content?.blog as BlogPost[] || []).length,
     locations: (content?.locations as Location[] || []).length,
     faq: (content?.faq as Faq[] || []).length,
@@ -1483,7 +1485,7 @@ export default function AdminShell() {
               <TestimonialsEditor data={localData as Testimonial[]} onChange={handleDataChange} />
             )}
             {section === 'treatments' && (
-              <TreatmentsEditor data={localData as { dermatology: Treatment[]; dental: Treatment[] }} onChange={handleDataChange} />
+              <TreatmentsEditor data={localData as { dermatology: Treatment[]; dental: Treatment[]; orthodontics?: Treatment[]; facialTrauma?: Treatment[] }} onChange={handleDataChange} />
             )}
             {section === 'doctor' && localData && (
               <DoctorEditor data={localData as Record<string, unknown>} onChange={handleDataChange} />
