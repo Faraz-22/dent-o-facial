@@ -48,9 +48,21 @@ export default function HeroSection() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-28 pb-16 lg:pt-32">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div className="relative">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="h-px w-10 bg-gold" />
-              <span className="section-label">{label}</span>
+            <div className="w-full overflow-hidden whitespace-nowrap mb-8 -mx-6 px-6 lg:-mx-8 lg:px-8 border-y border-gold/20 py-3 bg-gold/5 shadow-inner flex">
+              <div className="inline-flex animate-marquee shrink-0">
+                {[...Array(6)].map((_, i) => (
+                  <span key={i} className="text-sm md:text-base tracking-[0.15em] font-bold text-gold-dark uppercase font-inter mx-6 shrink-0">
+                    {label}
+                  </span>
+                ))}
+              </div>
+              <div className="inline-flex animate-marquee shrink-0">
+                {[...Array(6)].map((_, i) => (
+                  <span key={i} className="text-sm md:text-base tracking-[0.15em] font-bold text-gold-dark uppercase font-inter mx-6 shrink-0">
+                    {label}
+                  </span>
+                ))}
+              </div>
             </div>
 
             <h1 className={`font-playfair text-5xl lg:text-6xl xl:text-7xl text-charcoal leading-[1.1] mb-6 ${manualHeadline ? 'notranslate' : ''}`}>
@@ -137,24 +149,7 @@ export default function HeroSection() {
                 </div>
               </div>
 
-              <div className="absolute -left-8 top-8 z-20 luxury-card rounded-2xl p-4 w-48">
-                <div className="flex items-center gap-2 mb-2">
-                  <Award size={16} className="text-gold" />
-                  <span className="text-xs font-semibold text-charcoal">Certified</span>
-                </div>
-                <p className="text-xs text-charcoal-muted leading-relaxed">
-                  Specialist in Dermatology & Dental Surgery
-                </p>
-              </div>
 
-              <div className="absolute -right-4 bottom-16 z-20 luxury-card rounded-2xl p-4 w-44">
-                <div className="flex items-center gap-2 mb-2">
-                  <MapPin size={14} className="text-gold" />
-                  <span className="text-xs font-semibold text-charcoal">Locations</span>
-                </div>
-                <p className="text-xs text-charcoal-muted">Purnea</p>
-                <p className="text-xs text-charcoal-muted">Banmankhi</p>
-              </div>
 
               <div className="absolute -bottom-4 -left-4 w-24 h-24 border-l-2 border-b-2 border-gold/40 rounded-bl-3xl" />
               <div className="absolute -top-4 -right-4 w-24 h-24 border-r-2 border-t-2 border-gold/40 rounded-tr-3xl" />
