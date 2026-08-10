@@ -52,18 +52,14 @@ export default function BlogPage() {
               <Link key={post.slug} href={`/blog/${post.slug}`}>
                 <article className="luxury-card rounded-3xl overflow-hidden group h-full">
                   <div
-                    className="h-52 flex items-center justify-center relative overflow-hidden"
-                    style={{
-                      background: post.category === 'Dermatology'
-                        ? 'linear-gradient(135deg, #E8E3D8 0%, #D6B98C30 100%)'
-                        : 'linear-gradient(135deg, #E3E8E3 0%, #8CB9D630 100%)'
-                    }}
+                    className="h-52 flex items-center justify-center relative overflow-hidden bg-cream-dark"
                   >
                     {post.imageUrl ? (
                       <img src={post.imageUrl} alt={post.title} className="absolute inset-0 w-full h-full object-cover" />
                     ) : (
-                      <span className="text-charcoal-muted/40 text-sm">Article Image — Add via Admin</span>
+                      <div className="absolute inset-0 bg-gradient-to-br from-[#E8E3D8] to-[#D6B98C30]" />
                     )}
+                    {!post.imageUrl && <span className="relative z-10 text-charcoal-muted/60 text-sm">Article Image — Add via Admin</span>}
                   </div>
 
                   <div className="p-8">

@@ -362,7 +362,7 @@ function BlogEditor({ data, onChange }: { data: BlogPost[]; onChange: (v: BlogPo
         <div key={post.slug} className="p-5 rounded-2xl bg-[#1a1a2e] border border-gray-800 space-y-4">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2">
-              <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${post.category === 'Dermatology' ? 'bg-blue-900/50 text-blue-300' : 'bg-green-900/50 text-green-300'}`}>{post.category}</span>
+              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-indigo-900/50 text-indigo-300">{post.category || 'Uncategorized'}</span>
               {post.featured && <span className="text-xs font-bold text-amber-400 bg-amber-900/30 px-2 py-0.5 rounded-full">Featured</span>}
             </div>
             <button onClick={() => onChange(data.filter(p => p.slug !== post.slug))} className="text-gray-500 hover:text-red-400 transition"><Trash2 size={15} /></button>
@@ -372,7 +372,7 @@ function BlogEditor({ data, onChange }: { data: BlogPost[]; onChange: (v: BlogPo
           <Field label="Excerpt" value={post.excerpt} onChange={v => update(post.slug, 'excerpt', v)} multiline />
           <Field label="Blog Content (Body)" value={post.body || ''} onChange={v => update(post.slug, 'body', v)} multiline placeholder="Write your full blog post here... (HTML supported)" />
           <div className="grid grid-cols-3 gap-3">
-            <Field label="Category" value={post.category} onChange={v => update(post.slug, 'category', v)} />
+            <Field label="Category" value={post.category} onChange={v => update(post.slug, 'category', v)} placeholder="e.g. General, Skincare" />
             <Field label="Date" value={post.date} onChange={v => update(post.slug, 'date', v)} placeholder="e.g. Aug 15, 2026" />
             <Field label="Read Time" value={post.readTime} onChange={v => update(post.slug, 'readTime', v)} />
           </div>
@@ -402,7 +402,7 @@ function BlogEditor({ data, onChange }: { data: BlogPost[]; onChange: (v: BlogPo
           </label>
         </div>
       ))}
-      <button onClick={() => onChange([...data, { slug: `post-${Date.now()}`, title: '', excerpt: '', category: 'Dermatology', date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }), readTime: '5 min read', featured: false, imageUrl: '' }])}
+      <button onClick={() => onChange([...data, { slug: `post-${Date.now()}`, title: '', excerpt: '', category: 'General', date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }), readTime: '5 min read', featured: false, imageUrl: '' }])}
         className="flex items-center gap-2 px-4 py-3 rounded-xl border border-dashed border-gray-700 text-gray-500 hover:text-white hover:border-gray-500 transition text-sm w-full justify-center">
         <Plus size={14} /> Add Blog Post
       </button>
