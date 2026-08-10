@@ -1,7 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Clock, CheckCircle2, ImageIcon } from 'lucide-react'
+import { ArrowRight, Clock, CheckCircle2, ImageIcon, ChevronDown } from 'lucide-react'
 import CTASection from '@/components/sections/CTASection'
 import { useSiteContent } from '@/hooks/useSiteContent'
 
@@ -25,7 +26,7 @@ function TreatmentCard({ treatment, category, whatsappNumber, whatsappMessage }:
   const imageUrl = treatment.images?.[0]
 
   return (
-    <div id={treatment.id} className="luxury-card rounded-3xl p-8 lg:p-10 scroll-mt-28 flex flex-col h-full">
+    <div id={treatment.id} className="luxury-card rounded-3xl p-8 lg:p-10 flex flex-col h-full bg-white">
       {/* Image Placeholder connected to slug page */}
       <Link href={`/treatments/${treatment.id}`} className="block relative w-full h-48 md:h-56 rounded-2xl overflow-hidden mb-6 bg-[#12122a] shrink-0 group">
          {imageUrl ? (
@@ -84,22 +85,76 @@ function TreatmentCard({ treatment, category, whatsappNumber, whatsappMessage }:
   )
 }
 
-export default function TreatmentsPage() {
-  const { data } = useSiteContent()
-  const treatments = data?.treatments as { dermatology: Treatment[]; dental: Treatment[] } | undefined
-  const cta = data?.cta as Record<string, unknown> | undefined
-  const whatsappNumber = (cta?.whatsappNumber as string) || (data?.hero as any)?.whatsappNumber || '916201231060'
-  const whatsappMessage = (cta?.treatmentBookingMessage as string) || 'Hello, I am interested in {treatment}. Please guide me.'
-  const dermatology = treatments?.dermatology || []
-  const dental = treatments?.dental || []
+function TreatmentAccordion({ title, treatments, category, whatsappNumber, whatsappMessage, defaultOpen = false, bgColor = 'bg-cream' }: {
+  title: string, treatments: Treatment[], category: string, whatsappNumber: string, whatsappMessage: string, defaultOpen?: boolean, bgColor?: string
+}) {
+  const [isOpen, setIsOpen] = useState(defaultOpen)
 
   return (
-    <>
-      <section className="pt-32 pb-16 bg-ivory">
+    <section className={`py-8 ${bgColor} border-b border-gold/10 transition-colors`}>
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        
+        {/* Accordion Header */}
+        <button 
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full flex items-center justify-between py-6 group"
+        >
+          <div className="flex items-center gap-4">
+            <h2 className="font-playfair text-3xl md:text-4xl text-charcoal group-hover:text-gold-dark transition-colors text-left">{title}</h2>
+            <div className="h-px w-12 md:w-24 bg-gold/30 group-hover:bg-gold transition-colors" />
+            <span className="text-xs text-charcoal-muted uppercase tracking-widest font-medium hidden sm:block">
+              {treatments.length} {treatments.length === 1 ? 'Procedure' : 'Procedures'}
+            </span>
+          </div>
+          <div className={`w-12 h-12 rounded-full border border-gold/20 flex items-center justify-center text-charcoal transition-all duration-300 ${isOpen ? 'bg-gold border-gold rotate-180' : 'group-hover:border-gold'}`}>
+            <ChevronDown size={20} />
+          </div>
+        </button>
+
+        {/* Accordion Content */}
+        <div 
+          className={`grid transition-all duration-500 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100 mt-8 mb-8' : 'grid-rows-[0fr] opacity-0 mt-0 mb-0'}`}
+        >
+          <div className="overflow-hidden">
+            {treatments.length > 0 ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {treatments.map((t) => (
+                  <TreatmentCard key={t.id} treatment={t} category={category} whatsappNumber={whatsappNumber} whatsappMessage={whatsappMessage} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 bg-white/50 rounded-3xl border border-gold/10">
+                <p className="text-charcoal-muted text-lg font-medium">Procedures for {title} will be added soon.</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+      </div>
+    </section>
+  )
+}
+
+export default function TreatmentsPage() {
+  const { data } = useSiteContent()
+  const treatments = data?.treatments as Record<string, Treatment[]> | undefined
+  const cta = data?.cta as Record<string, unknown> | undefined
+  
+  const whatsappNumber = (cta?.whatsappNumber as string) || (data?.hero as any)?.whatsappNumber || '916201231060'
+  const whatsappMessage = (cta?.treatmentBookingMessage as string) || 'Hello, I am interested in {treatment}. Please guide me.'
+  
+  const dermatology = treatments?.dermatology || []
+  const dental = treatments?.dental || []
+  const orthodontics = treatments?.orthodontics || []
+  const facialTrauma = treatments?.facialTrauma || []
+
+  return (
+    <div className="bg-ivory min-h-screen">
+      <section className="pt-32 pb-16">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center">
           <div className="flex items-center justify-center gap-3 mb-6">
             <div className="h-px w-10 bg-gold" />
-            <span className="section-label">What We Offer</span>
+            <span className="section-label text-charcoal-muted">What We Offer</span>
             <div className="h-px w-10 bg-gold" />
           </div>
           <h1 className="font-playfair text-5xl lg:text-6xl text-charcoal mb-5">
@@ -111,37 +166,49 @@ export default function TreatmentsPage() {
         </div>
       </section>
 
-      <section className="py-16 bg-cream">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex items-center gap-4 mb-12">
-            <div className="h-px flex-1 bg-gold/20" />
-            <h2 className="font-playfair text-3xl text-charcoal px-4">Dermatology</h2>
-            <div className="h-px flex-1 bg-gold/20" />
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {dermatology.map((t) => (
-              <TreatmentCard key={t.id} treatment={t} category="Dermatology" whatsappNumber={whatsappNumber} whatsappMessage={whatsappMessage} />
-            ))}
-          </div>
-        </div>
-      </section>
+      <div className="pb-24">
+        <TreatmentAccordion 
+          title="Dermatology" 
+          category="Dermatology"
+          treatments={dermatology} 
+          whatsappNumber={whatsappNumber} 
+          whatsappMessage={whatsappMessage}
+          defaultOpen={true}
+          bgColor="bg-cream"
+        />
+        
+        <TreatmentAccordion 
+          title="Dental" 
+          category="Dental"
+          treatments={dental} 
+          whatsappNumber={whatsappNumber} 
+          whatsappMessage={whatsappMessage}
+          defaultOpen={true}
+          bgColor="bg-ivory"
+        />
 
-      <section className="py-16 bg-ivory">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex items-center gap-4 mb-12">
-            <div className="h-px flex-1 bg-gold/20" />
-            <h2 className="font-playfair text-3xl text-charcoal px-4">Dental</h2>
-            <div className="h-px flex-1 bg-gold/20" />
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {dental.map((t) => (
-              <TreatmentCard key={t.id} treatment={t} category="Dental" whatsappNumber={whatsappNumber} whatsappMessage={whatsappMessage} />
-            ))}
-          </div>
-        </div>
-      </section>
+        <TreatmentAccordion 
+          title="Orthodontics" 
+          category="Orthodontics"
+          treatments={orthodontics} 
+          whatsappNumber={whatsappNumber} 
+          whatsappMessage={whatsappMessage}
+          defaultOpen={false}
+          bgColor="bg-cream"
+        />
+
+        <TreatmentAccordion 
+          title="Facial Trauma" 
+          category="Facial Trauma"
+          treatments={facialTrauma} 
+          whatsappNumber={whatsappNumber} 
+          whatsappMessage={whatsappMessage}
+          defaultOpen={false}
+          bgColor="bg-ivory"
+        />
+      </div>
 
       <CTASection />
-    </>
+    </div>
   )
 }
