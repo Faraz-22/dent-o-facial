@@ -185,7 +185,7 @@ export default function AboutPage() {
               </div>
             </section>
 
-            {/* Qualifications Section (Swipable Carousel) */}
+            {/* Qualifications Section */}
             {aboutCredentials.length > 0 && (
               <section className="py-24 relative overflow-hidden bg-charcoal text-ivory">
                 <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
@@ -196,13 +196,13 @@ export default function AboutPage() {
                     </h3>
                   </div>
                   
-                  <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-6 pb-8 -mx-6 px-6 lg:mx-0 lg:px-0">
+                  <div className="flex lg:grid overflow-x-auto lg:overflow-visible snap-x snap-mandatory lg:snap-none hide-scrollbar gap-6 lg:gap-6 pb-8 lg:pb-0 -mx-6 px-6 lg:mx-0 lg:px-0 lg:grid-cols-4">
                     {aboutCredentials.map(({ icon, title: credTitle, desc }: any, idx: number) => {
                       const Icon = iconMap[icon] || Award
                       return (
                         <div 
                           key={idx} 
-                          className="min-w-[280px] md:min-w-[320px] shrink-0 snap-center group relative bg-white/5 backdrop-blur-md rounded-[2rem] p-8 text-center border border-white/5 hover:bg-white/10 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(214,185,140,0.15)] hover:border-gold/30 transition-all duration-500"
+                          className="w-full min-w-[85vw] md:min-w-[45vw] lg:min-w-0 lg:w-auto shrink-0 snap-center group relative bg-white/5 backdrop-blur-md rounded-[2rem] p-8 text-center border border-white/5 hover:bg-white/10 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(214,185,140,0.15)] hover:border-gold/30 transition-all duration-500"
                         >
                           <div className="w-16 h-16 rounded-2xl bg-gold/10 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:bg-gold transition-all duration-500">
                             <Icon size={24} className="text-gold group-hover:text-charcoal transition-colors duration-500" />
@@ -220,7 +220,7 @@ export default function AboutPage() {
         )
       })}
 
-      {/* Global Clinic Values Section (Moved out of loop, Swipable Carousel) */}
+      {/* Global Clinic Values Section */}
       {doctors[0]?.values && doctors[0].values.length > 0 && (
         <section className="py-24 relative overflow-hidden bg-cream">
           <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
@@ -231,13 +231,13 @@ export default function AboutPage() {
               </h3>
             </div>
             
-            <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-8 pb-8 -mx-6 px-6 lg:mx-0 lg:px-0">
+            <div className="flex lg:grid overflow-x-auto lg:overflow-visible snap-x snap-mandatory lg:snap-none hide-scrollbar gap-6 lg:gap-8 pb-8 lg:pb-0 -mx-6 px-6 lg:mx-0 lg:px-0 lg:grid-cols-3">
               {doctors[0].values.map(({ icon, title: valTitle, desc }: any, idx: number) => {
                 const Icon = iconMap[icon] || Star
                 return (
                   <div 
                     key={idx} 
-                    className="min-w-[300px] md:min-w-[350px] shrink-0 snap-center group bg-white rounded-[2.5rem] p-10 shadow-lg hover:shadow-2xl border border-transparent hover:border-gold/30 transition-all duration-500 hover:-translate-y-2 relative overflow-hidden"
+                    className="w-full min-w-[85vw] md:min-w-[45vw] lg:min-w-0 lg:w-auto shrink-0 snap-center group bg-white rounded-[2.5rem] p-10 shadow-lg hover:shadow-2xl border border-transparent hover:border-gold/30 transition-all duration-500 hover:-translate-y-2 relative overflow-hidden"
                   >
                     <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-bl-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700" />
                     
