@@ -55,18 +55,18 @@ export default function Navbar({
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-4">
             {logoUrl && (
-              <img src={logoUrl} alt="Dent-O-Facial Logo" className="h-16 md:h-20 w-auto object-contain" />
+              <img src={logoUrl} alt="Dent-O-Facial Logo" className="h-16 md:h-[4.5rem] w-auto object-contain" />
             )}
-            <div className="flex flex-col leading-tight">
-              <span className="font-playfair text-xl md:text-2xl font-600 text-charcoal tracking-wide">
+            <div className="flex flex-col justify-center pt-1">
+              <span className="font-playfair text-xl md:text-[1.35rem] font-semibold text-charcoal tracking-wide mb-1 leading-none">
                 Dent-O-Facial
               </span>
-              <span className="text-xs text-gold-dark tracking-[0.15em] uppercase font-inter font-medium mt-0.5">
+              <span className="text-[9px] md:text-[10px] text-gold-dark tracking-[0.25em] uppercase font-inter font-bold leading-tight">
                 Dr. Hadi Raza
               </span>
-              <span className="text-[10px] text-charcoal-muted tracking-[0.15em] uppercase font-inter font-medium">
+              <span className="text-[9px] md:text-[10px] text-charcoal-muted tracking-[0.25em] uppercase font-inter font-medium leading-tight mt-0.5">
                 Dr. Nahid Raza
               </span>
             </div>

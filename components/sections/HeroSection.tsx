@@ -45,25 +45,27 @@ export default function HeroSection() {
         <div className="absolute top-0 left-1/2 w-px h-32 bg-gradient-to-b from-transparent to-gold/20" />
       </div>
 
+      <div className="absolute top-20 left-0 right-0 w-full overflow-hidden whitespace-nowrap border-y border-gold/20 py-2.5 bg-gold/10 shadow-sm flex z-30 backdrop-blur-sm">
+        <div className="inline-flex animate-marquee shrink-0">
+          {[...Array(6)].map((_, i) => (
+            <span key={i} className="text-sm md:text-base tracking-[0.2em] font-bold text-gold-dark uppercase font-inter mx-8 shrink-0">
+              {label}
+            </span>
+          ))}
+        </div>
+        <div className="inline-flex animate-marquee shrink-0">
+          {[...Array(6)].map((_, i) => (
+            <span key={i} className="text-sm md:text-base tracking-[0.2em] font-bold text-gold-dark uppercase font-inter mx-8 shrink-0">
+              {label}
+            </span>
+          ))}
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-28 pb-16 lg:pt-32">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div className="relative">
-            <div className="w-full overflow-hidden whitespace-nowrap mb-8 -mx-6 px-6 lg:-mx-8 lg:px-8 border-y border-gold/20 py-3 bg-gold/5 shadow-inner flex">
-              <div className="inline-flex animate-marquee shrink-0">
-                {[...Array(6)].map((_, i) => (
-                  <span key={i} className="text-sm md:text-base tracking-[0.15em] font-bold text-gold-dark uppercase font-inter mx-6 shrink-0">
-                    {label}
-                  </span>
-                ))}
-              </div>
-              <div className="inline-flex animate-marquee shrink-0">
-                {[...Array(6)].map((_, i) => (
-                  <span key={i} className="text-sm md:text-base tracking-[0.15em] font-bold text-gold-dark uppercase font-inter mx-6 shrink-0">
-                    {label}
-                  </span>
-                ))}
-              </div>
-            </div>
+
 
             <h1 className={`font-playfair text-5xl lg:text-6xl xl:text-7xl text-charcoal leading-[1.1] mb-6 ${manualHeadline ? 'notranslate' : ''}`}>
               {headline.split(' ').slice(0, 1).join(' ')}{' '}
