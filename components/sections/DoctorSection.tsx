@@ -93,10 +93,12 @@ export default function DoctorSection() {
                 key={idx} 
                 className={idx === current ? 'block animate-fade-in' : 'hidden'}
               >
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                  <div className="relative order-2 lg:order-1">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+                  
+                  {/* Desktop Image */}
+                  <div className="relative hidden lg:block">
                     <div
-                      className="relative w-full max-w-md mx-auto rounded-3xl overflow-hidden"
+                      className="relative w-full max-w-md mx-auto rounded-3xl overflow-hidden shadow-2xl"
                       style={{ height: '520px', background: 'linear-gradient(135deg, #2A2A2A 0%, #3A3A3A 100%)' }}
                     >
                       {imageUrl ? (
@@ -118,7 +120,8 @@ export default function DoctorSection() {
                     <div className="absolute -bottom-6 -right-6 w-32 h-32 border-r-2 border-b-2 border-gold/30 rounded-br-3xl" />
                   </div>
 
-                  <div className="order-1 lg:order-2">
+                  {/* Content Column */}
+                  <div>
                     <h2 className="font-playfair text-4xl lg:text-5xl text-ivory mb-2">
                       {name}
                     </h2>
@@ -126,19 +129,44 @@ export default function DoctorSection() {
                       {title}
                     </p>
 
-                    <p className="text-gray-300 text-base leading-relaxed mb-4">
+                    {/* Mobile Image */}
+                    <div className="relative block lg:hidden mb-8">
+                      <div
+                        className="relative w-full max-w-sm mx-auto rounded-3xl overflow-hidden shadow-xl"
+                        style={{ height: '400px', background: 'linear-gradient(135deg, #2A2A2A 0%, #3A3A3A 100%)' }}
+                      >
+                        {imageUrl ? (
+                          <img
+                            src={imageUrl}
+                            alt={name}
+                            className="absolute inset-0 w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center">
+                            <div className="w-24 h-24 rounded-full bg-gold/10 flex items-center justify-center mb-4">
+                              <Users size={36} className="text-gold" />
+                            </div>
+                            <p className="text-gray-400 text-sm">Portrait Missing</p>
+                          </div>
+                        )}
+                        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold to-transparent" />
+                      </div>
+                      <div className="absolute -bottom-4 right-2 w-24 h-24 border-r-2 border-b-2 border-gold/30 rounded-br-3xl" />
+                    </div>
+
+                    <p className="text-gray-300 text-base leading-relaxed mb-6">
                       {shortBio}
                     </p>
 
-                    <div className="space-y-3 mb-10">
+                    <div className="space-y-4 mb-10">
                       {credentials.map((c) => {
                         const Icon = iconMap[c.icon as keyof typeof iconMap] || Award
                         return (
-                          <div key={c.label} className="flex items-center gap-3">
+                          <div key={c.label} className="flex items-center gap-3 bg-white/5 px-4 py-3 rounded-xl border border-white/5">
                             <div className="w-8 h-8 rounded-lg bg-gold/10 flex items-center justify-center shrink-0">
                               <Icon size={14} className="text-gold" />
                             </div>
-                            <span className="text-gray-300 text-sm">{c.label}</span>
+                            <span className="text-gray-300 text-sm font-medium">{c.label}</span>
                           </div>
                         )
                       })}
