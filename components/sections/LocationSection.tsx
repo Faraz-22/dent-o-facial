@@ -16,6 +16,9 @@ interface Location {
 export default function LocationSection() {
   const { data } = useSiteContent()
   const locations: Location[] = data?.locations || []
+  
+  // Reverse the array so the second location (e.g., Banmankhi) shows up first
+  const reversedLocations = [...locations].reverse()
   const cta = data?.cta as Record<string, unknown> | undefined
   const whatsappNumber = cta?.whatsappNumber as string || (data?.hero as any)?.whatsappNumber || '917488404161'
 
@@ -40,7 +43,7 @@ export default function LocationSection() {
     },
   ]
 
-  const displayLocations = locations.length > 0 ? locations : defaultLocations
+  const displayLocations = reversedLocations.length > 0 ? reversedLocations : defaultLocations
 
   return (
     <section className="py-24 bg-ivory">
