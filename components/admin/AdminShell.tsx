@@ -60,7 +60,7 @@ interface BlogPost { slug: string; title: string; excerpt: string; category: str
 interface Location { id: string; name: string; address: string; phone: string; hours: string; hoursDetail: string; mapUrl: string; primary: boolean }
 interface Faq { id: string; q: string; a: string }
 interface ResultsItem { id: string; label: string; duration: string; note: string; beforeImage?: string; afterImage?: string }
-interface ResultsData { dermatology: ResultsItem[]; dental: ResultsItem[] }
+interface ResultsData { dermatology: ResultsItem[]; dental: ResultsItem[]; orthodontics?: ResultsItem[]; facialTrauma?: ResultsItem[] }
 
 // ─── Input ───────────────────────────────────────────────────────────────────
 function Field({ label, value, onChange, multiline, placeholder }: {
@@ -614,12 +614,16 @@ const CategoryList = ({
   cat, 
   items, 
   data, 
-  onChange 
+  onChange,
+  label,
+  colorClass
 }: { 
-  cat: 'dermatology' | 'dental'; 
+  cat: 'dermatology' | 'dental' | 'orthodontics' | 'facialTrauma'; 
   items: ResultsItem[];
   data: ResultsData;
   onChange: (v: ResultsData) => void;
+  label: string;
+  colorClass: string;
 }) => {
   const [uploading, setUploading] = useState<{ id: string; side: 'before' | 'after' } | null>(null)
   
@@ -647,8 +651,8 @@ const CategoryList = ({
 
   return (
     <div className="space-y-3">
-      <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full ${cat === 'dermatology' ? 'bg-blue-900/50 text-blue-300' : 'bg-green-900/50 text-green-300'}`}>
-        {cat === 'dermatology' ? 'Dermatology' : 'Dental'}
+      <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full ${colorClass}`}>
+        {label}
       </span>
       {(items || []).map((r) => (
         <div key={r.id} className="p-4 rounded-xl bg-[#1a1a2e] border border-gray-800 space-y-4">
@@ -720,8 +724,10 @@ function ResultsEditor({ data, onChange }: { data: ResultsData; onChange: (v: Re
   if (!data) return <p className="text-gray-500 text-sm p-4">No data.</p>
   return (
     <div className="space-y-6">
-      <CategoryList cat="dermatology" items={data.dermatology} data={data} onChange={onChange} />
-      <CategoryList cat="dental" items={data.dental} data={data} onChange={onChange} />
+      <CategoryList cat="dermatology" items={data.dermatology || []} data={data} onChange={onChange} label="Dermatology" colorClass="bg-blue-900/50 text-blue-300" />
+      <CategoryList cat="dental" items={data.dental || []} data={data} onChange={onChange} label="Dental" colorClass="bg-green-900/50 text-green-300" />
+      <CategoryList cat="orthodontics" items={data.orthodontics || []} data={data} onChange={onChange} label="Orthodontics" colorClass="bg-purple-900/50 text-purple-300" />
+      <CategoryList cat="facialTrauma" items={data.facialTrauma || []} data={data} onChange={onChange} label="Facial Trauma" colorClass="bg-orange-900/50 text-orange-300" />
     </div>
   )
 }
