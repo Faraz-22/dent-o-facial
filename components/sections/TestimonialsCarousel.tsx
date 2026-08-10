@@ -23,6 +23,11 @@ export default function TestimonialsCarousel() {
 
   if (!testimonials.length) return null
 
+  const totalReviews = testimonials.length > 0 ? `${testimonials.length}+` : '0'
+  const averageRating = testimonials.length > 0 
+    ? (testimonials.reduce((acc, curr) => acc + curr.rating, 0) / testimonials.length).toFixed(1)
+    : '5.0'
+
   return (
     <section className="py-24 bg-cream">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
@@ -39,7 +44,7 @@ export default function TestimonialsCarousel() {
             {[...Array(5)].map((_, i) => (
               <Star key={i} size={18} className="text-gold fill-gold" />
             ))}
-            <span className="text-charcoal-muted text-sm ml-2">4.9 average · 200+ reviews</span>
+            <span className="text-charcoal-muted text-sm ml-2">{averageRating} average · {totalReviews} reviews</span>
           </div>
         </div>
 

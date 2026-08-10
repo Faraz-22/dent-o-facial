@@ -11,6 +11,12 @@ export default function HeroSection() {
   const hero = data?.hero as Record<string, any> | undefined
   const stats = (hero?.stats as Record<string, string>) || {}
   const heroImages = (data?.images as Record<string, any>)?.heroImages as string[] | undefined
+  const testimonials = (data?.testimonials as any[]) || []
+
+  // Dynamic calculations
+  const averageRating = testimonials.length > 0 
+    ? (testimonials.reduce((acc, curr) => acc + curr.rating, 0) / testimonials.length).toFixed(1)
+    : stats.rating || '4.9'
 
   const [currentIdx, setCurrentIdx] = useState(0)
 
@@ -103,7 +109,7 @@ export default function HeroSection() {
               </div>
               <div className="w-px h-12 bg-gold/20" />
               <div>
-                <p className="font-playfair text-3xl text-charcoal font-semibold">{stats.rating || '4.9'}</p>
+                <p className="font-playfair text-3xl text-charcoal font-semibold">{averageRating}</p>
                 <div className="flex items-center gap-1 mt-1">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} size={12} className="text-gold fill-gold" />

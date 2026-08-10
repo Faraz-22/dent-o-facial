@@ -16,6 +16,13 @@ interface Testimonial {
 export default function TestimonialsPage() {
   const { data } = useSiteContent()
   const testimonials: Testimonial[] = data?.testimonials || []
+  const heroStats = data?.hero?.stats || { patients: '500+', locations: '2' }
+
+  // Dynamic calculations
+  const totalReviews = testimonials.length > 0 ? `${testimonials.length}+` : '0'
+  const averageRating = testimonials.length > 0 
+    ? (testimonials.reduce((acc, curr) => acc + curr.rating, 0) / testimonials.length).toFixed(1)
+    : '5.0'
 
   return (
     <>
@@ -35,7 +42,7 @@ export default function TestimonialsPage() {
             ))}
           </div>
           <p className="text-charcoal-muted text-lg max-w-xl mx-auto">
-            Trusted by 500+ patients across Purnea and Banmankhi. Here&apos;s what they say.
+            Trusted by {heroStats.patients} patients across Purnea and Banmankhi. Here&apos;s what they say.
           </p>
         </div>
       </section>
@@ -44,10 +51,10 @@ export default function TestimonialsPage() {
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
-              { value: '500+', label: 'Happy Patients' },
-              { value: '4.9', label: 'Average Rating' },
-              { value: '200+', label: 'Reviews' },
-              { value: '2', label: 'Clinic Locations' },
+              { value: heroStats.patients, label: 'Happy Patients' },
+              { value: averageRating, label: 'Average Rating' },
+              { value: totalReviews, label: 'Reviews' },
+              { value: heroStats.locations, label: 'Clinic Locations' },
             ].map(({ value, label }) => (
               <div key={label}>
                 <p className="font-playfair text-3xl text-gold font-semibold">{value}</p>
