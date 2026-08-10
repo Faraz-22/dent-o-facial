@@ -1,6 +1,7 @@
 'use client'
 
-import { ArrowRight, Clock, CheckCircle2 } from 'lucide-react'
+import Link from 'next/link'
+import { ArrowRight, Clock, CheckCircle2, ImageIcon } from 'lucide-react'
 import CTASection from '@/components/sections/CTASection'
 import { useSiteContent } from '@/hooks/useSiteContent'
 
@@ -11,6 +12,7 @@ interface Treatment {
   duration: string
   benefits: string[]
   tag: string
+  images?: string[]
 }
 
 function TreatmentCard({ treatment, category, whatsappNumber, whatsappMessage }: {
@@ -20,12 +22,28 @@ function TreatmentCard({ treatment, category, whatsappNumber, whatsappMessage }:
     ? whatsappMessage.replace('{treatment}', treatment.name)
     : `Hello, I am interested in ${treatment.name}. Please guide me.`
 
+  const imageUrl = treatment.images?.[0]
+
   return (
-    <div id={treatment.id} className="luxury-card rounded-3xl p-8 lg:p-10 scroll-mt-28">
+    <div id={treatment.id} className="luxury-card rounded-3xl p-8 lg:p-10 scroll-mt-28 flex flex-col h-full">
+      {/* Image Placeholder connected to slug page */}
+      <Link href={`/treatments/${treatment.id}`} className="block relative w-full h-48 md:h-56 rounded-2xl overflow-hidden mb-6 bg-[#12122a] shrink-0 group">
+         {imageUrl ? (
+            <img src={imageUrl} alt={treatment.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+         ) : (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800 group-hover:bg-gray-200 dark:group-hover:bg-gray-700 transition-colors duration-500">
+              <ImageIcon size={32} className="text-gray-400 mb-2" />
+              <span className="text-xs text-gray-500 font-medium uppercase tracking-widest">Treatment Image</span>
+            </div>
+         )}
+      </Link>
+
       <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
         <div>
           <span className="treatment-tag mb-3 inline-block">{category}</span>
-          <h3 className="font-playfair text-2xl text-charcoal font-medium">{treatment.name}</h3>
+          <Link href={`/treatments/${treatment.id}`}>
+            <h3 className="font-playfair text-2xl text-charcoal font-medium hover:text-gold transition-colors">{treatment.name}</h3>
+          </Link>
         </div>
         <div className="flex flex-col items-end gap-2">
           {treatment.tag && (
@@ -38,7 +56,7 @@ function TreatmentCard({ treatment, category, whatsappNumber, whatsappMessage }:
         </div>
       </div>
 
-      <p className="text-charcoal-muted leading-relaxed mb-6">{treatment.shortDesc}</p>
+      <p className="text-charcoal-muted leading-relaxed mb-6 flex-grow">{treatment.shortDesc}</p>
 
       <div className="grid grid-cols-2 gap-2 mb-8">
         {treatment.benefits.map((b) => (
@@ -49,14 +67,19 @@ function TreatmentCard({ treatment, category, whatsappNumber, whatsappMessage }:
         ))}
       </div>
 
-      <a
-        href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="btn-gold px-6 py-3 rounded-full text-sm inline-flex items-center gap-2"
-      >
-        Book This Treatment <ArrowRight size={14} />
-      </a>
+      <div className="flex flex-col sm:flex-row items-center gap-4 mt-auto">
+        <a
+          href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-gold px-6 py-3 rounded-full text-sm inline-flex items-center justify-center gap-2 w-full sm:w-auto flex-1"
+        >
+          Book Now <ArrowRight size={14} />
+        </a>
+        <Link href={`/treatments/${treatment.id}`} className="btn-outline px-6 py-3 rounded-full text-sm text-center w-full sm:w-auto flex-1">
+          Learn More
+        </Link>
+      </div>
     </div>
   )
 }
