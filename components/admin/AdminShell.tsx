@@ -488,6 +488,27 @@ function HeroEditor({ data, onChange }: { data: Record<string, unknown>; onChang
         <Field label="WhatsApp Number" value={data.whatsappNumber as string || ''} onChange={v => set('whatsappNumber', v)} />
         <Field label="WhatsApp Message" value={data.whatsappMessage as string || ''} onChange={v => set('whatsappMessage', v)} />
       </div>
+
+      <div className="space-y-4 pt-4 border-t border-gray-800">
+        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Highlights (3 Cards)</h3>
+        {Array.isArray(data.highlights) && data.highlights.map((h: any, i: number) => (
+          <div key={i} className="p-4 rounded-xl bg-[#12122a] border border-gray-800 space-y-3">
+            <div className="flex gap-2">
+              <input value={h.icon} onChange={e => { const u = [...data.highlights as any[]]; u[i] = {...u[i], icon: e.target.value}; set('highlights', u) }} placeholder="Icon Name" className="w-1/3 px-3 py-2 rounded-lg bg-[#1a1a2e] border border-gray-700 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-amber-500" />
+              <input value={h.stat} onChange={e => { const u = [...data.highlights as any[]]; u[i] = {...u[i], stat: e.target.value}; set('highlights', u) }} placeholder="Stat Tag" className="flex-1 px-3 py-2 rounded-lg bg-[#1a1a2e] border border-gray-700 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-amber-500" />
+            </div>
+            <input value={h.title} onChange={e => { const u = [...data.highlights as any[]]; u[i] = {...u[i], title: e.target.value}; set('highlights', u) }} placeholder="Title" className="w-full px-3 py-2 rounded-lg bg-[#1a1a2e] border border-gray-700 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-amber-500" />
+            <textarea value={h.description} onChange={e => { const u = [...data.highlights as any[]]; u[i] = {...u[i], description: e.target.value}; set('highlights', u) }} placeholder="Description" rows={2} className="w-full px-3 py-2 rounded-lg bg-[#1a1a2e] border border-gray-700 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-amber-500 resize-none" />
+          </div>
+        ))}
+        {(!data.highlights || (data.highlights as any[]).length === 0) && (
+          <button onClick={() => set('highlights', [
+            { icon: 'Microscope', title: 'Advanced Dermatology', description: 'Cutting-edge skin treatments using the latest medical technology for acne, pigmentation, laser therapy, and skin rejuvenation.', stat: '15+ Treatments' },
+            { icon: 'Shield', title: 'Modern Dental Care', description: 'Comprehensive dental solutions from routine care to advanced smile design, implants, and cosmetic procedures.', stat: '10+ Procedures' },
+            { icon: 'Heart', title: 'Personalized Approach', description: 'Every patient receives a tailored treatment plan designed specifically for their unique needs, goals, and skin or dental profile.', stat: '500+ Patients' }
+          ])} className="text-xs text-amber-500 hover:text-amber-400 font-medium bg-amber-500/10 px-3 py-2 rounded-lg">Initialize Highlights Data</button>
+        )}
+      </div>
     </div>
   )
 }
