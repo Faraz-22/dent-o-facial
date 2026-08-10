@@ -64,14 +64,14 @@ export default function HighlightsSection() {
         <div 
           ref={scrollRef}
           onScroll={handleScroll}
-          className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar md:grid md:grid-cols-3 md:gap-8 -mx-6 md:mx-0"
+          className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar md:grid md:grid-cols-3 md:gap-8"
         >
           {highlights.map((h: any, idx: number) => {
             const Icon = iconMap[h.icon as string] || Heart
             return (
               <div
                 key={idx}
-                className="flex flex-col items-center text-center group min-w-full md:min-w-0 shrink-0 snap-center relative px-6 md:px-0"
+                className="flex flex-col items-center text-center group w-full shrink-0 snap-center relative px-2 md:px-0"
               >
                 {/* Icon */}
                 <div className="w-16 h-16 rounded-2xl bg-ivory border border-gold/20 flex items-center justify-center mb-5 group-hover:bg-gold/10 group-hover:border-gold/40 transition-all duration-300 shadow-sm">
