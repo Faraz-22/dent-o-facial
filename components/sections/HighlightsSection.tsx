@@ -2,6 +2,7 @@
 
 import { Shield, Microscope, Heart, LucideIcon } from 'lucide-react'
 import { useSiteContent } from '@/hooks/useSiteContent'
+import { useRef, useState } from 'react'
 
 const defaultHighlights = [
   {
@@ -33,6 +34,8 @@ const iconMap: Record<string, LucideIcon> = {
 export default function HighlightsSection() {
   const { data } = useSiteContent()
   const heroData = data?.hero as Record<string, any> | undefined
+  const [activeIndex, setActiveIndex] = useState(0)
+  const scrollRef = useRef<HTMLDivElement>(null)
   
   // Use CMS highlights if available and valid, otherwise fallback
   const rawHighlights = heroData?.highlights && Array.isArray(heroData.highlights) && heroData.highlights.length > 0
@@ -42,13 +45,27 @@ export default function HighlightsSection() {
   // Ensure exactly 3 items are rendered to keep the layout intact
   const highlights = rawHighlights.slice(0, 3)
 
+  const handleScroll = () => {
+    if (!scrollRef.current) return
+    const scrollLeft = scrollRef.current.scrollLeft
+    const width = scrollRef.current.clientWidth
+    const index = Math.round(scrollLeft / width)
+    if (index !== activeIndex) {
+      setActiveIndex(index)
+    }
+  }
+
   return (
     <section className="py-20 bg-cream relative overflow-hidden">
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold/20 to-transparent" />
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         
         {/* Mobile: Swipable Flexbox | Desktop: Grid */}
-        <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar md:grid md:grid-cols-3 md:gap-8 pb-8 md:pb-0 -mx-6 md:mx-0">
+        <div 
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar md:grid md:grid-cols-3 md:gap-8 -mx-6 md:mx-0"
+        >
           {highlights.map((h: any, idx: number) => {
             const Icon = iconMap[h.icon as string] || Heart
             return (
@@ -81,6 +98,16 @@ export default function HighlightsSection() {
               </div>
             )
           })}
+        </div>
+
+        {/* Pagination Dots (Mobile Only) */}
+        <div className="flex justify-center gap-2 mt-8 md:hidden">
+          {highlights.map((_, idx) => (
+            <div 
+              key={idx} 
+              className={`h-1.5 rounded-full transition-all duration-300 ${activeIndex === idx ? 'bg-gold-dark w-4' : 'bg-gold/30 w-1.5'}`}
+            />
+          ))}
         </div>
       </div>
       
