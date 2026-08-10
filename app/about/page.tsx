@@ -258,12 +258,12 @@ export default function AboutPage() {
                   {/* Text Content Box */}
                   <div className={`w-full lg:w-8/12 bg-white/80 backdrop-blur-xl rounded-[2.5rem] p-8 lg:p-16 shadow-xl border border-white/50 relative z-20 ${isEven ? 'order-2' : 'order-1'}`}>
                     
-                    <span className="text-gold-dark text-xs font-bold tracking-[0.2em] uppercase mb-4 block">
-                      {title}
-                    </span>
-                    <h2 className="font-playfair text-4xl lg:text-6xl text-charcoal mb-8 leading-tight">
+                    <h2 className="font-playfair text-4xl lg:text-6xl text-charcoal mb-2 leading-tight">
                       {name}
                     </h2>
+                    <span className="text-gold-dark text-xs font-bold tracking-[0.2em] uppercase mb-8 block">
+                      {title}
+                    </span>
 
                     {/* Mobile Image (renders specifically below Title/Name as requested) */}
                     <div className="relative block lg:hidden mb-10">
