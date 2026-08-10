@@ -370,8 +370,10 @@ function BlogEditor({ data, onChange }: { data: BlogPost[]; onChange: (v: BlogPo
           <Field label="Slug" value={post.slug} onChange={v => update(post.slug, 'slug', v)} placeholder="url-slug" />
           <Field label="Title" value={post.title} onChange={v => update(post.slug, 'title', v)} placeholder="Blog title" />
           <Field label="Excerpt" value={post.excerpt} onChange={v => update(post.slug, 'excerpt', v)} multiline />
-          <div className="grid grid-cols-2 gap-3">
+          <Field label="Blog Content (Body)" value={post.body || ''} onChange={v => update(post.slug, 'body', v)} multiline placeholder="Write your full blog post here... (HTML supported)" />
+          <div className="grid grid-cols-3 gap-3">
             <Field label="Category" value={post.category} onChange={v => update(post.slug, 'category', v)} />
+            <Field label="Date" value={post.date} onChange={v => update(post.slug, 'date', v)} placeholder="e.g. Aug 15, 2026" />
             <Field label="Read Time" value={post.readTime} onChange={v => update(post.slug, 'readTime', v)} />
           </div>
           <div className="space-y-2">

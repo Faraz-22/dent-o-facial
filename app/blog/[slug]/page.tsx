@@ -5,21 +5,22 @@ import fs from 'fs'
 import path from 'path'
 
 // Fetch statically during build or on demand
-async function getPost(slug: string) {
+async function getPostData(slug: string) {
   const file = path.join(process.cwd(), 'data', 'site-content.json')
   try {
     const raw = fs.readFileSync(file, 'utf-8')
     const data = JSON.parse(raw)
     const blogs = data.blog || []
-    return blogs.find((b: any) => b.slug === slug)
+    const post = blogs.find((b: any) => b.slug === slug)
+    return { post, doctor: data.doctor || {} }
   } catch (err) {
-    return null
+    return { post: null, doctor: {} }
   }
 }
 
 export default async function BlogPostPage(props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
-  const post = await getPost(params.slug)
+  const { post, doctor } = await getPostData(params.slug)
 
   if (!post) {
     notFound()
@@ -56,8 +57,8 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
                 <User size={18} className="text-gold-dark" />
               </div>
               <div>
-                <p className="text-sm font-medium text-charcoal">Dr. Hadi Raza</p>
-                <p className="text-xs text-charcoal-muted">Dermatology & Dental Specialist</p>
+                <p className="text-sm font-medium text-charcoal">{doctor.name || 'Author'}</p>
+                <p className="text-xs text-charcoal-muted">{doctor.title || 'Specialist'}</p>
               </div>
             </div>
             
