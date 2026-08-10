@@ -1,6 +1,6 @@
 'use client'
 
-import { GraduationCap, Award, Heart, Stethoscope, Users, Star } from 'lucide-react'
+import { GraduationCap, Award, Heart, Stethoscope, Users, Star, Quote } from 'lucide-react'
 import CTASection from '@/components/sections/CTASection'
 import { useSiteContent } from '@/hooks/useSiteContent'
 
@@ -58,23 +58,32 @@ export default function AboutPage() {
 
   return (
     <>
-      <section className="pt-32 pb-10 bg-ivory relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-cream to-transparent opacity-70" />
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
-          <div className="max-w-3xl">
-            <div className="flex items-center gap-3 mb-6">
+      {/* Hero Section */}
+      <section className="pt-40 pb-24 bg-charcoal relative overflow-hidden">
+        {/* Luxury Background Elements */}
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-gold/5 to-transparent opacity-80" />
+        <div className="absolute -top-32 -left-32 w-96 h-96 bg-gold/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '6s' }} />
+        <div className="absolute bottom-0 right-0 w-[40rem] h-[40rem] bg-gold/5 rounded-full blur-3xl" />
+        
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10 text-center">
+          <div className="max-w-3xl mx-auto animate-fade-in-up" style={{ animationDuration: '1.2s' }}>
+            <div className="flex items-center justify-center gap-3 mb-6">
               <div className="h-px w-10 bg-gold" />
-              <span className="section-label">Our Specialists</span>
+              <span className="section-label text-gold/80 tracking-[0.3em]">OUR SPECIALISTS</span>
+              <div className="h-px w-10 bg-gold" />
             </div>
-            <h1 className="font-playfair text-5xl lg:text-7xl text-charcoal leading-tight mb-6">
+            <h1 className="font-playfair text-5xl lg:text-7xl text-ivory leading-tight mb-6 drop-shadow-lg">
               Meet the <br />
-              <span className="italic text-gold-dark">Doctors</span>
+              <span className="italic text-gold">Doctors</span>
             </h1>
-            <p className="text-charcoal-muted text-lg leading-relaxed max-w-xl">
-              Committed to transforming lives through exceptional, personalized medical and dental care.
+            <p className="text-gray-300 text-lg leading-relaxed max-w-xl mx-auto font-light">
+              Committed to transforming lives through exceptional, personalized medical and dental care. Experience the perfect blend of science and art.
             </p>
           </div>
         </div>
+        
+        {/* Bottom edge fade to content */}
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-ivory to-transparent" />
       </section>
 
       {doctors.map((doctor, index) => {
@@ -90,17 +99,21 @@ export default function AboutPage() {
         const isEven = index % 2 === 0
 
         return (
-          <div key={doctor.id || index} className="mb-20">
+          <div key={doctor.id || index} className="mb-0">
             {/* The Journey Section */}
-            <section className={`py-16 ${isEven ? 'bg-cream' : 'bg-ivory'}`}>
-              <div className="max-w-7xl mx-auto px-6 lg:px-8">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+            <section className={`py-24 relative overflow-hidden ${isEven ? 'bg-ivory' : 'bg-cream'}`}>
+              {/* Subtle background flourishes */}
+              {!isEven && <div className="absolute top-0 left-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl" />}
+              {isEven && <div className="absolute bottom-0 right-0 w-96 h-96 bg-gold/5 rounded-full blur-3xl" />}
+
+              <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+                <div className="flex flex-col lg:flex-row gap-0 items-center">
                   
-                  {/* Image Column */}
-                  <div className={`relative ${isEven ? 'order-1' : 'order-1 lg:order-2'}`}>
+                  {/* Desktop Image Box - Asymmetrical overlapping left side */}
+                  <div className={`hidden lg:block w-5/12 relative z-10 ${isEven ? 'order-1 -mr-16' : 'order-2 -ml-16'}`}>
                     <div
-                      className="rounded-3xl overflow-hidden relative"
-                      style={{ height: '560px', background: 'linear-gradient(135deg, #E8E3D8 0%, #D6B98C22 100%)' }}
+                      className="relative rounded-[2rem] overflow-hidden shadow-2xl transition-transform duration-700 hover:scale-[1.02]"
+                      style={{ height: '600px', background: 'linear-gradient(135deg, #E8E3D8 0%, #D6B98C22 100%)' }}
                     >
                       {imageUrl ? (
                         <img
@@ -113,32 +126,63 @@ export default function AboutPage() {
                           <div className="w-28 h-28 rounded-full bg-gold/20 flex items-center justify-center mb-4">
                             <Users size={48} className="text-gold" />
                           </div>
-                          <p className="text-charcoal-muted text-sm">Portrait Missing</p>
+                          <p className="text-charcoal-muted text-sm font-medium">Portrait Missing</p>
                         </div>
                       )}
+                      
+                      {/* Inner gold glow */}
+                      <div className="absolute inset-0 border-[1px] border-gold/20 rounded-[2rem] pointer-events-none" />
                     </div>
-                    <div className={`absolute -bottom-5 w-32 h-32 border-b-2 border-gold/30 ${isEven ? '-right-5 border-r-2 rounded-br-3xl' : '-left-5 border-l-2 rounded-bl-3xl'}`} />
                   </div>
 
-                  {/* Text Column */}
-                  <div className={`lg:pt-4 ${isEven ? 'order-2' : 'order-2 lg:order-1'}`}>
-                    <span className="section-label mb-4 block">{title}</span>
-                    <h2 className="font-playfair text-3xl lg:text-5xl text-charcoal mb-6">
+                  {/* Text Content Box */}
+                  <div className={`w-full lg:w-8/12 bg-white/80 backdrop-blur-xl rounded-[2.5rem] p-8 lg:p-16 shadow-xl border border-white/50 relative z-20 ${isEven ? 'order-2' : 'order-1'}`}>
+                    
+                    <span className="text-gold-dark text-xs font-bold tracking-[0.2em] uppercase mb-4 block">
+                      {title}
+                    </span>
+                    <h2 className="font-playfair text-4xl lg:text-6xl text-charcoal mb-8 leading-tight">
                       {name}
                     </h2>
 
-                    <div className="space-y-5 text-charcoal-muted leading-relaxed">
+                    {/* Mobile Image (renders specifically below Title/Name as requested) */}
+                    <div className="relative block lg:hidden mb-10">
+                      <div
+                        className="relative w-full rounded-3xl overflow-hidden shadow-xl"
+                        style={{ height: '400px', background: 'linear-gradient(135deg, #E8E3D8 0%, #D6B98C22 100%)' }}
+                      >
+                        {imageUrl ? (
+                          <img
+                            src={imageUrl}
+                            alt={name}
+                            className="absolute inset-0 w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center">
+                            <div className="w-24 h-24 rounded-full bg-gold/20 flex items-center justify-center mb-4">
+                              <Users size={36} className="text-gold" />
+                            </div>
+                            <p className="text-charcoal-muted text-sm font-medium">Portrait Missing</p>
+                          </div>
+                        )}
+                        <div className="absolute inset-0 border border-gold/10 rounded-3xl pointer-events-none" />
+                      </div>
+                    </div>
+
+                    {/* Bio Text */}
+                    <div className="space-y-6 text-charcoal-muted text-lg leading-relaxed font-light">
                       {bioParagraphs.map((p: string, i: number) => (
                         <p key={i}>{p}</p>
                       ))}
                     </div>
 
                     {quote && (
-                      <blockquote className="mt-8 pl-6 border-l-2 border-gold">
-                        <p className="font-playfair text-lg text-charcoal italic">
+                      <div className="mt-10 pt-8 border-t border-gold/20 relative">
+                        <Quote className="absolute top-4 left-0 text-gold/20" size={40} />
+                        <p className="font-playfair text-xl text-charcoal italic pl-8 pr-4">
                           &ldquo;{quote}&rdquo;
                         </p>
-                      </blockquote>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -147,23 +191,28 @@ export default function AboutPage() {
 
             {/* Qualifications Section */}
             {aboutCredentials.length > 0 && (
-              <section className={`py-16 ${isEven ? 'bg-ivory' : 'bg-cream'}`}>
-                <div className="max-w-7xl mx-auto px-6 lg:px-8">
-                  <div className="text-center mb-10">
-                    <h3 className="font-playfair text-2xl lg:text-3xl text-charcoal">
-                      Credentials & Expertise
+              <section className="py-24 relative overflow-hidden bg-charcoal text-ivory">
+                <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+                  <div className="text-center mb-16">
+                    <span className="section-label text-gold/70 block mb-3">Expertise</span>
+                    <h3 className="font-playfair text-3xl lg:text-5xl">
+                      Credentials & Specializations
                     </h3>
                   </div>
+                  
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {aboutCredentials.map(({ icon, title: credTitle, desc }: any, idx: number) => {
                       const Icon = iconMap[icon] || Award
                       return (
-                        <div key={idx} className="luxury-card rounded-2xl p-6 text-center bg-white/50 backdrop-blur-sm">
-                          <div className="w-12 h-12 rounded-xl bg-gold/10 flex items-center justify-center mx-auto mb-4">
-                            <Icon size={20} className="text-gold-dark" />
+                        <div 
+                          key={idx} 
+                          className="group relative bg-white/5 backdrop-blur-md rounded-[2rem] p-8 text-center border border-white/5 hover:bg-white/10 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(214,185,140,0.15)] hover:border-gold/30 transition-all duration-500"
+                        >
+                          <div className="w-16 h-16 rounded-2xl bg-gold/10 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:bg-gold transition-all duration-500">
+                            <Icon size={24} className="text-gold group-hover:text-charcoal transition-colors duration-500" />
                           </div>
-                          <h4 className="font-playfair text-lg text-charcoal font-medium mb-2">{credTitle}</h4>
-                          <p className="text-charcoal-muted text-sm leading-relaxed">{desc}</p>
+                          <h4 className="font-playfair text-xl font-medium mb-3 group-hover:text-gold transition-colors duration-300">{credTitle}</h4>
+                          <p className="text-gray-400 text-sm leading-relaxed">{desc}</p>
                         </div>
                       )
                     })}
@@ -174,23 +223,30 @@ export default function AboutPage() {
 
             {/* Values Section */}
             {values.length > 0 && (
-              <section className="py-16 bg-charcoal text-ivory">
-                <div className="max-w-7xl mx-auto px-6 lg:px-8">
-                  <div className="text-center mb-10">
-                    <h3 className="font-playfair text-2xl lg:text-3xl">
-                      Core Values
+              <section className={`py-24 relative overflow-hidden ${isEven ? 'bg-cream' : 'bg-ivory'}`}>
+                <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+                  <div className="text-center mb-16">
+                    <span className="section-label block mb-3">Our Core Foundation</span>
+                    <h3 className="font-playfair text-3xl lg:text-5xl text-charcoal">
+                      Clinic Values
                     </h3>
                   </div>
+                  
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {values.map(({ icon, title: valTitle, desc }: any, idx: number) => {
                       const Icon = iconMap[icon] || Star
                       return (
-                        <div key={idx} className="border border-charcoal-light rounded-2xl p-8 hover:border-gold/30 transition-colors duration-300">
-                          <div className="w-12 h-12 rounded-xl bg-gold/10 flex items-center justify-center mb-5">
-                            <Icon size={20} className="text-gold" />
+                        <div 
+                          key={idx} 
+                          className="group bg-white rounded-[2.5rem] p-10 shadow-lg hover:shadow-2xl border border-transparent hover:border-gold/30 transition-all duration-500 hover:-translate-y-2 relative overflow-hidden"
+                        >
+                          <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-bl-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700" />
+                          
+                          <div className="w-14 h-14 rounded-2xl bg-gold/10 flex items-center justify-center mb-6 relative z-10 group-hover:rotate-[10deg] transition-transform duration-300">
+                            <Icon size={24} className="text-gold-dark" />
                           </div>
-                          <h4 className="font-playfair text-xl font-medium mb-3">{valTitle}</h4>
-                          <p className="text-gray-400 text-sm leading-relaxed">{desc}</p>
+                          <h4 className="font-playfair text-2xl text-charcoal font-semibold mb-4 relative z-10">{valTitle}</h4>
+                          <p className="text-charcoal-muted text-base leading-relaxed relative z-10">{desc}</p>
                         </div>
                       )
                     })}
