@@ -168,23 +168,13 @@ export default function TreatmentsPage() {
 
       <div className="pb-24">
         <TreatmentAccordion 
-          title="Dermatology" 
-          category="Dermatology"
-          treatments={dermatology} 
-          whatsappNumber={whatsappNumber} 
-          whatsappMessage={whatsappMessage}
-          defaultOpen={true}
-          bgColor="bg-cream"
-        />
-        
-        <TreatmentAccordion 
           title="Dental" 
           category="Dental"
           treatments={dental} 
           whatsappNumber={whatsappNumber} 
           whatsappMessage={whatsappMessage}
           defaultOpen={true}
-          bgColor="bg-ivory"
+          bgColor="bg-cream"
         />
 
         <TreatmentAccordion 
@@ -194,13 +184,23 @@ export default function TreatmentsPage() {
           whatsappNumber={whatsappNumber} 
           whatsappMessage={whatsappMessage}
           defaultOpen={false}
-          bgColor="bg-cream"
+          bgColor="bg-ivory"
         />
 
         <TreatmentAccordion 
           title="Facial Trauma" 
           category="Facial Trauma"
           treatments={facialTrauma} 
+          whatsappNumber={whatsappNumber} 
+          whatsappMessage={whatsappMessage}
+          defaultOpen={false}
+          bgColor="bg-cream"
+        />
+
+        <TreatmentAccordion 
+          title="Dermatology" 
+          category="Dermatology"
+          treatments={dermatology} 
           whatsappNumber={whatsappNumber} 
           whatsappMessage={whatsappMessage}
           defaultOpen={false}
