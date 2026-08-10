@@ -28,10 +28,10 @@ export default function ResultsPage() {
   const traumaResults = (results?.facialTrauma || []).map(r => ({ ...r, category: 'facialTrauma' as const }))
 
   const allResults: Result[] = [
-    ...dermaResults,
     ...dentalResults,
     ...orthoResults,
     ...traumaResults,
+    ...dermaResults,
   ]
 
   const filtered = activeCategory === 'all'
@@ -40,10 +40,10 @@ export default function ResultsPage() {
 
   const filterTabs = [
     { id: 'all', label: 'All' },
-    { id: 'dermatology', label: 'Dermatology' },
     { id: 'dental', label: 'Dental' },
     { id: 'orthodontics', label: 'Orthodontics' },
-    { id: 'facialTrauma', label: 'Facial Trauma' }
+    { id: 'facialTrauma', label: 'Facial Trauma' },
+    { id: 'dermatology', label: 'Dermatology' }
   ]
 
   return (

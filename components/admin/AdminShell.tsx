@@ -724,10 +724,10 @@ function ResultsEditor({ data, onChange }: { data: ResultsData; onChange: (v: Re
   if (!data) return <p className="text-gray-500 text-sm p-4">No data.</p>
   return (
     <div className="space-y-6">
-      <CategoryList cat="dermatology" items={data.dermatology || []} data={data} onChange={onChange} label="Dermatology" colorClass="bg-blue-900/50 text-blue-300" />
       <CategoryList cat="dental" items={data.dental || []} data={data} onChange={onChange} label="Dental" colorClass="bg-green-900/50 text-green-300" />
       <CategoryList cat="orthodontics" items={data.orthodontics || []} data={data} onChange={onChange} label="Orthodontics" colorClass="bg-purple-900/50 text-purple-300" />
       <CategoryList cat="facialTrauma" items={data.facialTrauma || []} data={data} onChange={onChange} label="Facial Trauma" colorClass="bg-orange-900/50 text-orange-300" />
+      <CategoryList cat="dermatology" items={data.dermatology || []} data={data} onChange={onChange} label="Dermatology" colorClass="bg-blue-900/50 text-blue-300" />
     </div>
   )
 }
