@@ -52,7 +52,7 @@ export default function Navbar({
         isLoggedInAdmin ? (scrolled ? 'top-8 bg-ivory/95 backdrop-blur-md shadow-sm border-b border-gold/10' : 'top-8 bg-transparent') : (scrolled ? 'top-0 bg-ivory/95 backdrop-blur-md shadow-sm border-b border-gold/10' : 'top-0 bg-transparent')
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+      <div className="max-w-7xl xl:max-w-[100rem] mx-auto px-6 lg:px-8 xl:px-12">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-4">
