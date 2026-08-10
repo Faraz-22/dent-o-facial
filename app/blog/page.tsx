@@ -19,8 +19,12 @@ interface BlogPost {
 export default function BlogPage() {
   const { data } = useSiteContent()
   const posts: BlogPost[] = data?.blog || []
-  const featuredPosts = posts.filter(p => p.featured)
-  const regularPosts = posts.filter(p => !p.featured)
+  
+  // Sort posts by date, most recent first
+  const sortedPosts = [...posts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  
+  const featuredPosts = sortedPosts.filter(p => p.featured)
+  const regularPosts = sortedPosts.filter(p => !p.featured)
 
   return (
     <>
