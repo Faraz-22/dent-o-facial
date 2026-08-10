@@ -1,18 +1,15 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Clock, Calendar, User } from 'lucide-react'
-import fs from 'fs'
-import path from 'path'
+import { getMergedContent } from '@/lib/content'
 
 // Fetch statically during build or on demand
 async function getPostData(slug: string) {
-  const file = path.join(process.cwd(), 'data', 'site-content.json')
   try {
-    const raw = fs.readFileSync(file, 'utf-8')
-    const data = JSON.parse(raw)
-    const blogs = data.blog || []
+    const data = await getMergedContent()
+    const blogs = (data.blog || []) as any[]
     const post = blogs.find((b: any) => b.slug === slug)
-    return { post, doctor: data.doctor || {} }
+    return { post, doctor: (data.doctor as any) || {} }
   } catch (err) {
     return { post: null, doctor: {} }
   }

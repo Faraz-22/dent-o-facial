@@ -1,22 +1,19 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Clock, Sparkles, CheckCircle2 } from 'lucide-react'
-import fs from 'fs'
-import path from 'path'
+import { getMergedContent } from '@/lib/content'
 
 // Fetch statically during build or on demand
 async function getTreatment(slug: string) {
-  const file = path.join(process.cwd(), 'data', 'site-content.json')
   try {
-    const raw = fs.readFileSync(file, 'utf-8')
-    const data = JSON.parse(raw)
+    const data = await getMergedContent()
     const allTreatments = [
       ...(data.treatments?.dermatology || []),
       ...(data.treatments?.dental || []),
       ...(data.treatments?.orthodontics || []),
       ...(data.treatments?.facialTrauma || [])
     ]
-    return allTreatments.find(t => t.id === slug)
+    return (allTreatments as any[]).find(t => t.id === slug)
   } catch (err) {
     return null
   }
