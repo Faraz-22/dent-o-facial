@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Sparkles, Zap, Sun, Smile, Star, Activity, ImageIcon } from 'lucide-react'
 import { useSiteContent } from '@/hooks/useSiteContent'
@@ -75,6 +75,18 @@ function TreatmentCard({ treatment, index }: { treatment: any; index: number }) 
 export default function TreatmentsGrid() {
   const { data } = useSiteContent()
   const treatments = data?.treatments
+  const [activeIndex, setActiveIndex] = useState(0)
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  const handleScroll = () => {
+    if (!scrollRef.current) return
+    const scrollLeft = scrollRef.current.scrollLeft
+    const width = scrollRef.current.clientWidth
+    const index = Math.round(scrollLeft / width)
+    if (index !== activeIndex) {
+      setActiveIndex(index)
+    }
+  }
 
   const allTreatments = [
     ...((treatments?.dermatology as Array<{ id: string; name: string; shortDesc: string; tag: string }>) || []).map(t => ({ ...t, category: 'Dermatology' })),
@@ -114,9 +126,25 @@ export default function TreatmentsGrid() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div 
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 -mx-6 md:mx-0"
+        >
           {displayTreatments.map((treatment, index) => (
-            <TreatmentCard key={treatment.id} treatment={treatment} index={index} />
+            <div key={treatment.id} className="w-full shrink-0 snap-center relative px-6 md:px-0">
+              <TreatmentCard treatment={treatment} index={index} />
+            </div>
+          ))}
+        </div>
+
+        {/* Pagination Dots (Mobile Only) */}
+        <div className="flex justify-center gap-2 mt-8 md:hidden">
+          {displayTreatments.map((_, idx) => (
+            <div 
+              key={idx} 
+              className={`h-1.5 rounded-full transition-all duration-300 ${activeIndex === idx ? 'bg-gold-dark w-4' : 'bg-gold/30 w-1.5'}`}
+            />
           ))}
         </div>
 
