@@ -1,10 +1,135 @@
 'use client'
 
+import { useRef, useState } from 'react'
 import { GraduationCap, Award, Heart, Stethoscope, Users, Star, Quote } from 'lucide-react'
 import CTASection from '@/components/sections/CTASection'
 import { useSiteContent } from '@/hooks/useSiteContent'
 
 const iconMap: Record<string, React.ElementType> = { GraduationCap, Award, Heart, Stethoscope, Star, Users }
+
+// ---------------------------
+// Credentials Carousel Component
+// ---------------------------
+function CredentialsCarousel({ credentials }: { credentials: any[] }) {
+  const [activeIndex, setActiveIndex] = useState(0)
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  const handleScroll = () => {
+    if (!scrollRef.current) return
+    const scrollLeft = scrollRef.current.scrollLeft
+    const width = scrollRef.current.clientWidth
+    const index = Math.round(scrollLeft / width)
+    if (index !== activeIndex) setActiveIndex(index)
+  }
+
+  return (
+    <section className="py-24 relative overflow-hidden bg-charcoal text-ivory">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+        <div className="text-center mb-16">
+          <span className="section-label text-gold/70 block mb-3">Expertise</span>
+          <h3 className="font-playfair text-3xl lg:text-5xl">
+            Credentials & Specializations
+          </h3>
+        </div>
+        
+        <div 
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="flex lg:grid overflow-x-auto lg:overflow-visible snap-x snap-mandatory lg:snap-none hide-scrollbar gap-6 pb-4 lg:pb-0 -mx-6 px-6 lg:mx-0 lg:px-0 lg:grid-cols-4"
+        >
+          {credentials.map(({ icon, title: credTitle, desc }: any, idx: number) => {
+            const Icon = iconMap[icon] || Award
+            return (
+              <div 
+                key={idx} 
+                className="w-full shrink-0 snap-center lg:w-auto group relative bg-white/5 backdrop-blur-md rounded-[2rem] p-8 text-center border border-white/5 hover:bg-white/10 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(214,185,140,0.15)] hover:border-gold/30 transition-all duration-500"
+              >
+                <div className="w-16 h-16 rounded-2xl bg-gold/10 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:bg-gold transition-all duration-500">
+                  <Icon size={24} className="text-gold group-hover:text-charcoal transition-colors duration-500" />
+                </div>
+                <h4 className="font-playfair text-xl font-medium mb-3 group-hover:text-gold transition-colors duration-300">{credTitle}</h4>
+                <p className="text-gray-400 text-sm leading-relaxed">{desc}</p>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Pagination Dots (Mobile Only) */}
+        <div className="flex justify-center gap-2 mt-8 lg:hidden">
+          {credentials.map((_, idx) => (
+            <div 
+              key={idx} 
+              className={`h-1.5 rounded-full transition-all duration-300 ${activeIndex === idx ? 'bg-gold-dark w-4' : 'bg-gold/30 w-1.5'}`}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ---------------------------
+// Clinic Values Carousel Component
+// ---------------------------
+function ValuesCarousel({ values }: { values: any[] }) {
+  const [activeIndex, setActiveIndex] = useState(0)
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  const handleScroll = () => {
+    if (!scrollRef.current) return
+    const scrollLeft = scrollRef.current.scrollLeft
+    const width = scrollRef.current.clientWidth
+    const index = Math.round(scrollLeft / width)
+    if (index !== activeIndex) setActiveIndex(index)
+  }
+
+  return (
+    <section className="py-24 relative overflow-hidden bg-cream">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+        <div className="text-center mb-16">
+          <span className="section-label block mb-3">Our Core Foundation</span>
+          <h3 className="font-playfair text-3xl lg:text-5xl text-charcoal">
+            Clinic Values
+          </h3>
+        </div>
+        
+        <div 
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="flex lg:grid overflow-x-auto lg:overflow-visible snap-x snap-mandatory lg:snap-none hide-scrollbar gap-6 lg:gap-8 pb-4 lg:pb-0 -mx-6 px-6 lg:mx-0 lg:px-0 lg:grid-cols-3"
+        >
+          {values.map(({ icon, title: valTitle, desc }: any, idx: number) => {
+            const Icon = iconMap[icon] || Star
+            return (
+              <div 
+                key={idx} 
+                className="w-full shrink-0 snap-center lg:w-auto group bg-white rounded-[2.5rem] p-10 shadow-lg hover:shadow-2xl border border-transparent hover:border-gold/30 transition-all duration-500 hover:-translate-y-2 relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-bl-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700" />
+                
+                <div className="w-14 h-14 rounded-2xl bg-gold/10 flex items-center justify-center mb-6 relative z-10 group-hover:rotate-[10deg] transition-transform duration-300">
+                  <Icon size={24} className="text-gold-dark" />
+                </div>
+                <h4 className="font-playfair text-2xl text-charcoal font-semibold mb-4 relative z-10">{valTitle}</h4>
+                <p className="text-charcoal-muted text-base leading-relaxed relative z-10">{desc}</p>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Pagination Dots (Mobile Only) */}
+        <div className="flex justify-center gap-2 mt-8 lg:hidden">
+          {values.map((_, idx) => (
+            <div 
+              key={idx} 
+              className={`h-1.5 rounded-full transition-all duration-300 ${activeIndex === idx ? 'bg-gold-dark w-4' : 'bg-gold/30 w-1.5'}`}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
 
 const defaultDoctors = [
   {
@@ -90,7 +215,6 @@ export default function AboutPage() {
         const imageKey = doctor.imageKey || 'aboutImage'
         const imageUrl = (data?.images as Record<string, string>)?.[imageKey]
         const aboutCredentials = doctor.aboutCredentials || []
-        const values = doctor.values || []
         const bioParagraphs = longBio.split('\n\n').filter(Boolean)
         const isEven = index % 2 === 0
 
@@ -186,75 +310,22 @@ export default function AboutPage() {
             </section>
 
             {/* Qualifications Section */}
-            {aboutCredentials.length > 0 && (
-              <section className="py-24 relative overflow-hidden bg-charcoal text-ivory">
-                <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
-                  <div className="text-center mb-16">
-                    <span className="section-label text-gold/70 block mb-3">Expertise</span>
-                    <h3 className="font-playfair text-3xl lg:text-5xl">
-                      Credentials & Specializations
-                    </h3>
-                  </div>
-                  
-                  <div className="flex lg:grid overflow-x-auto lg:overflow-visible snap-x snap-mandatory lg:snap-none hide-scrollbar gap-6 lg:gap-6 pb-8 lg:pb-0 -mx-6 px-6 lg:mx-0 lg:px-0 lg:grid-cols-4">
-                    {aboutCredentials.map(({ icon, title: credTitle, desc }: any, idx: number) => {
-                      const Icon = iconMap[icon] || Award
-                      return (
-                        <div 
-                          key={idx} 
-                          className="w-full min-w-[85vw] md:min-w-[45vw] lg:min-w-0 lg:w-auto shrink-0 snap-center group relative bg-white/5 backdrop-blur-md rounded-[2rem] p-8 text-center border border-white/5 hover:bg-white/10 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(214,185,140,0.15)] hover:border-gold/30 transition-all duration-500"
-                        >
-                          <div className="w-16 h-16 rounded-2xl bg-gold/10 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:bg-gold transition-all duration-500">
-                            <Icon size={24} className="text-gold group-hover:text-charcoal transition-colors duration-500" />
-                          </div>
-                          <h4 className="font-playfair text-xl font-medium mb-3 group-hover:text-gold transition-colors duration-300">{credTitle}</h4>
-                          <p className="text-gray-400 text-sm leading-relaxed">{desc}</p>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              </section>
-            )}
+            {aboutCredentials.length > 0 && <CredentialsCarousel credentials={aboutCredentials} />}
           </div>
         )
       })}
 
       {/* Global Clinic Values Section */}
       {doctors[0]?.values && doctors[0].values.length > 0 && (
-        <section className="py-24 relative overflow-hidden bg-cream">
-          <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
-            <div className="text-center mb-16">
-              <span className="section-label block mb-3">Our Core Foundation</span>
-              <h3 className="font-playfair text-3xl lg:text-5xl text-charcoal">
-                Clinic Values
-              </h3>
-            </div>
-            
-            <div className="flex lg:grid overflow-x-auto lg:overflow-visible snap-x snap-mandatory lg:snap-none hide-scrollbar gap-6 lg:gap-8 pb-8 lg:pb-0 -mx-6 px-6 lg:mx-0 lg:px-0 lg:grid-cols-3">
-              {doctors[0].values.map(({ icon, title: valTitle, desc }: any, idx: number) => {
-                const Icon = iconMap[icon] || Star
-                return (
-                  <div 
-                    key={idx} 
-                    className="w-full min-w-[85vw] md:min-w-[45vw] lg:min-w-0 lg:w-auto shrink-0 snap-center group bg-white rounded-[2.5rem] p-10 shadow-lg hover:shadow-2xl border border-transparent hover:border-gold/30 transition-all duration-500 hover:-translate-y-2 relative overflow-hidden"
-                  >
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-bl-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700" />
-                    
-                    <div className="w-14 h-14 rounded-2xl bg-gold/10 flex items-center justify-center mb-6 relative z-10 group-hover:rotate-[10deg] transition-transform duration-300">
-                      <Icon size={24} className="text-gold-dark" />
-                    </div>
-                    <h4 className="font-playfair text-2xl text-charcoal font-semibold mb-4 relative z-10">{valTitle}</h4>
-                    <p className="text-charcoal-muted text-base leading-relaxed relative z-10">{desc}</p>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        </section>
+        <ValuesCarousel values={doctors[0].values} />
       )}
 
       <CTASection />
+      
+      <style dangerouslySetInnerHTML={{__html: `
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}} />
     </>
   )
 }
