@@ -59,31 +59,27 @@ export default function AboutPage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="pt-40 pb-24 bg-charcoal relative overflow-hidden">
+      <section className="pt-40 pb-24 bg-ivory relative overflow-hidden">
         {/* Luxury Background Elements */}
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-gold/5 to-transparent opacity-80" />
-        <div className="absolute -top-32 -left-32 w-96 h-96 bg-gold/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '6s' }} />
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-cream to-transparent opacity-80" />
+        <div className="absolute -top-32 -left-32 w-96 h-96 bg-gold/5 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '6s' }} />
         <div className="absolute bottom-0 right-0 w-[40rem] h-[40rem] bg-gold/5 rounded-full blur-3xl" />
         
         <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10 text-center">
           <div className="max-w-3xl mx-auto animate-fade-in-up" style={{ animationDuration: '1.2s' }}>
             <div className="flex items-center justify-center gap-3 mb-6">
               <div className="h-px w-10 bg-gold" />
-              <span className="section-label text-gold/80 tracking-[0.3em]">OUR SPECIALISTS</span>
+              <span className="section-label text-charcoal-muted tracking-[0.3em]">OUR SPECIALISTS</span>
               <div className="h-px w-10 bg-gold" />
             </div>
-            <h1 className="font-playfair text-5xl lg:text-7xl text-ivory leading-tight mb-6 drop-shadow-lg">
-              Meet the <br />
-              <span className="italic text-gold">Doctors</span>
+            <h1 className="font-playfair text-5xl lg:text-7xl text-charcoal leading-tight mb-6">
+              Meet the <span className="italic text-gold-dark">Doctors</span>
             </h1>
-            <p className="text-gray-300 text-lg leading-relaxed max-w-xl mx-auto font-light">
+            <p className="text-charcoal-muted text-lg leading-relaxed max-w-xl mx-auto">
               Committed to transforming lives through exceptional, personalized medical and dental care. Experience the perfect blend of science and art.
             </p>
           </div>
         </div>
-        
-        {/* Bottom edge fade to content */}
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-ivory to-transparent" />
       </section>
 
       {doctors.map((doctor, index) => {
