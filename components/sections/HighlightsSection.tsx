@@ -48,13 +48,13 @@ export default function HighlightsSection() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         
         {/* Mobile: Swipable Flexbox | Desktop: Grid */}
-        <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-6 md:gap-8 md:grid md:grid-cols-3 pb-8 md:pb-0 -mx-6 px-6 md:mx-0 md:px-0">
+        <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar md:grid md:grid-cols-3 md:gap-8 pb-8 md:pb-0 -mx-6 md:mx-0">
           {highlights.map((h: any, idx: number) => {
             const Icon = iconMap[h.icon as string] || Heart
             return (
               <div
                 key={idx}
-                className="flex flex-col items-center text-center group min-w-[280px] sm:min-w-[320px] md:min-w-0 snap-center relative"
+                className="flex flex-col items-center text-center group min-w-full md:min-w-0 shrink-0 snap-center relative px-6 md:px-0"
               >
                 {/* Icon */}
                 <div className="w-16 h-16 rounded-2xl bg-ivory border border-gold/20 flex items-center justify-center mb-5 group-hover:bg-gold/10 group-hover:border-gold/40 transition-all duration-300 shadow-sm">
