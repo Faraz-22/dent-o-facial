@@ -185,7 +185,7 @@ export default function AboutPage() {
               </div>
             </section>
 
-            {/* Qualifications Section */}
+            {/* Qualifications Section (Swipable Carousel) */}
             {aboutCredentials.length > 0 && (
               <section className="py-24 relative overflow-hidden bg-charcoal text-ivory">
                 <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
@@ -196,13 +196,13 @@ export default function AboutPage() {
                     </h3>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-6 pb-8 -mx-6 px-6 lg:mx-0 lg:px-0">
                     {aboutCredentials.map(({ icon, title: credTitle, desc }: any, idx: number) => {
                       const Icon = iconMap[icon] || Award
                       return (
                         <div 
                           key={idx} 
-                          className="group relative bg-white/5 backdrop-blur-md rounded-[2rem] p-8 text-center border border-white/5 hover:bg-white/10 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(214,185,140,0.15)] hover:border-gold/30 transition-all duration-500"
+                          className="min-w-[280px] md:min-w-[320px] shrink-0 snap-center group relative bg-white/5 backdrop-blur-md rounded-[2rem] p-8 text-center border border-white/5 hover:bg-white/10 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(214,185,140,0.15)] hover:border-gold/30 transition-all duration-500"
                         >
                           <div className="w-16 h-16 rounded-2xl bg-gold/10 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:bg-gold transition-all duration-500">
                             <Icon size={24} className="text-gold group-hover:text-charcoal transition-colors duration-500" />
@@ -216,43 +216,43 @@ export default function AboutPage() {
                 </div>
               </section>
             )}
-
-            {/* Values Section */}
-            {values.length > 0 && (
-              <section className={`py-24 relative overflow-hidden ${isEven ? 'bg-cream' : 'bg-ivory'}`}>
-                <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
-                  <div className="text-center mb-16">
-                    <span className="section-label block mb-3">Our Core Foundation</span>
-                    <h3 className="font-playfair text-3xl lg:text-5xl text-charcoal">
-                      Clinic Values
-                    </h3>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {values.map(({ icon, title: valTitle, desc }: any, idx: number) => {
-                      const Icon = iconMap[icon] || Star
-                      return (
-                        <div 
-                          key={idx} 
-                          className="group bg-white rounded-[2.5rem] p-10 shadow-lg hover:shadow-2xl border border-transparent hover:border-gold/30 transition-all duration-500 hover:-translate-y-2 relative overflow-hidden"
-                        >
-                          <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-bl-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700" />
-                          
-                          <div className="w-14 h-14 rounded-2xl bg-gold/10 flex items-center justify-center mb-6 relative z-10 group-hover:rotate-[10deg] transition-transform duration-300">
-                            <Icon size={24} className="text-gold-dark" />
-                          </div>
-                          <h4 className="font-playfair text-2xl text-charcoal font-semibold mb-4 relative z-10">{valTitle}</h4>
-                          <p className="text-charcoal-muted text-base leading-relaxed relative z-10">{desc}</p>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              </section>
-            )}
           </div>
         )
       })}
+
+      {/* Global Clinic Values Section (Moved out of loop, Swipable Carousel) */}
+      {doctors[0]?.values && doctors[0].values.length > 0 && (
+        <section className="py-24 relative overflow-hidden bg-cream">
+          <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+            <div className="text-center mb-16">
+              <span className="section-label block mb-3">Our Core Foundation</span>
+              <h3 className="font-playfair text-3xl lg:text-5xl text-charcoal">
+                Clinic Values
+              </h3>
+            </div>
+            
+            <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-8 pb-8 -mx-6 px-6 lg:mx-0 lg:px-0">
+              {doctors[0].values.map(({ icon, title: valTitle, desc }: any, idx: number) => {
+                const Icon = iconMap[icon] || Star
+                return (
+                  <div 
+                    key={idx} 
+                    className="min-w-[300px] md:min-w-[350px] shrink-0 snap-center group bg-white rounded-[2.5rem] p-10 shadow-lg hover:shadow-2xl border border-transparent hover:border-gold/30 transition-all duration-500 hover:-translate-y-2 relative overflow-hidden"
+                  >
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-bl-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700" />
+                    
+                    <div className="w-14 h-14 rounded-2xl bg-gold/10 flex items-center justify-center mb-6 relative z-10 group-hover:rotate-[10deg] transition-transform duration-300">
+                      <Icon size={24} className="text-gold-dark" />
+                    </div>
+                    <h4 className="font-playfair text-2xl text-charcoal font-semibold mb-4 relative z-10">{valTitle}</h4>
+                    <p className="text-charcoal-muted text-base leading-relaxed relative z-10">{desc}</p>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       <CTASection />
     </>
