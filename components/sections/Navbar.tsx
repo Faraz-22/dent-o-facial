@@ -60,15 +60,18 @@ export default function Navbar({
               <img src={logoUrl} alt="Dent-O-Facial Logo" className="h-16 md:h-[4.5rem] w-auto object-contain" />
             )}
             <div className="flex flex-col justify-center pt-1">
-              <span className="font-playfair text-xl md:text-[1.35rem] font-semibold text-charcoal tracking-wide mb-1 leading-none">
+              <span className="font-playfair text-2xl md:text-[1.6rem] font-bold text-charcoal tracking-wide mb-1 leading-none">
                 Dent-O-Facial
               </span>
-              <span className="text-[9px] md:text-[10px] text-gold-dark tracking-[0.25em] uppercase font-inter font-bold leading-tight">
-                Dr. Hadi Raza
-              </span>
-              <span className="text-[9px] md:text-[10px] text-gold-dark tracking-[0.25em] uppercase font-inter font-bold leading-tight mt-0.5">
-                Dr. Nahid Raza
-              </span>
+              <div className="flex items-center gap-1.5 md:gap-2">
+                <span className="text-[8px] md:text-[9.5px] text-gold-dark tracking-[0.2em] uppercase font-inter font-bold leading-tight">
+                  Dr. Hadi Raza
+                </span>
+                <span className="w-1 h-1 rounded-full bg-gold/50" />
+                <span className="text-[8px] md:text-[9.5px] text-gold-dark tracking-[0.2em] uppercase font-inter font-bold leading-tight">
+                  Dr. Nahid Raza
+                </span>
+              </div>
             </div>
           </Link>
 

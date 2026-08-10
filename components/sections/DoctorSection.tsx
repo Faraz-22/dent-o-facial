@@ -55,7 +55,7 @@ export default function DoctorSection() {
       <div className="absolute bottom-0 left-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl" />
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
         
         {/* Carousel Controls */}
         <div className="flex items-center justify-between mb-12">
@@ -66,13 +66,13 @@ export default function DoctorSection() {
           <div className="flex items-center gap-3">
             <button
               onClick={prev}
-              className="w-10 h-10 rounded-full border border-gold/30 flex items-center justify-center text-ivory hover:bg-gold hover:text-charcoal transition-all duration-300"
+              className="w-10 h-10 rounded-full border border-gold/30 flex items-center justify-center text-ivory hover:bg-gold hover:text-charcoal transition-all duration-300 relative z-20"
             >
               <ChevronLeft size={18} />
             </button>
             <button
               onClick={next}
-              className="w-10 h-10 rounded-full border border-gold/30 flex items-center justify-center text-ivory hover:bg-gold hover:text-charcoal transition-all duration-300"
+              className="w-10 h-10 rounded-full border border-gold/30 flex items-center justify-center text-ivory hover:bg-gold hover:text-charcoal transition-all duration-300 relative z-20"
             >
               <ChevronRight size={18} />
             </button>
@@ -91,7 +91,7 @@ export default function DoctorSection() {
             return (
               <div 
                 key={idx} 
-                className={`transition-opacity duration-700 ${idx === current ? 'opacity-100 block relative z-10' : 'opacity-0 hidden absolute inset-0 z-0'}`}
+                className={idx === current ? 'block animate-fade-in' : 'hidden'}
               >
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                   <div className="relative order-2 lg:order-1">
