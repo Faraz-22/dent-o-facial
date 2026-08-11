@@ -51,17 +51,17 @@ export default function HeroSection() {
         <div className="absolute top-0 left-1/2 w-px h-32 bg-gradient-to-b from-transparent to-gold/20" />
       </div>
 
-      <div className="absolute top-20 left-0 right-0 w-full overflow-hidden whitespace-nowrap border-y border-gold/20 py-2.5 bg-gold/10 shadow-sm flex z-30 backdrop-blur-sm">
+      <div className="absolute top-20 left-0 right-0 w-full overflow-hidden whitespace-nowrap border-y-2 border-gold/40 py-5 bg-gradient-to-r from-gold/10 via-gold/20 to-gold/10 shadow-lg flex z-30 backdrop-blur-md">
         <div className="inline-flex animate-marquee shrink-0">
           {[...Array(6)].map((_, i) => (
-            <span key={i} className="text-sm md:text-base tracking-[0.2em] font-bold text-gold-dark uppercase font-inter mx-8 shrink-0">
+            <span key={i} className="text-xl md:text-3xl lg:text-4xl tracking-[0.25em] font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gold-dark to-amber-500 uppercase font-playfair mx-12 shrink-0 drop-shadow-sm">
               {label}
             </span>
           ))}
         </div>
         <div className="inline-flex animate-marquee shrink-0">
           {[...Array(6)].map((_, i) => (
-            <span key={i} className="text-sm md:text-base tracking-[0.2em] font-bold text-gold-dark uppercase font-inter mx-8 shrink-0">
+            <span key={i} className="text-xl md:text-3xl lg:text-4xl tracking-[0.25em] font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gold-dark to-amber-500 uppercase font-playfair mx-12 shrink-0 drop-shadow-sm">
               {label}
             </span>
           ))}
