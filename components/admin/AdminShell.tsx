@@ -198,105 +198,106 @@ function TestimonialsEditor({ data, onChange }: { data: Testimonial[]; onChange:
   )
 }
 
-function TreatmentsEditor({ data, onChange }: { data: { dermatology: Treatment[]; dental: Treatment[]; orthodontics?: Treatment[]; facialTrauma?: Treatment[] }; onChange: (v: typeof data) => void }) {
-  if (!data) return <p className="text-gray-500 text-sm p-4">No data.</p>
-  const CategoryList = ({ cat, items, label, colorClass }: { cat: 'dermatology' | 'dental' | 'orthodontics' | 'facialTrauma'; items: Treatment[]; label: string; colorClass: string }) => {
-    const update = (id: string, field: keyof Treatment, value: any) =>
-      onChange({ ...data, [cat]: items.map(t => t.id === id ? { ...t, [field]: value } : t) })
-    const remove = (id: string) => onChange({ ...data, [cat]: items.filter(t => t.id !== id) })
-    const addBenefit = (id: string, idx: number, val: string) =>
-      onChange({ ...data, [cat]: items.map(t => t.id === id ? { ...t, benefits: t.benefits.map((b, i) => i === idx ? val : b) } : t) })
-    
-    const [uploading, setUploading] = useState<string | null>(null)
-    const onFileChange = async (id: string, file: File | undefined) => {
-      if (!file) return
-      setUploading(id)
-      try {
-        const compressedFile = await compressImage(file)
-        const formData = new FormData()
-        formData.append('file', compressedFile)
-        const res = await fetch('/api/upload', { method: 'POST', body: formData })
-        if (!res.ok) throw new Error('Upload failed')
-        const result = await res.json()
-        const t = items.find(t => t.id === id)
-        const currentImages = t?.images || []
-        update(id, 'images', [...currentImages, result.url])
-      } catch {
-        alert('Failed to upload image.')
-      } finally {
-        setUploading(null)
-      }
-    }
-    const removeImage = (id: string, idx: number) => {
+function CategoryList({ cat, items, label, colorClass, data, onChange }: { cat: 'dermatology' | 'dental' | 'orthodontics' | 'facialTrauma'; items: Treatment[]; label: string; colorClass: string; data: { dermatology: Treatment[]; dental: Treatment[]; orthodontics?: Treatment[]; facialTrauma?: Treatment[] }; onChange: (v: typeof data) => void }) {
+  const update = (id: string, field: keyof Treatment, value: any) =>
+    onChange({ ...data, [cat]: items.map(t => t.id === id ? { ...t, [field]: value } : t) })
+  const remove = (id: string) => onChange({ ...data, [cat]: items.filter(t => t.id !== id) })
+  const addBenefit = (id: string, idx: number, val: string) =>
+    onChange({ ...data, [cat]: items.map(t => t.id === id ? { ...t, benefits: t.benefits.map((b, i) => i === idx ? val : b) } : t) })
+  
+  const [uploading, setUploading] = useState<string | null>(null)
+  const onFileChange = async (id: string, file: File | undefined) => {
+    if (!file) return
+    setUploading(id)
+    try {
+      const compressedFile = await compressImage(file)
+      const formData = new FormData()
+      formData.append('file', compressedFile)
+      const res = await fetch('/api/upload', { method: 'POST', body: formData })
+      if (!res.ok) throw new Error('Upload failed')
+      const result = await res.json()
       const t = items.find(t => t.id === id)
-      if (t) update(id, 'images', (t.images || []).filter((_, i) => i !== idx))
+      const currentImages = t?.images || []
+      update(id, 'images', [...currentImages, result.url])
+    } catch {
+      alert('Failed to upload image.')
+    } finally {
+      setUploading(null)
     }
-    return (
-      <div className="space-y-3">
-        <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full ${colorClass}`}>
-          {label}
-        </span>
-        {(items || []).map((t) => (
-          <div key={t.id} className="p-5 rounded-2xl bg-[#1a1a2e] border border-gray-800 space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-300">{t.name || 'New Treatment'}</span>
-              <button onClick={() => remove(t.id)} className="text-gray-500 hover:text-red-400 transition"><Trash2 size={14} /></button>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Field label="Name" value={t.name} onChange={v => update(t.id, 'name', v)} placeholder="Treatment name" />
-              <Field label="Duration" value={t.duration} onChange={v => update(t.id, 'duration', v)} placeholder="e.g. 4–8 weeks" />
-            </div>
-            <Field label="Short Description" value={t.shortDesc} onChange={v => update(t.id, 'shortDesc', v)} multiline />
-            <Field label="Tag (optional)" value={t.tag} onChange={v => update(t.id, 'tag', v)} placeholder="e.g. Most Popular" />
-            <div>
-              <span className="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">Benefits (4)</span>
-              <div className="grid grid-cols-2 gap-2">
-                {(t.benefits || []).map((b, idx) => (
-                  <input key={idx} value={b} onChange={e => addBenefit(t.id, idx, e.target.value)}
-                    placeholder={`Benefit ${idx + 1}`}
-                    className="px-3 py-2 rounded-lg bg-[#12122a] border border-gray-700 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-amber-500 transition" />
-                ))}
-              </div>
-            </div>
-            <div className="pt-2 border-t border-gray-800">
-              <label className="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">Treatment Images</label>
-              <input 
-                type="file" 
-                accept="image/*"
-                onChange={(e) => onFileChange(t.id, e.target.files?.[0])}
-                disabled={uploading === t.id}
-                className="w-full text-sm text-gray-400 file:mr-4 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-amber-900/30 file:text-amber-400 hover:file:bg-amber-900/50 transition cursor-pointer"
-              />
-              {uploading === t.id && <span className="text-xs text-amber-500 mt-2 block animate-pulse">Uploading...</span>}
-              
-              {t.images && t.images.length > 0 && (
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mt-3">
-                  {t.images.map((url, i) => (
-                    <div key={i} className="relative group rounded-lg overflow-hidden border border-gray-700 aspect-square">
-                      <img src={url} alt={`Treatment ${i + 1}`} className="w-full h-full object-cover" />
-                      <button onClick={() => removeImage(t.id, i)} className="absolute inset-0 bg-black/60 hidden group-hover:flex items-center justify-center text-red-400 transition">
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
-        <button onClick={() => onChange({ ...data, [cat]: [...(items || []), { id: Date.now().toString(), name: '', shortDesc: '', duration: '', benefits: ['', '', '', ''], tag: '' }] })}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-dashed border-gray-700 text-gray-500 hover:text-white hover:border-gray-500 transition text-sm w-full justify-center">
-          <Plus size={13} /> Add Treatment
-        </button>
-      </div>
-    )
+  }
+  const removeImage = (id: string, idx: number) => {
+    const t = items.find(t => t.id === id)
+    if (t) update(id, 'images', (t.images || []).filter((_, i) => i !== idx))
   }
   return (
+    <div className="space-y-3">
+      <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full ${colorClass}`}>
+        {label}
+      </span>
+      {(items || []).map((t) => (
+        <div key={t.id} className="p-5 rounded-2xl bg-[#1a1a2e] border border-gray-800 space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-300">{t.name || 'New Treatment'}</span>
+            <button onClick={() => remove(t.id)} className="text-gray-500 hover:text-red-400 transition"><Trash2 size={14} /></button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Field label="Name" value={t.name} onChange={v => update(t.id, 'name', v)} placeholder="Treatment name" />
+            <Field label="Duration" value={t.duration} onChange={v => update(t.id, 'duration', v)} placeholder="e.g. 4–8 weeks" />
+          </div>
+          <Field label="Short Description" value={t.shortDesc} onChange={v => update(t.id, 'shortDesc', v)} multiline />
+          <Field label="Tag (optional)" value={t.tag} onChange={v => update(t.id, 'tag', v)} placeholder="e.g. Most Popular" />
+          <div>
+            <span className="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">Benefits (4)</span>
+            <div className="grid grid-cols-2 gap-2">
+              {(t.benefits || []).map((b, idx) => (
+                <input key={idx} value={b} onChange={e => addBenefit(t.id, idx, e.target.value)}
+                  placeholder={`Benefit ${idx + 1}`}
+                  className="px-3 py-2 rounded-lg bg-[#12122a] border border-gray-700 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-amber-500 transition" />
+              ))}
+            </div>
+          </div>
+          <div className="pt-2 border-t border-gray-800">
+            <label className="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">Treatment Images</label>
+            <input 
+              type="file" 
+              accept="image/*"
+              onChange={(e) => onFileChange(t.id, e.target.files?.[0])}
+              disabled={uploading === t.id}
+              className="w-full text-sm text-gray-400 file:mr-4 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-amber-900/30 file:text-amber-400 hover:file:bg-amber-900/50 transition cursor-pointer"
+            />
+            {uploading === t.id && <span className="text-xs text-amber-500 mt-2 block animate-pulse">Uploading...</span>}
+            
+            {t.images && t.images.length > 0 && (
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mt-3">
+                {t.images.map((url, i) => (
+                  <div key={i} className="relative group rounded-lg overflow-hidden border border-gray-700 aspect-square">
+                    <img src={url} alt={`Treatment ${i + 1}`} className="w-full h-full object-cover" />
+                    <button onClick={() => removeImage(t.id, i)} className="absolute inset-0 bg-black/60 hidden group-hover:flex items-center justify-center text-red-400 transition">
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+      <button onClick={() => onChange({ ...data, [cat]: [...(items || []), { id: Date.now().toString(), name: '', shortDesc: '', duration: '', benefits: ['', '', '', ''], tag: '' }] })}
+        className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-dashed border-gray-700 text-gray-500 hover:text-white hover:border-gray-500 transition text-sm w-full justify-center">
+        <Plus size={13} /> Add Treatment
+      </button>
+    </div>
+  )
+}
+
+function TreatmentsEditor({ data, onChange }: { data: { dermatology: Treatment[]; dental: Treatment[]; orthodontics?: Treatment[]; facialTrauma?: Treatment[] }; onChange: (v: typeof data) => void }) {
+  if (!data) return <p className="text-gray-500 text-sm p-4">No data.</p>
+  return (
     <div className="space-y-6">
-      <CategoryList cat="dermatology" items={data.dermatology || []} label="Dermatology" colorClass="bg-blue-900/50 text-blue-300" />
-      <CategoryList cat="dental" items={data.dental || []} label="Dental" colorClass="bg-green-900/50 text-green-300" />
-      <CategoryList cat="orthodontics" items={data.orthodontics || []} label="Orthodontics" colorClass="bg-purple-900/50 text-purple-300" />
-      <CategoryList cat="facialTrauma" items={data.facialTrauma || []} label="Facial Trauma" colorClass="bg-orange-900/50 text-orange-300" />
+      <CategoryList cat="dermatology" items={data.dermatology || []} label="Dermatology" colorClass="bg-blue-900/50 text-blue-300" data={data} onChange={onChange} />
+      <CategoryList cat="dental" items={data.dental || []} label="Dental" colorClass="bg-green-900/50 text-green-300" data={data} onChange={onChange} />
+      <CategoryList cat="orthodontics" items={data.orthodontics || []} label="Orthodontics" colorClass="bg-purple-900/50 text-purple-300" data={data} onChange={onChange} />
+      <CategoryList cat="facialTrauma" items={data.facialTrauma || []} label="Facial Trauma" colorClass="bg-orange-900/50 text-orange-300" data={data} onChange={onChange} />
     </div>
   )
 }
