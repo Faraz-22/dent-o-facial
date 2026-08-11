@@ -198,7 +198,7 @@ function TestimonialsEditor({ data, onChange }: { data: Testimonial[]; onChange:
   )
 }
 
-function CategoryList({ cat, items, label, colorClass, data, onChange }: { cat: 'dermatology' | 'dental' | 'orthodontics' | 'facialTrauma'; items: Treatment[]; label: string; colorClass: string; data: { dermatology: Treatment[]; dental: Treatment[]; orthodontics?: Treatment[]; facialTrauma?: Treatment[] }; onChange: (v: typeof data) => void }) {
+function TreatmentsCategoryList({ cat, items, label, colorClass, data, onChange }: { cat: 'dermatology' | 'dental' | 'orthodontics' | 'facialTrauma'; items: Treatment[]; label: string; colorClass: string; data: { dermatology: Treatment[]; dental: Treatment[]; orthodontics?: Treatment[]; facialTrauma?: Treatment[] }; onChange: (v: typeof data) => void }) {
   const update = (id: string, field: keyof Treatment, value: any) =>
     onChange({ ...data, [cat]: items.map(t => t.id === id ? { ...t, [field]: value } : t) })
   const remove = (id: string) => onChange({ ...data, [cat]: items.filter(t => t.id !== id) })
@@ -294,10 +294,10 @@ function TreatmentsEditor({ data, onChange }: { data: { dermatology: Treatment[]
   if (!data) return <p className="text-gray-500 text-sm p-4">No data.</p>
   return (
     <div className="space-y-6">
-      <CategoryList cat="dermatology" items={data.dermatology || []} label="Dermatology" colorClass="bg-blue-900/50 text-blue-300" data={data} onChange={onChange} />
-      <CategoryList cat="dental" items={data.dental || []} label="Dental" colorClass="bg-green-900/50 text-green-300" data={data} onChange={onChange} />
-      <CategoryList cat="orthodontics" items={data.orthodontics || []} label="Orthodontics" colorClass="bg-purple-900/50 text-purple-300" data={data} onChange={onChange} />
-      <CategoryList cat="facialTrauma" items={data.facialTrauma || []} label="Facial Trauma" colorClass="bg-orange-900/50 text-orange-300" data={data} onChange={onChange} />
+      <TreatmentsCategoryList cat="dermatology" items={data.dermatology || []} label="Dermatology" colorClass="bg-blue-900/50 text-blue-300" data={data} onChange={onChange} />
+      <TreatmentsCategoryList cat="dental" items={data.dental || []} label="Dental" colorClass="bg-green-900/50 text-green-300" data={data} onChange={onChange} />
+      <TreatmentsCategoryList cat="orthodontics" items={data.orthodontics || []} label="Orthodontics" colorClass="bg-purple-900/50 text-purple-300" data={data} onChange={onChange} />
+      <TreatmentsCategoryList cat="facialTrauma" items={data.facialTrauma || []} label="Facial Trauma" colorClass="bg-orange-900/50 text-orange-300" data={data} onChange={onChange} />
     </div>
   )
 }
