@@ -1252,7 +1252,8 @@ function AnalyticsDashboard() {
 export default function AdminShell() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const section = searchParams.get('section') || 'dashboard'
+  let section = searchParams.get('section') || 'dashboard'
+  if (section === 'doctor') section = 'doctors'
   const sectionRef = useRef(section)
   useEffect(() => { sectionRef.current = section }, [section])
 
