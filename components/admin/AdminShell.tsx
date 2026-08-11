@@ -22,7 +22,7 @@ const SECTIONS = [
   { key: 'hero',        label: 'Hero Section',    href: '/admin/dashboard?section=hero',   icon: Eye },
   { key: 'testimonials',label: 'Testimonials',     href: '/admin/dashboard?section=testimonials', icon: MessageSquare },
   { key: 'treatments',  label: 'Treatments',       href: '/admin/dashboard?section=treatments', icon: Stethoscope },
-  { key: 'doctor',      label: 'Doctor Info',      href: '/admin/dashboard?section=doctor',  icon: User },
+  { key: 'doctors',     label: 'Doctors Info',     href: '/admin/dashboard?section=doctors', icon: User },
   { key: 'locations',   label: 'Locations',       href: '/admin/dashboard?section=locations', icon: MapPin },
   { key: 'blog',        label: 'Blog Posts',        href: '/admin/dashboard?section=blog',   icon: FileText },
   { key: 'faq',         label: 'FAQs',              href: '/admin/dashboard?section=faq',     icon: Bell },
@@ -41,7 +41,7 @@ const SECTION_DESC: Record<string, string> = {
   hero:        'Homepage headline, tagline, description, and stats',
   testimonials: 'Patient reviews on homepage and testimonials page',
   treatments:  'All dermatology and dental procedures',
-  doctor:      'Doctor bio, credentials, and about page content',
+  doctors:     'Doctor bios, credentials, and about page content',
   locations:   'Clinic addresses, phone numbers, hours, and Google Maps',
   blog:        'Health articles — titles, excerpts, categories',
   faq:         'Frequently asked questions on the contact page',
@@ -517,66 +517,85 @@ function HeroEditor({ data, onChange }: { data: Record<string, unknown>; onChang
   )
 }
 
-function DoctorEditor({ data, onChange }: { data: Record<string, unknown>; onChange: (v: Record<string, unknown>) => void }) {
-  if (!data) return <p className="text-gray-500 text-sm p-4">No data.</p>
-  const set = (key: string, value: unknown) => onChange({ ...data, [key]: value })
-  const creds = (data.credentials as Array<{icon:string;label:string}>) || []
-  const aboutCreds = (data.aboutCredentials as Array<{icon:string;title:string;desc:string}>) || []
-  const values = (data.values as Array<{icon:string;title:string;desc:string}>) || []
+function DoctorsEditor({ data, onChange }: { data: any[]; onChange: (v: any[]) => void }) {
+  if (!Array.isArray(data)) return <p className="text-gray-500 text-sm p-4">No data.</p>
+  const update = (id: string, field: string, value: any) =>
+    onChange(data.map(d => d.id === id ? { ...d, [field]: value } : d))
+
   return (
     <div className="space-y-8">
-      <div className="space-y-4">
-        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Basic Info</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <Field label="Full Name" value={data.name as string || ''} onChange={v => set('name', v)} />
-          <Field label="Title / Specialty" value={data.title as string || ''} onChange={v => set('title', v)} />
-        </div>
-        <Field label="Short Bio" value={data.shortBio as string || ''} onChange={v => set('shortBio', v)} multiline />
-        <Field label="Long Bio" value={data.longBio as string || ''} onChange={v => set('longBio', v)} multiline />
-        <Field label="Quote" value={data.quote as string || ''} onChange={v => set('quote', v)} multiline />
-      </div>
-      <div className="space-y-3">
-        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Homepage Credentials ({creds.length})</h3>
-        {creds.map((c, i) => (
-          <div key={i} className="flex gap-2">
-            <input value={c.icon} onChange={e => { const u=[...creds]; u[i]={...u[i],icon:e.target.value}; set('credentials',u) }}
-              placeholder="Icon" className="w-32 px-3 py-2 rounded-lg bg-[#1a1a2e] border border-gray-700 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-amber-500" />
-            <input value={c.label} onChange={e => { const u=[...creds]; u[i]={...u[i],label:e.target.value}; set('credentials',u) }}
-              placeholder="Label" className="flex-1 px-3 py-2 rounded-lg bg-[#1a1a2e] border border-gray-700 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-amber-500" />
-          </div>
-        ))}
-      </div>
-      <div className="space-y-3">
-        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">About Credentials ({aboutCreds.length})</h3>
-        {aboutCreds.map((c, i) => (
-          <div key={i} className="p-4 rounded-xl bg-[#1a1a2e] border border-gray-800 space-y-2">
-            <div className="flex gap-2">
-              <input value={c.icon} onChange={e => { const u=[...aboutCreds]; u[i]={...u[i],icon:e.target.value}; set('aboutCredentials',u) }}
-                placeholder="Icon" className="w-32 px-3 py-2 rounded-lg bg-[#12122a] border border-gray-700 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-amber-500" />
-              <input value={c.title} onChange={e => { const u=[...aboutCreds]; u[i]={...u[i],title:e.target.value}; set('aboutCredentials',u) }}
-                placeholder="Title" className="flex-1 px-3 py-2 rounded-lg bg-[#12122a] border border-gray-700 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-amber-500" />
+      {data.map((doc, idx) => {
+        const creds = doc.credentials || []
+        const aboutCreds = doc.aboutCredentials || []
+        const values = doc.values || []
+        return (
+          <div key={doc.id || idx} className="p-5 rounded-2xl bg-[#1a1a2e] border border-gray-800 space-y-8">
+            <div className="flex justify-between items-center">
+              <h3 className="text-sm font-bold text-amber-400">Doctor #{idx + 1}</h3>
+              <button onClick={() => onChange(data.filter(d => d.id !== doc.id))} className="text-gray-500 hover:text-red-400 transition">
+                <Trash2 size={16} />
+              </button>
             </div>
-            <input value={c.desc} onChange={e => { const u=[...aboutCreds]; u[i]={...u[i],desc:e.target.value}; set('aboutCredentials',u) }}
-              placeholder="Description" className="w-full px-3 py-2 rounded-lg bg-[#12122a] border border-gray-700 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-amber-500" />
-          </div>
-        ))}
-      </div>
-      <div className="space-y-3">
-        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Clinic Values ({values.length})</h3>
-        {values.map((v, i) => (
-          <div key={i} className="p-4 rounded-xl bg-[#1a1a2e] border border-gray-800 space-y-2">
-            <div className="flex gap-2">
-              <input value={v.icon} onChange={e => { const u=[...values]; u[i]={...u[i],icon:e.target.value}; set('values',u) }}
-                placeholder="Icon" className="w-32 px-3 py-2 rounded-lg bg-[#12122a] border border-gray-700 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-amber-500" />
-              <input value={v.title} onChange={e => { const u=[...values]; u[i]={...u[i],title:e.target.value}; set('values',u) }}
-                placeholder="Title" className="flex-1 px-3 py-2 rounded-lg bg-[#12122a] border border-gray-700 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-amber-500" />
+            <div className="space-y-4">
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Basic Info</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Field label="Full Name" value={doc.name || ''} onChange={v => update(doc.id, 'name', v)} />
+                <Field label="Title / Specialty" value={doc.title || ''} onChange={v => update(doc.id, 'title', v)} />
+              </div>
+              <Field label="Short Bio" value={doc.shortBio || ''} onChange={v => update(doc.id, 'shortBio', v)} multiline />
+              <Field label="Long Bio" value={doc.longBio || ''} onChange={v => update(doc.id, 'longBio', v)} multiline />
+              <Field label="Quote" value={doc.quote || ''} onChange={v => update(doc.id, 'quote', v)} multiline />
+              <Field label="Image Key" value={doc.imageKey || ''} onChange={v => update(doc.id, 'imageKey', v)} placeholder="e.g. doctorImage or doctorNahidImage" />
             </div>
-            <textarea value={v.desc} onChange={e => { const u=[...values]; u[i]={...u[i],desc:e.target.value}; set('values',u) }}
-              rows={2} placeholder="Description"
-              className="w-full px-3 py-2 rounded-lg bg-[#12122a] border border-gray-700 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-amber-500 resize-none" />
+            <div className="space-y-3">
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Homepage Credentials ({creds.length})</h3>
+              {creds.map((c: any, i: number) => (
+                <div key={i} className="flex gap-2">
+                  <input value={c.icon} onChange={e => { const u=[...creds]; u[i]={...u[i],icon:e.target.value}; update(doc.id, 'credentials', u) }}
+                    placeholder="Icon" className="w-32 px-3 py-2 rounded-lg bg-[#12122a] border border-gray-700 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-amber-500" />
+                  <input value={c.label} onChange={e => { const u=[...creds]; u[i]={...u[i],label:e.target.value}; update(doc.id, 'credentials', u) }}
+                    placeholder="Label" className="flex-1 px-3 py-2 rounded-lg bg-[#12122a] border border-gray-700 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-amber-500" />
+                </div>
+              ))}
+            </div>
+            <div className="space-y-3">
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">About Credentials ({aboutCreds.length})</h3>
+              {aboutCreds.map((c: any, i: number) => (
+                <div key={i} className="p-4 rounded-xl bg-[#12122a] border border-gray-800 space-y-2">
+                  <div className="flex gap-2">
+                    <input value={c.icon} onChange={e => { const u=[...aboutCreds]; u[i]={...u[i],icon:e.target.value}; update(doc.id, 'aboutCredentials', u) }}
+                      placeholder="Icon" className="w-32 px-3 py-2 rounded-lg bg-[#1a1a2e] border border-gray-700 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-amber-500" />
+                    <input value={c.title} onChange={e => { const u=[...aboutCreds]; u[i]={...u[i],title:e.target.value}; update(doc.id, 'aboutCredentials', u) }}
+                      placeholder="Title" className="flex-1 px-3 py-2 rounded-lg bg-[#1a1a2e] border border-gray-700 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-amber-500" />
+                  </div>
+                  <input value={c.desc} onChange={e => { const u=[...aboutCreds]; u[i]={...u[i],desc:e.target.value}; update(doc.id, 'aboutCredentials', u) }}
+                    placeholder="Description" className="w-full px-3 py-2 rounded-lg bg-[#1a1a2e] border border-gray-700 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-amber-500" />
+                </div>
+              ))}
+            </div>
+            <div className="space-y-3">
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Clinic Values ({values.length})</h3>
+              {values.map((v: any, i: number) => (
+                <div key={i} className="p-4 rounded-xl bg-[#12122a] border border-gray-800 space-y-2">
+                  <div className="flex gap-2">
+                    <input value={v.icon} onChange={e => { const u=[...values]; u[i]={...u[i],icon:e.target.value}; update(doc.id, 'values', u) }}
+                      placeholder="Icon" className="w-32 px-3 py-2 rounded-lg bg-[#1a1a2e] border border-gray-700 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-amber-500" />
+                    <input value={v.title} onChange={e => { const u=[...values]; u[i]={...u[i],title:e.target.value}; update(doc.id, 'values', u) }}
+                      placeholder="Title" className="flex-1 px-3 py-2 rounded-lg bg-[#1a1a2e] border border-gray-700 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-amber-500" />
+                  </div>
+                  <textarea value={v.desc} onChange={e => { const u=[...values]; u[i]={...u[i],desc:e.target.value}; update(doc.id, 'values', u) }}
+                    rows={2} placeholder="Description"
+                    className="w-full px-3 py-2 rounded-lg bg-[#1a1a2e] border border-gray-700 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-amber-500 resize-none" />
+                </div>
+              ))}
+            </div>
           </div>
-        ))}
-      </div>
+        )
+      })}
+      <button onClick={() => onChange([...data, { id: Date.now().toString(), name: 'New Doctor', title: '', shortBio: '', longBio: '', quote: '', imageKey: '', credentials: [], aboutCredentials: [], values: [] }])}
+        className="flex items-center gap-2 px-4 py-3 rounded-xl border border-dashed border-gray-700 text-gray-500 hover:text-white hover:border-gray-500 transition text-sm w-full justify-center">
+        <Plus size={14} /> Add Doctor
+      </button>
     </div>
   )
 }
@@ -1410,7 +1429,7 @@ export default function AdminShell() {
                 <Check size={11} /> Saved!
               </div>
             )}
-            {['hero', 'testimonials', 'treatments', 'doctor', 'locations', 'blog', 'faq', 'cta', 'results', 'images', 'translations'].includes(section) && (
+            {['hero', 'testimonials', 'treatments', 'doctors', 'locations', 'blog', 'faq', 'cta', 'results', 'images', 'translations'].includes(section) && (
               <button
                 onClick={handleSave}
                 disabled={saveStatus === 'saving'}
@@ -1456,7 +1475,7 @@ export default function AdminShell() {
                     { label:'Blog Posts', count: counts.blog, icon: FileText, section:'blog', color: cardColors[2] },
                     { label:'Locations', count: counts.locations, icon: MapPin, section:'locations', color: cardColors[3] },
                     { label:'FAQs', count: counts.faq, icon: Bell, section:'faq', color: cardColors[4] },
-                    { label:'Doctor Info', count: 1, icon: User, section:'doctor', color: cardColors[5] },
+                    { label:'Doctors Info', count: (content?.doctors as any[] || []).length, icon: User, section:'doctors', color: cardColors[5] },
                     { label:'Hero Section', count: 1, icon: Eye, section:'hero', color: cardColors[6] },
                     { label:'CTA & Contact', count: 1, icon: Settings, section:'cta', color: cardColors[7] },
                     { label:'Results Gallery', count: 1, icon: Star, section:'results', color: cardColors[8] },
@@ -1495,8 +1514,8 @@ export default function AdminShell() {
             {section === 'treatments' && (
               <TreatmentsEditor data={localData as { dermatology: Treatment[]; dental: Treatment[]; orthodontics?: Treatment[]; facialTrauma?: Treatment[] }} onChange={handleDataChange} />
             )}
-            {section === 'doctor' && localData && (
-              <DoctorEditor data={localData as Record<string, unknown>} onChange={handleDataChange} />
+            {section === 'doctors' && localData && (
+              <DoctorsEditor data={localData as any[]} onChange={handleDataChange} />
             )}
             {section === 'locations' && (
               <LocationsEditor data={localData as Location[]} onChange={handleDataChange} />

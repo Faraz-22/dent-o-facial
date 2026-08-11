@@ -5,7 +5,7 @@ const DATA_FILE = path.join(process.cwd(), 'data', 'site-content.json')
 
 export interface Content {
   hero: Record<string, unknown>
-  doctor: Record<string, unknown>
+  doctors: unknown[]
   locations: unknown[]
   treatments: { dermatology: unknown[]; dental: unknown[] }
   testimonials: unknown[]

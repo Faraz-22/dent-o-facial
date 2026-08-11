@@ -13,70 +13,6 @@
     "whatsappMessage": "Hello, I want to book an appointment.",
     "logoUrl": "/uploads/1785267564530-Screenshot_2026-07-20_205709.png"
   },
-  "doctor": {
-    "name": "Dr. Hadi Raza",
-    "title": "Dermatology & Dental Surgery Specialist",
-    "shortBio": "Dr. Hadi Raza brings a rare combination of expertise in both dermatology and dental surgery, offering comprehensive facial aesthetic care under one roof. With 3–5 years of dedicated clinical experience, he has transformed hundreds of lives across Purnea and Banmankhi.",
-    "longBio": "Growing up in Bihar, Dr. Hadi Raza witnessed firsthand how limited access to quality dermatological and dental care affected the confidence and wellbeing of people in his community. Skin conditions went untreated. Smiles were left unrepaired. That early experience planted the seed for a lifelong mission.\n\nAfter completing his MBBS, Dr. Raza pursued advanced specialized training in dermatology and dental surgery, studying the intersection of science and aesthetics that defines modern facial medicine. He trained under leading practitioners and immersed himself in the latest laser technologies, cosmetic procedures, and restorative dental techniques.\n\nReturning to Bihar, he established Dent-O-Facial with a singular vision: to bring premium, world-class skin and dental care to Purnea and Banmankhi — without requiring patients to travel to distant metros.",
-    "quote": "My goal is simple: when a patient walks out of my clinic, they should feel more confident, more beautiful, and completely taken care of.",
-    "credentials": [
-      {
-        "icon": "GraduationCap",
-        "label": "MBBS — Certified Physician"
-      },
-      {
-        "icon": "Award",
-        "label": "Specialist in Dermatology & Aesthetics"
-      },
-      {
-        "icon": "Award",
-        "label": "Advanced Dental Surgery Training"
-      },
-      {
-        "icon": "Heart",
-        "label": "Patient-Centered Care Philosophy"
-      }
-    ],
-    "aboutCredentials": [
-      {
-        "icon": "GraduationCap",
-        "title": "MBBS",
-        "desc": "Certified medical degree with focus on skin and dental sciences"
-      },
-      {
-        "icon": "Award",
-        "title": "Dermatology Specialist",
-        "desc": "Advanced training in cosmetic dermatology and laser treatments"
-      },
-      {
-        "icon": "Award",
-        "title": "Dental Surgery",
-        "desc": "Specialized in aesthetic dental procedures and oral surgery"
-      },
-      {
-        "icon": "Stethoscope",
-        "title": "3–5 Years Experience",
-        "desc": "Hands-on clinical experience across Purnea and Banmankhi"
-      }
-    ],
-    "values": [
-      {
-        "icon": "Heart",
-        "title": "Patient-First Philosophy",
-        "desc": "Every decision is made with the patient's comfort, safety, and long-term wellbeing as the top priority."
-      },
-      {
-        "icon": "Star",
-        "title": "Excellence in Results",
-        "desc": "We combine clinical precision with an artistic eye to deliver outcomes that exceed expectations."
-      },
-      {
-        "icon": "Users",
-        "title": "Accessible Luxury",
-        "desc": "Premium care shouldn't be out of reach. We bring world-class treatments to Bihar at accessible costs."
-      }
-    ]
-  },
   "locations": [
     {
       "id": "banmankhi",
@@ -429,5 +365,139 @@
     "aboutImage": "/uploads/1785257781947-openart-image_gmww8-oW_1772864254810_raw.png",
     "clinicImage": "/uploads/1785257883603-Designing_A_Doctor_s_Clinic__1_.webp",
     "heroImages": []
-  }
+  },
+  "doctors": [
+    {
+      "id": "hadi",
+      "name": "Dr. Hadi Raza",
+      "title": "Dermatology & Dental Surgery Specialist",
+      "shortBio": "Dr. Hadi Raza brings a rare combination of expertise in both dermatology and dental surgery, offering comprehensive facial aesthetic care under one roof. With 3–5 years of dedicated clinical experience, he has transformed hundreds of lives across Purnea and Banmankhi.",
+      "longBio": "Growing up in Bihar, Dr. Hadi Raza witnessed firsthand how limited access to quality dermatological and dental care affected the confidence and wellbeing of people in his community. Skin conditions went untreated. Smiles were left unrepaired. That early experience planted the seed for a lifelong mission.\n\nAfter completing his MBBS, Dr. Raza pursued advanced specialized training in dermatology and dental surgery, studying the intersection of science and aesthetics that defines modern facial medicine. He trained under leading practitioners and immersed himself in the latest laser technologies, cosmetic procedures, and restorative dental techniques.\n\nReturning to Bihar, he established Dent-O-Facial with a singular vision: to bring premium, world-class skin and dental care to Purnea and Banmankhi — without requiring patients to travel to distant metros.",
+      "quote": "My goal is simple: when a patient walks out of my clinic, they should feel more confident, more beautiful, and completely taken care of.",
+      "credentials": [
+        {
+          "icon": "GraduationCap",
+          "label": "MBBS — Certified Physician"
+        },
+        {
+          "icon": "Award",
+          "label": "Specialist in Dermatology & Aesthetics"
+        },
+        {
+          "icon": "Award",
+          "label": "Advanced Dental Surgery Training"
+        },
+        {
+          "icon": "Heart",
+          "label": "Patient-Centered Care Philosophy"
+        }
+      ],
+      "aboutCredentials": [
+        {
+          "icon": "GraduationCap",
+          "title": "MBBS",
+          "desc": "Certified medical degree with focus on skin and dental sciences"
+        },
+        {
+          "icon": "Award",
+          "title": "Dermatology Specialist",
+          "desc": "Advanced training in cosmetic dermatology and laser treatments"
+        },
+        {
+          "icon": "Award",
+          "title": "Dental Surgery",
+          "desc": "Specialized in aesthetic dental procedures and oral surgery"
+        },
+        {
+          "icon": "Stethoscope",
+          "title": "3–5 Years Experience",
+          "desc": "Hands-on clinical experience across Purnea and Banmankhi"
+        }
+      ],
+      "values": [
+        {
+          "icon": "Heart",
+          "title": "Patient-First Philosophy",
+          "desc": "Every decision is made with the patient's comfort, safety, and long-term wellbeing as the top priority."
+        },
+        {
+          "icon": "Star",
+          "title": "Excellence in Results",
+          "desc": "We combine clinical precision with an artistic eye to deliver outcomes that exceed expectations."
+        },
+        {
+          "icon": "Users",
+          "title": "Accessible Luxury",
+          "desc": "Premium care shouldn't be out of reach. We bring world-class treatments to Bihar at accessible costs."
+        }
+      ],
+      "imageKey": "doctorImage"
+    },
+    {
+      "id": "nahid",
+      "name": "Dr. Nahid Raza",
+      "title": "Senior Dental Surgeon",
+      "shortBio": "Dr. Nahid Raza specializes in advanced dental procedures, ensuring every patient leaves with a confident, beautiful smile and optimal oral health.",
+      "longBio": "Dr. Nahid Raza is a highly skilled dental surgeon with a profound dedication to restorative and cosmetic dentistry.\\n\\nShe believes that a healthy smile is the foundation of confidence. Her expertise spans across advanced endodontics, cosmetic smile makeovers, and pediatric dental care.\\n\\nKnown for her gentle touch, Dr. Nahid ensures that even the most anxious patients feel completely at ease during their treatments.",
+      "quote": "A beautiful smile is a universal language of kindness and confidence.",
+      "imageKey": "doctorNahidImage",
+      "credentials": [
+        {
+          "icon": "GraduationCap",
+          "label": "BDS — Certified Dental Surgeon"
+        },
+        {
+          "icon": "Award",
+          "label": "Specialist in Cosmetic Dentistry"
+        },
+        {
+          "icon": "Award",
+          "label": "Advanced Endodontics Training"
+        },
+        {
+          "icon": "Heart",
+          "label": "Compassionate Family Care"
+        }
+      ],
+      "aboutCredentials": [
+        {
+          "icon": "GraduationCap",
+          "title": "Dental Degree",
+          "desc": "BDS with Honors"
+        },
+        {
+          "icon": "Award",
+          "title": "Cosmetic Dentistry",
+          "desc": "Certified in advanced smile design"
+        },
+        {
+          "icon": "Stethoscope",
+          "title": "Endodontics",
+          "desc": "Specialized in pain-free root canals"
+        },
+        {
+          "icon": "Heart",
+          "title": "Experience",
+          "desc": "Over 8 years of clinical excellence"
+        }
+      ],
+      "values": [
+        {
+          "icon": "Heart",
+          "title": "Compassion",
+          "desc": "Gentle, anxiety-free dental care."
+        },
+        {
+          "icon": "Star",
+          "title": "Precision",
+          "desc": "Meticulous attention to dental aesthetics."
+        },
+        {
+          "icon": "Users",
+          "title": "Family Care",
+          "desc": "Dedicated to treating patients of all ages."
+        }
+      ]
+    }
+  ]
 }
