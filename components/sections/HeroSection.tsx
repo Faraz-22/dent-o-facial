@@ -51,17 +51,17 @@ export default function HeroSection() {
         <div className="absolute top-0 left-1/2 w-px h-32 bg-gradient-to-b from-transparent to-gold/20" />
       </div>
 
-      <div className="absolute top-20 left-0 right-0 w-full overflow-hidden whitespace-nowrap border-y-2 border-gold/40 py-5 bg-gradient-to-r from-gold/10 via-gold/20 to-gold/10 shadow-lg flex z-30 backdrop-blur-md">
+      <div className="absolute top-20 left-0 right-0 w-full overflow-hidden whitespace-nowrap border-y-4 border-gold/50 py-8 bg-gradient-to-r from-gold/10 via-gold/30 to-gold/10 shadow-2xl flex z-30 backdrop-blur-lg">
         <div className="inline-flex animate-marquee shrink-0">
           {[...Array(6)].map((_, i) => (
-            <span key={i} className="text-xl md:text-3xl lg:text-4xl tracking-[0.25em] font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gold-dark to-amber-500 uppercase font-playfair mx-12 shrink-0 drop-shadow-sm">
+            <span key={i} className="text-3xl md:text-5xl lg:text-6xl tracking-[0.3em] font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-100 to-amber-500 uppercase font-playfair mx-16 shrink-0 drop-shadow-[0_2px_10px_rgba(251,191,36,0.5)]">
               {label}
             </span>
           ))}
         </div>
         <div className="inline-flex animate-marquee shrink-0">
           {[...Array(6)].map((_, i) => (
-            <span key={i} className="text-xl md:text-3xl lg:text-4xl tracking-[0.25em] font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gold-dark to-amber-500 uppercase font-playfair mx-12 shrink-0 drop-shadow-sm">
+            <span key={i} className="text-3xl md:text-5xl lg:text-6xl tracking-[0.3em] font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-100 to-amber-500 uppercase font-playfair mx-16 shrink-0 drop-shadow-[0_2px_10px_rgba(251,191,36,0.5)]">
               {label}
             </span>
           ))}
