@@ -868,8 +868,10 @@ function UsersViewer() {
 // ─── Images Editor ───────────────────────────────────────────────────────────
 const IMAGE_FIELDS: { key: string; label: string; hint: string; isArray?: boolean }[] = [
   { key: 'heroImages', label: 'Hero Section Images (Slideshow)', hint: 'Upload multiple images to create an auto-sliding slideshow on the homepage. Recommended: 800×1000 portrait.', isArray: true },
-  { key: 'doctorImage', label: 'Doctor Section Image', hint: 'Portrait in the "About the Doctor" section on homepage. Recommended: 600×800.' },
-  { key: 'aboutImage', label: 'About Page Image', hint: 'Full portrait on the About page. Recommended: 600×800.' },
+  { key: 'doctorImage', label: 'Dr. Hadi Homepage Image', hint: 'Portrait for Dr. Hadi in the "About the Doctor" section on homepage. Recommended: 600×800.' },
+  { key: 'doctorNahidImage', label: 'Dr. Nahid Homepage Image', hint: 'Portrait for Dr. Nahid in the "About the Doctor" section on homepage. Recommended: 600×800.' },
+  { key: 'aboutImage', label: 'Dr. Hadi About Page Image', hint: 'Full portrait for Dr. Hadi on the About page. Recommended: 600×800.' },
+  { key: 'aboutNahidImage', label: 'Dr. Nahid About Page Image', hint: 'Full portrait for Dr. Nahid on the About page. Recommended: 600×800.' },
   { key: 'clinicImage', label: 'Clinic Image', hint: 'Exterior or interior shot of the clinic. Optional, for future use.' },
 ]
 
