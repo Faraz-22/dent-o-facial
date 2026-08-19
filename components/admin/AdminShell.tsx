@@ -210,7 +210,7 @@ function TreatmentsCategoryList({ cat, items, label, colorClass, data, onChange 
     if (!file) return
     setUploading(id)
     try {
-      const compressedFile = await compressImage(file)
+      const compressedFile = await compressImage(file, { targetWidth: 800, targetHeight: 800, crop: true })
       const formData = new FormData()
       formData.append('file', compressedFile)
       const res = await fetch('/api/upload', { method: 'POST', body: formData })
@@ -343,7 +343,7 @@ function BlogEditor({ data, onChange }: { data: BlogPost[]; onChange: (v: BlogPo
     if (!file) return
     setUploading(slug)
     try {
-      const compressedFile = await compressImage(file)
+      const compressedFile = await compressImage(file, { targetWidth: 1200, targetHeight: 800, crop: true })
       const formData = new FormData()
       formData.append('file', compressedFile)
       
@@ -445,7 +445,7 @@ function HeroEditor({ data, onChange }: { data: Record<string, unknown>; onChang
     if (!file) return
     setUploading(true)
     try {
-      const compressedFile = await compressImage(file)
+      const compressedFile = await compressImage(file, { maxWidth: 400 })
       const formData = new FormData()
       formData.append('file', compressedFile)
       const res = await fetch('/api/upload', { method: 'POST', body: formData })
@@ -656,7 +656,7 @@ const CategoryList = ({
     if (!file) return
     setUploading({ id, side })
     try {
-      const compressedFile = await compressImage(file)
+      const compressedFile = await compressImage(file, { targetWidth: 800, targetHeight: 800, crop: true })
       const formData = new FormData()
       formData.append('file', compressedFile)
       
@@ -884,7 +884,12 @@ function ImagesEditor({ data, onChange }: { data: Record<string, any>; onChange:
     if (!file) return
     setUploading(key)
     try {
-      const compressedFile = await compressImage(file)
+      let options = {};
+      if (key === 'heroImages') options = { targetWidth: 800, targetHeight: 1000, crop: true };
+      else if (key.includes('doctor') || key.includes('about')) options = { targetWidth: 600, targetHeight: 800, crop: true };
+      else if (key === 'clinicImage') options = { targetWidth: 1200, targetHeight: 800, crop: true };
+
+      const compressedFile = await compressImage(file, options)
       const formData = new FormData()
       formData.append('file', compressedFile)
       const res = await fetch('/api/upload', { method: 'POST', body: formData })

@@ -1,4 +1,17 @@
-export async function compressImage(file: File, maxWidth = 1200, quality = 0.7): Promise<File> {
+export interface CompressOptions {
+  maxWidth?: number;
+  targetWidth?: number;
+  targetHeight?: number;
+  quality?: number;
+  crop?: boolean;
+}
+
+export async function compressImage(
+  file: File,
+  options: CompressOptions = {}
+): Promise<File> {
+  const { maxWidth = 1200, targetWidth, targetHeight, quality = 0.7, crop = false } = options;
+
   // If it's not an image (e.g., PDF), return the original file
   if (!file.type.startsWith('image/')) {
     return file;
@@ -12,20 +25,45 @@ export async function compressImage(file: File, maxWidth = 1200, quality = 0.7):
       img.src = event.target?.result as string;
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
+        
+        let finalWidth = img.width;
+        let finalHeight = img.height;
+        let srcX = 0, srcY = 0, srcWidth = img.width, srcHeight = img.height;
 
-        if (width > maxWidth) {
-          height = (maxWidth / width) * height;
-          width = maxWidth;
+        if (targetWidth && targetHeight && crop) {
+          finalWidth = targetWidth;
+          finalHeight = targetHeight;
+          const imgRatio = img.width / img.height;
+          const targetRatio = targetWidth / targetHeight;
+
+          if (imgRatio > targetRatio) {
+            // Image is wider than target: crop horizontally
+            srcHeight = img.height;
+            srcWidth = img.height * targetRatio;
+            srcX = (img.width - srcWidth) / 2;
+          } else {
+            // Image is taller than target: crop vertically
+            srcWidth = img.width;
+            srcHeight = img.width / targetRatio;
+            srcY = (img.height - srcHeight) / 2;
+          }
+        } else if (targetWidth && targetHeight && !crop) {
+            finalWidth = targetWidth;
+            finalHeight = targetHeight;
+        } else {
+          // Standard max width scaling
+          if (finalWidth > maxWidth) {
+            finalHeight = (maxWidth / finalWidth) * finalHeight;
+            finalWidth = maxWidth;
+          }
         }
 
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = finalWidth;
+        canvas.height = finalHeight;
 
         const ctx = canvas.getContext('2d');
         if (ctx) {
-          ctx.drawImage(img, 0, 0, width, height);
+          ctx.drawImage(img, srcX, srcY, srcWidth, srcHeight, 0, 0, finalWidth, finalHeight);
           canvas.toBlob((blob) => {
             if (blob) {
               const compressedFile = new File([blob], file.name, {
