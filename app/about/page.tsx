@@ -232,8 +232,8 @@ export default function AboutPage() {
                   {/* Desktop Image Box - Asymmetrical overlapping left side */}
                   <div className={`hidden lg:block w-5/12 relative z-10 ${isEven ? 'order-1 -mr-16' : 'order-2 -ml-16'}`}>
                     <div
-                      className="relative rounded-[2rem] overflow-hidden shadow-2xl transition-transform duration-700 hover:scale-[1.02]"
-                      style={{ height: '600px', background: 'linear-gradient(135deg, #E8E3D8 0%, #D6B98C22 100%)' }}
+                      className="relative rounded-[2rem] overflow-hidden shadow-2xl transition-transform duration-700 hover:scale-[1.02] aspect-[3/4] w-full"
+                      style={{ background: 'linear-gradient(135deg, #E8E3D8 0%, #D6B98C22 100%)' }}
                     >
                       {imageUrl ? (
                         <img
@@ -268,8 +268,8 @@ export default function AboutPage() {
                     {/* Mobile Image (renders specifically below Title/Name as requested) */}
                     <div className="relative block lg:hidden mb-10">
                       <div
-                        className="relative w-full rounded-3xl overflow-hidden shadow-xl"
-                        style={{ height: '400px', background: 'linear-gradient(135deg, #E8E3D8 0%, #D6B98C22 100%)' }}
+                        className="relative w-full max-w-md mx-auto rounded-3xl overflow-hidden shadow-xl aspect-[3/4]"
+                        style={{ background: 'linear-gradient(135deg, #E8E3D8 0%, #D6B98C22 100%)' }}
                       >
                         {imageUrl ? (
                           <img

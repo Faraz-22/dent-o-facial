@@ -98,8 +98,8 @@ export default function DoctorSection() {
                   {/* Desktop Image */}
                   <div className="relative hidden lg:block">
                     <div
-                      className="relative w-full max-w-md mx-auto rounded-3xl overflow-hidden shadow-2xl"
-                      style={{ height: '520px', background: 'linear-gradient(135deg, #2A2A2A 0%, #3A3A3A 100%)' }}
+                      className="relative w-full max-w-md mx-auto rounded-3xl overflow-hidden shadow-2xl aspect-[3/4]"
+                      style={{ background: 'linear-gradient(135deg, #2A2A2A 0%, #3A3A3A 100%)' }}
                     >
                       {imageUrl ? (
                         <img
@@ -132,8 +132,8 @@ export default function DoctorSection() {
                     {/* Mobile Image */}
                     <div className="relative block lg:hidden mb-8">
                       <div
-                        className="relative w-full max-w-sm mx-auto rounded-3xl overflow-hidden shadow-xl"
-                        style={{ height: '400px', background: 'linear-gradient(135deg, #2A2A2A 0%, #3A3A3A 100%)' }}
+                        className="relative w-full max-w-sm mx-auto rounded-3xl overflow-hidden shadow-xl aspect-[3/4]"
+                        style={{ background: 'linear-gradient(135deg, #2A2A2A 0%, #3A3A3A 100%)' }}
                       >
                         {imageUrl ? (
                           <img
