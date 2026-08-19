@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Search, Filter, Calendar, FileText, Upload, Plus, X, Check, Eye, Trash2, IndianRupee, Activity, CreditCard, ChevronRight } from 'lucide-react'
+import { Search, Filter, Calendar, FileText, Upload, Plus, X, Check, Eye, Trash2, IndianRupee, Activity, CreditCard, ChevronRight, Printer } from 'lucide-react'
 import { compressImage } from '@/lib/imageUtils'
 
 export function PatientsCRM() {
@@ -24,6 +24,15 @@ export function PatientsCRM() {
   const [draftProfile, setDraftProfile] = useState<any>(null)
   const [newPayment, setNewPayment] = useState({ amount: '', date: new Date().toISOString().split('T')[0], method: 'Cash', notes: '' })
   const [activeTab, setActiveTab] = useState('overview')
+  const [printingRecord, setPrintingRecord] = useState<any>(null)
+  
+  const handlePrint = (record: any) => {
+    setPrintingRecord(record)
+    setTimeout(() => {
+      window.print()
+      setPrintingRecord(null)
+    }, 100)
+  }
 
   useEffect(() => {
     Promise.all([
@@ -309,6 +318,81 @@ export function PatientsCRM() {
   if (loading) return <div className="p-8 text-center text-gray-500">Loading patients...</div>
 
   return (
+    <>
+      <style>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          #print-prescription-area, #print-prescription-area * {
+            visibility: visible;
+          }
+          #print-prescription-area {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            padding: 20px;
+          }
+          /* Hide scrollbars during print */
+          ::-webkit-scrollbar {
+            display: none;
+          }
+        }
+      `}</style>
+
+      {/* Hidden Printable Area */}
+      {printingRecord && (
+        <div id="print-prescription-area" className="bg-white text-black min-h-screen p-8 max-w-[800px] mx-auto font-sans">
+          <div className="flex justify-between items-start border-b-2 border-gray-200 pb-6 mb-8">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center border-2 border-blue-600">
+                <span className="text-2xl font-black text-blue-600">D</span>
+              </div>
+              <div>
+                <h1 className="text-3xl font-black text-gray-900 tracking-tight">Dent-O-Facial</h1>
+                <p className="text-sm text-gray-500 font-medium tracking-widest uppercase">Luxury Dental & Dermatology</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="font-bold text-gray-800">Dr. Hadi Raza</p>
+              <p className="text-xs text-gray-500">BDS, MDS (Oral & Maxillofacial)</p>
+              <p className="text-xs text-gray-500 mt-1">Ph: +91 7488404161</p>
+            </div>
+          </div>
+          
+          <div className="bg-gray-50 rounded-xl p-4 mb-8 flex justify-between">
+            <div>
+              <p className="text-xs text-gray-500 uppercase font-bold tracking-widest mb-1">Patient Name</p>
+              <p className="font-semibold text-gray-900">{selectedPatient?.name}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 uppercase font-bold tracking-widest mb-1">Email</p>
+              <p className="font-semibold text-gray-900">{selectedPatient?.email}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-gray-500 uppercase font-bold tracking-widest mb-1">Date</p>
+              <p className="font-semibold text-gray-900">{new Date(printingRecord.date).toLocaleDateString()}</p>
+            </div>
+          </div>
+
+          <div className="mb-12 min-h-[300px]">
+            <div className="text-4xl font-serif text-blue-600 mb-6 font-bold italic">Rx</div>
+            <div className="whitespace-pre-wrap text-gray-800 text-lg leading-relaxed">
+              {printingRecord.notes || 'No prescription notes available.'}
+            </div>
+          </div>
+
+          <div className="mt-auto pt-16 flex justify-end">
+            <div className="text-center">
+              <div className="text-3xl" style={{ fontFamily: "'Brush Script MT', cursive" }}>Dr. Hadi Raza</div>
+              <div className="w-48 h-px bg-gray-300 my-2"></div>
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Doctor Signature</p>
+            </div>
+          </div>
+        </div>
+      )}
+
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-center gap-4">
         <div className="relative flex-1">
@@ -661,9 +745,19 @@ export function PatientsCRM() {
                           </div>
                           {r.notes && <p className="text-sm text-gray-400 mb-3 bg-[#12122a] p-3 rounded-lg border border-gray-800/50">{r.notes}</p>}
                           <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-800/50">
-                            <a href={`/api/records/${r.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-500 hover:text-amber-400 transition bg-amber-500/10 hover:bg-amber-500/20 px-3 py-1.5 rounded-md">
-                              <Eye size={12} /> View Document
-                            </a>
+                            <div className="flex gap-2">
+                              <a href={`/api/records/${r.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-500 hover:text-amber-400 transition bg-amber-500/10 hover:bg-amber-500/20 px-3 py-1.5 rounded-md">
+                                <Eye size={12} /> View Document
+                              </a>
+                              {(r.type.toLowerCase() === 'prescription' || r.notes) && (
+                                <button 
+                                  onClick={() => handlePrint(r)}
+                                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-400 hover:text-blue-300 transition bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded-md"
+                                >
+                                  <Printer size={12} /> Print Prescription
+                                </button>
+                              )}
+                            </div>
                             <button 
                               onClick={() => deleteRecord(r.id)}
                               className="text-gray-500 hover:text-red-500 transition p-1.5 rounded hover:bg-red-500/10"
@@ -845,5 +939,6 @@ export function PatientsCRM() {
         </div>
       )}
     </div>
+    </>
   )
 }
