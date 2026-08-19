@@ -218,7 +218,8 @@ export function PatientsCRM() {
     
     const totalCost = draftProfile?.totalCost || 0
     const sumPayments = updatedHistory.reduce((sum, p) => sum + p.amount, 0)
-    const newDues = Math.max(0, totalCost - sumPayments)
+    const legacyPaid = draftProfile?.totalPayments || 0
+    const newDues = Math.max(0, totalCost - (sumPayments + legacyPaid))
     
     setDraftProfile({
       ...draftProfile,
@@ -232,7 +233,8 @@ export function PatientsCRM() {
     const updatedHistory = (draftProfile?.paymentHistory || []).filter((p: any) => p.id !== id)
     const totalCost = draftProfile?.totalCost || 0
     const sumPayments = updatedHistory.reduce((sum: number, p: any) => sum + p.amount, 0)
-    const newDues = Math.max(0, totalCost - sumPayments)
+    const legacyPaid = draftProfile?.totalPayments || 0
+    const newDues = Math.max(0, totalCost - (sumPayments + legacyPaid))
     
     setDraftProfile({
       ...draftProfile,
@@ -244,10 +246,11 @@ export function PatientsCRM() {
   const handleCostChange = (val: number) => {
     const history = draftProfile?.paymentHistory || []
     const sumPayments = history.reduce((sum: number, p: any) => sum + p.amount, 0)
+    const legacyPaid = draftProfile?.totalPayments || 0
     setDraftProfile({
       ...draftProfile,
       totalCost: val,
-      dues: Math.max(0, val - sumPayments)
+      dues: Math.max(0, val - (sumPayments + legacyPaid))
     })
   }
 
@@ -259,6 +262,13 @@ export function PatientsCRM() {
   const selectedPatient = patients.find(p => p.email === selectedPatientEmail)
   const patientAppts = selectedPatient ? appointments.filter(a => a.email === selectedPatient.email) : []
   const patientRecords = selectedPatient ? records.filter(r => r.patientEmail === selectedPatient.email) : []
+
+  const currentCost = draftProfile?.totalCost || 0
+  const legacyPaid = draftProfile?.totalPayments || 0
+  const historySum = (draftProfile?.paymentHistory || []).reduce((sum: number, p: any) => sum + p.amount, 0)
+  const displayDues = Math.max(0, currentCost - (historySum + legacyPaid))
+  const pendingPayment = Number(newPayment.amount) || 0
+  const previewDues = Math.max(0, displayDues - pendingPayment)
 
   if (loading) return <div className="p-8 text-center text-gray-500">Loading patients...</div>
 
@@ -409,49 +419,55 @@ export function PatientsCRM() {
                       </div>
                       <div>
                         <label className="block text-xs font-semibold text-gray-500 mb-2">Outstanding Dues (₹) <span className="text-[10px] text-gray-600 font-normal ml-1">(Auto-calculated)</span></label>
-                        <div className="w-full px-4 py-3 rounded-xl bg-red-900/10 border border-red-900/30 text-red-400 text-sm font-bold flex items-center">
-                          ₹{(draftProfile?.dues || 0).toLocaleString()}
+                        <div className="w-full px-4 py-3 rounded-xl bg-red-900/10 border border-red-900/30 text-red-400 text-sm font-bold flex items-center justify-between">
+                          <span>₹{displayDues.toLocaleString()}</span>
+                          {pendingPayment > 0 && (
+                            <span className="text-green-500 text-xs flex items-center gap-1 opacity-80">
+                              - ₹{pendingPayment.toLocaleString()} = ₹{previewDues.toLocaleString()}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
 
                     <div className="mb-4">
                       <h5 className="text-xs font-semibold text-white mb-3">Log New Payment</h5>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-black/20 p-4 rounded-xl border border-white/5">
                         <input 
                           type="number" 
                           placeholder="Amount (₹)"
                           value={newPayment.amount}
                           onChange={e => setNewPayment({...newPayment, amount: e.target.value})}
-                          className="px-4 py-2.5 rounded-xl bg-black/20 border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500"
+                          className="px-4 py-2.5 rounded-lg bg-[#1a1a2e] border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500"
                         />
                         <input 
                           type="date"
                           style={{ colorScheme: 'dark' }}
                           value={newPayment.date}
                           onChange={e => setNewPayment({...newPayment, date: e.target.value})}
-                          className="px-4 py-2.5 rounded-xl bg-black/20 border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500"
+                          className="px-4 py-2.5 rounded-lg bg-[#1a1a2e] border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500 cursor-pointer"
                         />
                         <select
+                          style={{ colorScheme: 'dark' }}
                           value={newPayment.method}
                           onChange={e => setNewPayment({...newPayment, method: e.target.value})}
-                          className="px-4 py-2.5 rounded-xl bg-black/20 border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500 appearance-none"
+                          className="px-4 py-2.5 rounded-lg bg-[#1a1a2e] border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500 cursor-pointer"
                         >
-                          <option value="Cash">Cash</option>
-                          <option value="UPI">UPI</option>
-                          <option value="Card">Card</option>
-                          <option value="Bank Transfer">Bank Transfer</option>
+                          <option value="Cash" className="bg-[#1a1a2e]">Cash</option>
+                          <option value="UPI" className="bg-[#1a1a2e]">UPI</option>
+                          <option value="Card" className="bg-[#1a1a2e]">Card</option>
+                          <option value="Bank Transfer" className="bg-[#1a1a2e]">Bank Transfer</option>
                         </select>
                         <input 
                           type="text" 
                           placeholder="Notes (Optional)"
                           value={newPayment.notes}
                           onChange={e => setNewPayment({...newPayment, notes: e.target.value})}
-                          className="px-4 py-2.5 rounded-xl bg-black/20 border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500"
+                          className="px-4 py-2.5 rounded-lg bg-[#1a1a2e] border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500"
                         />
-                        <div className="col-span-2 md:col-span-4 flex justify-end">
-                          <button onClick={addPayment} type="button" className="px-5 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-lg transition-all flex items-center gap-1">
-                            <Plus size={14} /> Add Payment
+                        <div className="col-span-2 md:col-span-4 flex justify-end mt-2">
+                          <button onClick={addPayment} type="button" className="px-5 py-2.5 bg-green-600 hover:bg-green-500 text-white text-xs font-bold rounded-lg transition-all flex items-center gap-1 shadow-lg shadow-green-900/20">
+                            <Plus size={14} /> Add Payment to Record
                           </button>
                         </div>
                       </div>
