@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     let isAuthorized = false
     let query: any = {}
 
-    if (adminAuth?.value === 'true') {
+    if ((adminAuth?.value === 'true' || adminAuth?.value === 'staff')) {
       isAuthorized = true
       query = email ? { patientEmail: email } : {} // Admin can fetch all or filter by email
     } else if (userAuth?.value) {
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
   try {
     const cookieStore = await cookies()
     const adminAuth = cookieStore.get('admin-auth')
-    if (adminAuth?.value !== 'true') {
+    if ((adminAuth?.value !== 'true' && adminAuth?.value !== 'staff')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -86,7 +86,7 @@ export async function DELETE(request: Request) {
   try {
     const cookieStore = await cookies()
     const adminAuth = cookieStore.get('admin-auth')
-    if (adminAuth?.value !== 'true') {
+    if ((adminAuth?.value !== 'true' && adminAuth?.value !== 'staff')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

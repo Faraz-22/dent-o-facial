@@ -30,7 +30,7 @@ export async function GET() {
   // Only admins can view user list
   const cookieStore = await cookies()
   const adminAuth = cookieStore.get('admin-auth')
-  if (adminAuth?.value !== 'true') {
+  if ((adminAuth?.value !== 'true' && adminAuth?.value !== 'staff')) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -51,7 +51,7 @@ export async function DELETE(request: Request) {
   // Only admins can delete users
   const cookieStore = await cookies()
   const adminAuth = cookieStore.get('admin-auth')
-  if (adminAuth?.value !== 'true') {
+  if ((adminAuth?.value !== 'true' && adminAuth?.value !== 'staff')) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

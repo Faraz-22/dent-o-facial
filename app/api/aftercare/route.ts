@@ -18,7 +18,7 @@ export async function GET(request: Request) {
     const userAuth = cookieStore.get('user-auth')
     
     let isAuthorized = false
-    if (adminAuth?.value === 'true') {
+    if ((adminAuth?.value === 'true' || adminAuth?.value === 'staff')) {
       isAuthorized = true
     } else if (userAuth?.value) {
       try {
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
   try {
     const cookieStore = await cookies()
     const adminAuth = cookieStore.get('admin-auth')
-    if (adminAuth?.value !== 'true') {
+    if ((adminAuth?.value !== 'true' && adminAuth?.value !== 'staff')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
