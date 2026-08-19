@@ -14,6 +14,9 @@ export async function GET() {
   if (adminAuth?.value === 'true') {
     return NextResponse.json({ ok: true, role: 'admin', name: 'Admin' })
   }
+  if (adminAuth?.value === 'staff') {
+    return NextResponse.json({ ok: true, role: 'staff', name: 'Staff Admin' })
+  }
   
   const userAuth = cookieStore.get('user-auth')
   if (userAuth?.value) {

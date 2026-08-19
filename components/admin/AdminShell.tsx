@@ -1272,17 +1272,33 @@ export default function AdminShell() {
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [saveError, setSaveError] = useState<string | null>(null)
   const [collapsed, setCollapsed] = useState(false)
+  const [adminRole, setAdminRole] = useState<'admin' | 'staff' | null>(null)
 
-  const currentSection = SECTIONS.find(s => s.key === section) || SECTIONS[0]
-  const SectionIcon = currentSection.icon
+  const visibleSections = adminRole === 'staff'
+    ? SECTIONS.filter(s => s.key === 'appointments' || s.key === 'dashboard')
+    : SECTIONS
+
+  // Fallback if staff tries to access a non-allowed section
+  if (adminRole === 'staff' && section !== 'appointments' && section !== 'dashboard') {
+    section = 'appointments'
+  }
+
+  const currentSection = visibleSections.find(s => s.key === section) || visibleSections[0]
+  const SectionIcon = currentSection?.icon || LayoutDashboard
 
   // Fetch content and stats
   useEffect(() => {
     Promise.all([
+      fetch('/api/auth/check', { cache: 'no-store' }).then(r => r.json()),
       fetch('/api/content', { cache: 'no-store' }).then(r => r.json()),
       fetch('/api/stats', { cache: 'no-store' }).then(r => r.json()).catch(() => ({}))
     ])
-      .then(([contentData, statsData]) => {
+      .then(([authData, contentData, statsData]) => {
+        if (!authData.ok || (authData.role !== 'admin' && authData.role !== 'staff')) {
+          router.push('/login')
+          return
+        }
+        setAdminRole(authData.role)
         setContent(contentData)
         setLocalData(contentData[section] ?? null)
         if (!statsData.error) setStats(statsData)
@@ -1380,7 +1396,7 @@ export default function AdminShell() {
 
         {/* Nav */}
         <nav className="flex-1 py-3 overflow-y-auto space-y-0.5">
-          {SECTIONS.map(({ key, label, href, icon: Icon }) => {
+          {visibleSections.map(({ key, label, href, icon: Icon }) => {
             const isActive = section === key || (key === 'dashboard' && section === 'dashboard')
             return (
               <Link key={key} href={href}

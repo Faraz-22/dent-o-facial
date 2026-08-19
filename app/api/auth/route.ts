@@ -27,6 +27,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, role: 'admin', name: 'Admin' })
     }
 
+    // 1.5 Check Staff Credentials
+    if (email.toLowerCase() === 'staff@dentofacial.com' && password === 'staff123') {
+      const cookieStore = await cookies()
+      cookieStore.set('admin-auth', 'staff', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+        path: '/',
+      })
+      cookieStore.delete('user-auth')
+      return NextResponse.json({ success: true, role: 'staff', name: 'Staff Admin' })
+    }
+
     // 2. Check User Credentials
     if (email) {
       let matchedUser = null;

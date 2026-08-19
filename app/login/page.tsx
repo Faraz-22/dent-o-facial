@@ -40,7 +40,7 @@ function LoginContent() {
       .then(res => res.json())
       .then(data => {
         if (data.ok) {
-          router.replace(data.role === 'admin' ? '/admin/dashboard' : '/account')
+          router.replace((data.role === 'admin' || data.role === 'staff') ? '/admin/dashboard' : '/account')
         } else {
           setCheckingAuth(false)
         }
@@ -58,7 +58,7 @@ function LoginContent() {
   useEffect(() => {
     if (loginResult) {
       const next = searchParams.get('next')
-      const target = loginResult.role === 'admin' ? '/admin/dashboard' : (next?.startsWith('/') ? next : '/account')
+      const target = (loginResult.role === 'admin' || loginResult.role === 'staff') ? '/admin/dashboard' : (next?.startsWith('/') ? next : '/account')
       
       const timer = setTimeout(() => {
         router.push(target)
