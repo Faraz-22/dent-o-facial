@@ -33,8 +33,8 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
         
         <article className="bg-white rounded-3xl overflow-hidden shadow-sm border border-cream-dark">
           {post.imageUrl && (
-            <div className="w-full h-64 md:h-96 relative">
-              <img src={post.imageUrl} alt={post.title} className="w-full h-full object-cover" />
+            <div className="w-full h-64 md:h-96 relative bg-[#fdfbf7] flex items-center justify-center border-b border-cream-dark">
+              <img src={post.imageUrl} alt={post.title} className="w-full h-full object-contain" />
             </div>
           )}
           

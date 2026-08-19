@@ -30,7 +30,7 @@ function TreatmentCard({ treatment, category, whatsappNumber, whatsappMessage }:
       {/* Image Placeholder connected to slug page */}
       <Link href={`/treatments/${treatment.id}`} className="block relative w-full h-48 md:h-56 rounded-2xl overflow-hidden mb-6 bg-[#12122a] shrink-0 group">
          {imageUrl ? (
-            <img src={imageUrl} alt={treatment.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+            <img src={imageUrl} alt={treatment.name} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700" />
          ) : (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800 group-hover:bg-gray-200 dark:group-hover:bg-gray-700 transition-colors duration-500">
               <ImageIcon size={32} className="text-gray-400 mb-2" />

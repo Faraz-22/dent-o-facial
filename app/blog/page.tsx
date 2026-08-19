@@ -55,7 +55,7 @@ export default function BlogPage() {
                     className="h-52 flex items-center justify-center relative overflow-hidden bg-cream-dark"
                   >
                     {post.imageUrl ? (
-                      <img src={post.imageUrl} alt={post.title} className="absolute inset-0 w-full h-full object-cover" />
+                      <img src={post.imageUrl} alt={post.title} className="absolute inset-0 w-full h-full object-contain" />
                     ) : (
                       <div className="absolute inset-0 bg-gradient-to-br from-[#E8E3D8] to-[#D6B98C30]" />
                     )}
@@ -100,7 +100,7 @@ export default function BlogPage() {
                     style={{ background: 'linear-gradient(135deg, #E8E3D8 0%, #D6B98C20 100%)' }}
                   >
                     {post.imageUrl ? (
-                      <img src={post.imageUrl} alt={post.title} className="absolute inset-0 w-full h-full object-cover" />
+                      <img src={post.imageUrl} alt={post.title} className="absolute inset-0 w-full h-full object-contain" />
                     ) : (
                       <Tag size={18} className="text-gold/40" />
                     )}

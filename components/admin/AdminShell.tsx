@@ -271,7 +271,7 @@ function TreatmentsCategoryList({ cat, items, label, colorClass, data, onChange 
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mt-3">
                 {t.images.map((url, i) => (
                   <div key={i} className="relative group rounded-lg overflow-hidden border border-gray-700 aspect-square">
-                    <img src={url} alt={`Treatment ${i + 1}`} className="w-full h-full object-cover" />
+                    <img src={url} alt={`Treatment ${i + 1}`} className="w-full h-full object-contain" />
                     <button onClick={() => removeImage(t.id, i)} className="absolute inset-0 bg-black/60 hidden group-hover:flex items-center justify-center text-red-400 transition">
                       <Trash2 size={16} />
                     </button>
@@ -389,7 +389,7 @@ function BlogEditor({ data, onChange }: { data: BlogPost[]; onChange: (v: BlogPo
             {uploading === post.slug && <span className="text-xs text-amber-500 block animate-pulse">Uploading...</span>}
             {post.imageUrl && (
               <div className="mt-2 flex items-center gap-4">
-                <img src={post.imageUrl} alt="Cover preview" className="h-12 w-16 object-cover rounded-lg border border-gray-700" />
+                <img src={post.imageUrl} alt="Cover preview" className="h-12 w-16 object-contain rounded-lg border border-gray-700" />
                 <button onClick={() => update(post.slug, 'imageUrl', '')} className="text-xs text-gray-500 hover:text-red-400 transition flex items-center gap-1">
                   <Trash2 size={12} /> Remove
                 </button>
@@ -703,7 +703,7 @@ const CategoryList = ({
               {uploading?.id === r.id && uploading.side === 'before' && <span className="text-xs text-amber-500 block animate-pulse">Uploading...</span>}
               {r.beforeImage && (
                 <div className="relative w-full h-24 rounded-lg overflow-hidden border border-gray-700 mt-2">
-                  <img src={r.beforeImage} alt="Before" className="w-full h-full object-cover" />
+                  <img src={r.beforeImage} alt="Before" className="w-full h-full object-contain" />
                   <button onClick={() => update(r.id, 'beforeImage', '')} className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 hover:opacity-100 transition">
                     <Trash2 size={14} className="text-red-400" />
                   </button>
@@ -724,7 +724,7 @@ const CategoryList = ({
               {uploading?.id === r.id && uploading.side === 'after' && <span className="text-xs text-amber-500 block animate-pulse">Uploading...</span>}
               {r.afterImage && (
                 <div className="relative w-full h-24 rounded-lg overflow-hidden border border-gray-700 mt-2">
-                  <img src={r.afterImage} alt="After" className="w-full h-full object-cover" />
+                  <img src={r.afterImage} alt="After" className="w-full h-full object-contain" />
                   <button onClick={() => update(r.id, 'afterImage', '')} className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 hover:opacity-100 transition">
                     <Trash2 size={14} className="text-red-400" />
                   </button>
@@ -958,7 +958,7 @@ function ImagesEditor({ data, onChange }: { data: Record<string, any>; onChange:
                     {(value as string[]).map((url, i) => (
                       <div key={i} className="space-y-2">
                         <div className="relative w-full h-32 rounded-xl overflow-hidden bg-[#12122a] border border-gray-700">
-                          <img src={url} alt={`${label} ${i + 1}`} className="w-full h-full object-cover" />
+                          <img src={url} alt={`${label} ${i + 1}`} className="w-full h-full object-contain" />
                         </div>
                         <button
                           onClick={() => removeArrayImage(key, i)}
@@ -972,7 +972,7 @@ function ImagesEditor({ data, onChange }: { data: Record<string, any>; onChange:
                 ) : (
                   <div className="space-y-2">
                     <div className="relative w-full h-48 rounded-xl overflow-hidden bg-[#12122a] border border-gray-700">
-                      <img src={value as string} alt={label} className="w-full h-full object-cover" />
+                      <img src={value as string} alt={label} className="w-full h-full object-contain" />
                     </div>
                     <button
                       onClick={() => onChange({ ...data, [key]: '' })}

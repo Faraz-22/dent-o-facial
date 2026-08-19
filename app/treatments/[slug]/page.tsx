@@ -48,8 +48,8 @@ export default async function TreatmentDetailPage(props: { params: Promise<{ slu
           <p className="text-charcoal-muted text-lg leading-relaxed mb-8">{treatment.shortDesc}</p>
           
           {treatment.images && treatment.images.length > 0 && (
-            <div className="w-full h-64 md:h-96 rounded-2xl overflow-hidden mb-12">
-              <img src={treatment.images[0]} alt={treatment.name} className="w-full h-full object-cover" />
+            <div className="w-full h-64 md:h-96 rounded-2xl overflow-hidden mb-12 bg-[#fdfbf7] border border-[#f5efde] flex items-center justify-center">
+              <img src={treatment.images[0]} alt={treatment.name} className="w-full h-full object-contain" />
             </div>
           )}
 
