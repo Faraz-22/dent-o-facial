@@ -44,6 +44,8 @@ export async function GET(request: Request) {
       const profileMap: Record<string, any> = {}
       allProfiles.forEach(item => {
         profileMap[item.email] = {
+          totalCost: item.totalCost || 0,
+          paymentHistory: item.paymentHistory || [],
           totalPayments: item.totalPayments,
           dues: item.dues,
           sessionsRequired: item.sessionsRequired,
@@ -79,7 +81,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { email, totalPayments, dues, sessionsRequired, sessionsCompleted } = body
+    const { email, totalPayments, dues, totalCost, paymentHistory, sessionsRequired, sessionsCompleted } = body
 
     if (!email) {
       return NextResponse.json({ error: 'Missing email' }, { status: 400 })
@@ -90,6 +92,8 @@ export async function POST(request: Request) {
       await PatientProfile.findOneAndUpdate(
         { email },
         { 
+          totalCost: Number(totalCost) || 0,
+          paymentHistory: Array.isArray(paymentHistory) ? paymentHistory : [],
           totalPayments: Number(totalPayments) || 0, 
           dues: Number(dues) || 0, 
           sessionsRequired: Number(sessionsRequired) || 0, 
@@ -110,6 +114,8 @@ export async function POST(request: Request) {
       }
 
       profilesData[email] = {
+        totalCost: Number(totalCost) || 0,
+        paymentHistory: Array.isArray(paymentHistory) ? paymentHistory : [],
         totalPayments: Number(totalPayments) || 0,
         dues: Number(dues) || 0,
         sessionsRequired: Number(sessionsRequired) || 0,

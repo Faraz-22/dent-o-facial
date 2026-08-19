@@ -167,6 +167,34 @@ export default function PatientDashboard() {
                     </div>
                   )}
                 </div>
+                
+                {profile.paymentHistory && profile.paymentHistory.length > 0 && (
+                  <div className="mt-8 pt-6 border-t border-cream-dark">
+                    <h3 className="font-playfair text-xl text-charcoal mb-4">Payment History</h3>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-sm text-charcoal">
+                        <thead className="bg-cream border-b border-cream-dark">
+                          <tr>
+                            <th className="px-4 py-3 font-semibold text-charcoal-muted uppercase tracking-wider text-xs">Date</th>
+                            <th className="px-4 py-3 font-semibold text-charcoal-muted uppercase tracking-wider text-xs">Amount</th>
+                            <th className="px-4 py-3 font-semibold text-charcoal-muted uppercase tracking-wider text-xs">Method</th>
+                            <th className="px-4 py-3 font-semibold text-charcoal-muted uppercase tracking-wider text-xs">Notes</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-cream-dark">
+                          {profile.paymentHistory.map((p: any) => (
+                            <tr key={p.id} className="hover:bg-cream/30 transition">
+                              <td className="px-4 py-3 font-medium">{new Date(p.date).toLocaleDateString()}</td>
+                              <td className="px-4 py-3 font-bold text-green-600">₹{p.amount.toLocaleString()}</td>
+                              <td className="px-4 py-3">{p.method}</td>
+                              <td className="px-4 py-3 text-xs text-charcoal-muted">{p.notes || '-'}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

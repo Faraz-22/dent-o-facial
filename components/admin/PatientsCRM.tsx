@@ -22,6 +22,7 @@ export function PatientsCRM() {
   const [recordSaveStatus, setRecordSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [profileSaveStatus, setProfileSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [draftProfile, setDraftProfile] = useState<any>(null)
+  const [newPayment, setNewPayment] = useState({ amount: '', date: new Date().toISOString().split('T')[0], method: 'Cash', notes: '' })
   const [activeTab, setActiveTab] = useState('overview')
 
   useEffect(() => {
@@ -198,9 +199,56 @@ export function PatientsCRM() {
 
   const openSlideOver = (patient: any) => {
     setSelectedPatientEmail(patient.email)
-    const profile = patientProfiles[patient.email] || { totalPayments: 0, dues: 0, sessionsRequired: 0, sessionsCompleted: 0 }
+    const profile = patientProfiles[patient.email] || { totalCost: 0, paymentHistory: [], dues: 0, sessionsRequired: 0, sessionsCompleted: 0 }
     setDraftProfile(profile)
     setActiveTab('overview')
+  }
+
+  const addPayment = () => {
+    if (!newPayment.amount || !newPayment.date) return
+    const payment = {
+      id: Math.random().toString(36).substring(7),
+      amount: Number(newPayment.amount),
+      date: newPayment.date,
+      method: newPayment.method,
+      notes: newPayment.notes
+    }
+    const currentHistory = Array.isArray(draftProfile?.paymentHistory) ? draftProfile.paymentHistory : []
+    const updatedHistory = [...currentHistory, payment]
+    
+    const totalCost = draftProfile?.totalCost || 0
+    const sumPayments = updatedHistory.reduce((sum, p) => sum + p.amount, 0)
+    const newDues = Math.max(0, totalCost - sumPayments)
+    
+    setDraftProfile({
+      ...draftProfile,
+      paymentHistory: updatedHistory,
+      dues: newDues
+    })
+    setNewPayment({ amount: '', date: new Date().toISOString().split('T')[0], method: 'Cash', notes: '' })
+  }
+
+  const removePayment = (id: string) => {
+    const updatedHistory = (draftProfile?.paymentHistory || []).filter((p: any) => p.id !== id)
+    const totalCost = draftProfile?.totalCost || 0
+    const sumPayments = updatedHistory.reduce((sum: number, p: any) => sum + p.amount, 0)
+    const newDues = Math.max(0, totalCost - sumPayments)
+    
+    setDraftProfile({
+      ...draftProfile,
+      paymentHistory: updatedHistory,
+      dues: newDues
+    })
+  }
+
+  const handleCostChange = (val: number) => {
+    const history = draftProfile?.paymentHistory || []
+    const sumPayments = history.reduce((sum: number, p: any) => sum + p.amount, 0)
+    setDraftProfile({
+      ...draftProfile,
+      totalCost: val,
+      dues: Math.max(0, val - sumPayments)
+    })
   }
 
   const closeSlideOver = () => {
@@ -347,28 +395,98 @@ export function PatientsCRM() {
                       <CreditCard size={14} className="text-amber-500" />
                       Billing & Payments
                     </h4>
-                    <div className="grid grid-cols-2 gap-5 mb-2">
+                    
+                    <div className="grid grid-cols-2 gap-5 mb-8 bg-black/20 p-5 rounded-2xl border border-white/5">
                       <div>
-                        <label className="block text-xs font-semibold text-gray-500 mb-2">Total Paid (₹)</label>
+                        <label className="block text-xs font-semibold text-gray-500 mb-2">Total Treatment Cost (₹)</label>
                         <input 
                           type="number" 
-                          value={draftProfile?.totalPayments || ''}
-                          onChange={e => setDraftProfile({...draftProfile, totalPayments: Number(e.target.value)})}
-                          className="w-full px-4 py-3 rounded-xl bg-black/20 border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all placeholder-gray-700"
+                          value={draftProfile?.totalCost || ''}
+                          onChange={e => handleCostChange(Number(e.target.value))}
+                          className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all placeholder-gray-700 font-medium"
                           placeholder="0"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold text-gray-500 mb-2">Dues Outstanding (₹)</label>
-                        <input 
-                          type="number" 
-                          value={draftProfile?.dues || ''}
-                          onChange={e => setDraftProfile({...draftProfile, dues: Number(e.target.value)})}
-                          className="w-full px-4 py-3 rounded-xl bg-black/20 border border-red-900/30 text-red-400 text-sm focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all placeholder-red-900/50"
-                          placeholder="0"
-                        />
+                        <label className="block text-xs font-semibold text-gray-500 mb-2">Outstanding Dues (₹) <span className="text-[10px] text-gray-600 font-normal ml-1">(Auto-calculated)</span></label>
+                        <div className="w-full px-4 py-3 rounded-xl bg-red-900/10 border border-red-900/30 text-red-400 text-sm font-bold flex items-center">
+                          ₹{(draftProfile?.dues || 0).toLocaleString()}
+                        </div>
                       </div>
                     </div>
+
+                    <div className="mb-4">
+                      <h5 className="text-xs font-semibold text-white mb-3">Log New Payment</h5>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <input 
+                          type="number" 
+                          placeholder="Amount (₹)"
+                          value={newPayment.amount}
+                          onChange={e => setNewPayment({...newPayment, amount: e.target.value})}
+                          className="px-4 py-2.5 rounded-xl bg-black/20 border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500"
+                        />
+                        <input 
+                          type="date"
+                          style={{ colorScheme: 'dark' }}
+                          value={newPayment.date}
+                          onChange={e => setNewPayment({...newPayment, date: e.target.value})}
+                          className="px-4 py-2.5 rounded-xl bg-black/20 border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500"
+                        />
+                        <select
+                          value={newPayment.method}
+                          onChange={e => setNewPayment({...newPayment, method: e.target.value})}
+                          className="px-4 py-2.5 rounded-xl bg-black/20 border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500 appearance-none"
+                        >
+                          <option value="Cash">Cash</option>
+                          <option value="UPI">UPI</option>
+                          <option value="Card">Card</option>
+                          <option value="Bank Transfer">Bank Transfer</option>
+                        </select>
+                        <input 
+                          type="text" 
+                          placeholder="Notes (Optional)"
+                          value={newPayment.notes}
+                          onChange={e => setNewPayment({...newPayment, notes: e.target.value})}
+                          className="px-4 py-2.5 rounded-xl bg-black/20 border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500"
+                        />
+                        <div className="col-span-2 md:col-span-4 flex justify-end">
+                          <button onClick={addPayment} type="button" className="px-5 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-lg transition-all flex items-center gap-1">
+                            <Plus size={14} /> Add Payment
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {draftProfile?.paymentHistory?.length > 0 && (
+                      <div className="mt-6 border border-white/5 rounded-2xl overflow-hidden">
+                        <table className="w-full text-left text-sm text-gray-400">
+                          <thead className="bg-white/5 text-xs uppercase text-gray-500">
+                            <tr>
+                              <th className="px-4 py-3 font-semibold">Date</th>
+                              <th className="px-4 py-3 font-semibold">Amount</th>
+                              <th className="px-4 py-3 font-semibold">Method</th>
+                              <th className="px-4 py-3 font-semibold">Notes</th>
+                              <th className="px-4 py-3 text-right font-semibold">Action</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-white/5 bg-black/20">
+                            {draftProfile.paymentHistory.map((p: any) => (
+                              <tr key={p.id} className="hover:bg-white/[0.02] transition">
+                                <td className="px-4 py-3 text-white">{new Date(p.date).toLocaleDateString()}</td>
+                                <td className="px-4 py-3 font-bold text-green-500">₹{p.amount.toLocaleString()}</td>
+                                <td className="px-4 py-3">{p.method}</td>
+                                <td className="px-4 py-3 text-xs">{p.notes || '-'}</td>
+                                <td className="px-4 py-3 text-right">
+                                  <button onClick={() => removePayment(p.id)} className="text-red-500/50 hover:text-red-500 transition">
+                                    <Trash2 size={14} />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
                   </div>
 
                   <div className="bg-white/[0.02] rounded-3xl border border-white/5 p-7 backdrop-blur-md">

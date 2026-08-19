@@ -123,8 +123,16 @@ const UserTestimonialSchema = new mongoose.Schema({
 
 const PatientProfileSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
-  totalPayments: { type: Number, default: 0 },
-  dues: { type: Number, default: 0 },
+  totalPayments: { type: Number, default: 0 }, // Legacy/derived
+  dues: { type: Number, default: 0 }, // Legacy/derived
+  totalCost: { type: Number, default: 0 },
+  paymentHistory: [{
+    id: { type: String, required: true },
+    amount: { type: Number, required: true },
+    date: { type: String, required: true },
+    method: { type: String, required: true },
+    notes: { type: String }
+  }],
   sessionsRequired: { type: Number, default: 0 },
   sessionsCompleted: { type: Number, default: 0 },
   updatedAt: { type: Date, default: Date.now }
