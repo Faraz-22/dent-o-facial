@@ -17,6 +17,7 @@ export default function PatientDashboard() {
   const [appointments, setAppointments] = useState<any[]>([])
   const [records, setRecords] = useState<any[]>([])
   const [aftercare, setAftercare] = useState<string>('')
+  const [profile, setProfile] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   
@@ -42,12 +43,14 @@ export default function PatientDashboard() {
         return Promise.all([
           fetch('/api/appointments', { cache: 'no-store' }).then(r => r.json()),
           fetch(`/api/records?email=${auth.email}`, { cache: 'no-store' }).then(r => r.json()),
-          fetch(`/api/aftercare?email=${auth.email}`, { cache: 'no-store' }).then(r => r.json())
-        ]).then(([apptsData, recordsData, aftercareData]) => {
+          fetch(`/api/aftercare?email=${auth.email}`, { cache: 'no-store' }).then(r => r.json()),
+          fetch(`/api/patient-profiles?email=${auth.email}`, { cache: 'no-store' }).then(r => r.json())
+        ]).then(([apptsData, recordsData, aftercareData, profileData]) => {
             const myAppts = apptsData.filter((a: any) => a.email === auth.email)
             setAppointments(myAppts)
             setRecords(recordsData)
             setAftercare(aftercareData.aftercare || '')
+            setProfile(profileData.profile || null)
             setLoading(false)
           })
       })
@@ -134,6 +137,39 @@ export default function PatientDashboard() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2 space-y-6">
+            
+            {profile && (profile.sessionsRequired > 0 || profile.dues > 0) && (
+              <div className="bg-white p-8 rounded-3xl border border-cream shadow-sm mb-8">
+                <h2 className="font-playfair text-2xl text-charcoal mb-6 border-b border-cream-dark pb-4">Treatment Progress & Billing</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {profile.sessionsRequired > 0 && (
+                    <div>
+                      <span className="text-xs font-semibold text-charcoal-muted uppercase tracking-widest block mb-3">Treatment Sessions</span>
+                      <div className="flex justify-between text-sm mb-2 font-medium text-charcoal">
+                        <span>{profile.sessionsCompleted} Completed</span>
+                        <span>{profile.sessionsRequired} Total</span>
+                      </div>
+                      <div className="w-full h-3 bg-cream-dark rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-gold transition-all duration-1000 ease-out" 
+                          style={{ width: `${Math.min((profile.sessionsCompleted / profile.sessionsRequired) * 100, 100)}%` }} 
+                        />
+                      </div>
+                    </div>
+                  )}
+                  {profile.dues > 0 && (
+                    <div>
+                      <span className="text-xs font-semibold text-charcoal-muted uppercase tracking-widest block mb-3">Outstanding Dues</span>
+                      <div className="text-3xl font-bold text-red-500">
+                        ₹{profile.dues.toLocaleString()}
+                      </div>
+                      <p className="text-xs text-charcoal-muted mt-2">Please clear your dues at the clinic during your next visit.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div className="flex items-center justify-between border-b border-cream-dark pb-4">
               <h2 className="font-playfair text-2xl text-charcoal">{t('account.appointments')}</h2>
               <Link href="/book" className="btn-outline px-4 py-2 rounded-full text-xs">{t('nav.book')}</Link>
