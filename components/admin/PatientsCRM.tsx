@@ -30,11 +30,20 @@ export function PatientsCRM() {
   
   const handlePrint = (record: any) => {
     setPrintingRecord(record)
+    // Add a longer delay (500ms) to ensure the DOM is painted and the image is loaded before print dialogue opens
     setTimeout(() => {
       window.print()
       setPrintingRecord(null)
-    }, 100)
+    }, 500)
   }
+
+  // Preload the banner image so it's instantly available when printing
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const img = new Image()
+      img.src = "/uploads/prescription-banner.png"
+    }
+  }, [])
 
   useEffect(() => {
     Promise.all([
