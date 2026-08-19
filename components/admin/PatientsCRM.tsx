@@ -199,7 +199,21 @@ export function PatientsCRM() {
 
   const openSlideOver = (patient: any) => {
     setSelectedPatientEmail(patient.email)
-    const profile = patientProfiles[patient.email] || { totalCost: 0, paymentHistory: [], dues: 0, sessionsRequired: 0, sessionsCompleted: 0 }
+    const profile = JSON.parse(JSON.stringify(patientProfiles[patient.email] || { totalCost: 0, paymentHistory: [], dues: 0, sessionsRequired: 0, sessionsCompleted: 0 }))
+    
+    if (profile.totalPayments > 0 && (!profile.paymentHistory || profile.paymentHistory.length === 0)) {
+      profile.paymentHistory = [{
+        id: 'legacy-' + Date.now(),
+        amount: profile.totalPayments,
+        date: profile.updatedAt ? profile.updatedAt.split('T')[0] : new Date().toISOString().split('T')[0],
+        method: 'Legacy/Unknown',
+        notes: 'Migrated from previous system'
+      }]
+      profile.totalPayments = 0
+      const sumPayments = profile.paymentHistory.reduce((sum: number, p: any) => sum + p.amount, 0)
+      profile.dues = Math.max(0, (profile.totalCost || 0) - sumPayments)
+    }
+
     setDraftProfile(profile)
     setActiveTab('overview')
   }
@@ -218,8 +232,7 @@ export function PatientsCRM() {
     
     const totalCost = draftProfile?.totalCost || 0
     const sumPayments = updatedHistory.reduce((sum, p) => sum + p.amount, 0)
-    const legacyPaid = draftProfile?.totalPayments || 0
-    const newDues = Math.max(0, totalCost - (sumPayments + legacyPaid))
+    const newDues = Math.max(0, totalCost - sumPayments)
     
     setDraftProfile({
       ...draftProfile,
@@ -233,8 +246,7 @@ export function PatientsCRM() {
     const updatedHistory = (draftProfile?.paymentHistory || []).filter((p: any) => p.id !== id)
     const totalCost = draftProfile?.totalCost || 0
     const sumPayments = updatedHistory.reduce((sum: number, p: any) => sum + p.amount, 0)
-    const legacyPaid = draftProfile?.totalPayments || 0
-    const newDues = Math.max(0, totalCost - (sumPayments + legacyPaid))
+    const newDues = Math.max(0, totalCost - sumPayments)
     
     setDraftProfile({
       ...draftProfile,
@@ -246,11 +258,10 @@ export function PatientsCRM() {
   const handleCostChange = (val: number) => {
     const history = draftProfile?.paymentHistory || []
     const sumPayments = history.reduce((sum: number, p: any) => sum + p.amount, 0)
-    const legacyPaid = draftProfile?.totalPayments || 0
     setDraftProfile({
       ...draftProfile,
       totalCost: val,
-      dues: Math.max(0, val - (sumPayments + legacyPaid))
+      dues: Math.max(0, val - sumPayments)
     })
   }
 
@@ -264,9 +275,8 @@ export function PatientsCRM() {
   const patientRecords = selectedPatient ? records.filter(r => r.patientEmail === selectedPatient.email) : []
 
   const currentCost = draftProfile?.totalCost || 0
-  const legacyPaid = draftProfile?.totalPayments || 0
   const historySum = (draftProfile?.paymentHistory || []).reduce((sum: number, p: any) => sum + p.amount, 0)
-  const displayDues = Math.max(0, currentCost - (historySum + legacyPaid))
+  const displayDues = Math.max(0, currentCost - historySum)
   const pendingPayment = Number(newPayment.amount) || 0
   const previewDues = Math.max(0, displayDues - pendingPayment)
 
