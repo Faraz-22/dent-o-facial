@@ -25,6 +25,8 @@ export function PatientsCRM() {
   const [newPayment, setNewPayment] = useState({ amount: '', date: new Date().toISOString().split('T')[0], method: 'Cash', notes: '' })
   const [activeTab, setActiveTab] = useState('overview')
   const [printingRecord, setPrintingRecord] = useState<any>(null)
+  const [doctorsList, setDoctorsList] = useState<any[]>([])
+  const [selectedPrintDoctor, setSelectedPrintDoctor] = useState<string>('hadi')
   
   const handlePrint = (record: any) => {
     setPrintingRecord(record)
@@ -40,10 +42,18 @@ export function PatientsCRM() {
       fetch('/api/appointments', { cache: 'no-store' }).then(r => r.json()),
       fetch('/api/records', { cache: 'no-store' }).then(r => r.json()),
       fetch('/api/aftercare', { cache: 'no-store' }).then(r => r.json()),
-      fetch('/api/patient-profiles', { cache: 'no-store' }).then(r => r.json())
-    ]).then(([u, a, r, af, prof]) => {
+      fetch('/api/patient-profiles', { cache: 'no-store' }).then(r => r.json()),
+      fetch('/api/content', { cache: 'no-store' }).then(r => r.json())
+    ]).then(([u, a, r, af, prof, c]) => {
       const userList = u.users || u || []
       const apptList = a || []
+      
+      if (c && c.doctors && Array.isArray(c.doctors)) {
+        setDoctorsList(c.doctors)
+        if (c.doctors.length > 0 && !selectedPrintDoctor) {
+          setSelectedPrintDoctor(c.doctors[0].id)
+        }
+      }
       
       const patientMap = new Map()
       apptList.forEach((appt: any) => {
@@ -315,6 +325,8 @@ export function PatientsCRM() {
   
   const superDues = calculateSuperDues()
 
+  const activeDoctor = doctorsList.find(d => d.id === selectedPrintDoctor) || doctorsList[0] || null
+
   if (loading) return <div className="p-8 text-center text-gray-500">Loading patients...</div>
 
   return (
@@ -333,7 +345,7 @@ export function PatientsCRM() {
             left: 0;
             top: 0;
             width: 100%;
-            padding: 40px;
+            padding: 20px 40px;
           }
           /* Hide scrollbars during print */
           ::-webkit-scrollbar {
@@ -345,23 +357,22 @@ export function PatientsCRM() {
       {/* Hidden Printable Area */}
       {printingRecord && (
         <div id="print-prescription-area" className="bg-white text-black min-h-screen p-8 max-w-[800px] mx-auto font-sans">
-          <div className="flex justify-between items-start border-b-2 border-gray-200 pb-6 mb-8 mt-8">
+          <div className="flex justify-between items-start border-b-2 border-gray-200 pb-4 mb-4">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center border-2 border-blue-600">
+              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center border-2 border-blue-600 shrink-0">
                 <span className="text-2xl font-black text-blue-600">D</span>
               </div>
               <div>
-                <h1 className="text-3xl font-black text-gray-900 tracking-tight">Dent-O-Facial</h1>
-                <p className="text-sm text-gray-500 font-medium tracking-widest uppercase">Luxury Dental & Dermatology</p>
+                <h1 className="text-xl font-black text-gray-900 tracking-tight leading-tight max-w-[300px]">Premium Dental, Braces, Implants<br/>and Facial Trauma Centre</h1>
               </div>
             </div>
-            <div className="text-right mt-2">
-              <p className="font-bold text-gray-800">Dr. Hadi Raza</p>
-              <p className="text-xs text-gray-500">BDS, MDS (Oral & Maxillofacial)</p>
+            <div className="text-right mt-1 max-w-[250px]">
+              <p className="font-bold text-gray-800">{activeDoctor?.name || 'Dr. Hadi Raza'}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{activeDoctor?.credentials ? activeDoctor.credentials.map((c: any) => c.label.split('—')[0].trim()).join(', ') : 'BDS, MDS (Oral & Maxillofacial)'}</p>
             </div>
           </div>
           
-          <div className="bg-gray-50 rounded-xl p-4 mb-8 flex justify-between">
+          <div className="bg-gray-50 rounded-xl p-4 mb-6 flex justify-between">
             <div>
               <p className="text-xs text-gray-500 uppercase font-bold tracking-widest mb-1">Patient Name</p>
               <p className="font-semibold text-gray-900">{selectedPatient?.name}</p>
@@ -377,15 +388,14 @@ export function PatientsCRM() {
           </div>
 
           <div className="mb-12 min-h-[300px]">
-            <div className="text-4xl font-serif text-blue-600 mb-6 font-bold italic">Rx</div>
-            <div className="whitespace-pre-wrap text-gray-800 text-lg leading-relaxed">
-              {printingRecord.notes || 'No prescription notes available.'}
+            <div className="whitespace-pre-wrap text-gray-800 text-lg leading-relaxed mt-2">
+              {printingRecord.notes || ''}
             </div>
           </div>
 
           <div className="mt-auto pt-16 flex justify-end">
             <div className="text-center">
-              <div className="text-3xl" style={{ fontFamily: "'Brush Script MT', cursive" }}>Dr. Hadi Raza</div>
+              <div className="text-3xl" style={{ fontFamily: "'Brush Script MT', cursive" }}>{activeDoctor?.name || 'Dr. Hadi Raza'}</div>
               <div className="w-48 h-px bg-gray-300 my-2"></div>
               <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Doctor Signature</p>
             </div>
@@ -724,12 +734,25 @@ export function PatientsCRM() {
                       <FileText size={14} className="text-amber-500" />
                       Prescriptions & Reports
                     </h4>
-                    <button 
-                      onClick={() => setUploadModal({ isOpen: true, email: selectedPatient.email })}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-white text-xs font-semibold transition border border-gray-700"
-                    >
-                      <Plus size={12} /> Add New
-                    </button>
+                    <div className="flex items-center gap-3">
+                      {doctorsList.length > 0 && (
+                        <select 
+                          value={selectedPrintDoctor}
+                          onChange={e => setSelectedPrintDoctor(e.target.value)}
+                          className="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-white text-xs font-semibold transition border border-gray-700 focus:outline-none focus:border-amber-500"
+                        >
+                          {doctorsList.map(doc => (
+                            <option key={doc.id} value={doc.id}>{doc.name}</option>
+                          ))}
+                        </select>
+                      )}
+                      <button 
+                        onClick={() => setUploadModal({ isOpen: true, email: selectedPatient.email })}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-white text-xs font-semibold transition border border-gray-700"
+                      >
+                        <Plus size={12} /> Add New
+                      </button>
+                    </div>
                   </div>
                   
                   {patientRecords.length > 0 ? (
