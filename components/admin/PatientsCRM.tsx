@@ -357,17 +357,11 @@ export function PatientsCRM() {
       {/* Hidden Printable Area */}
       {printingRecord && (
         <div id="print-prescription-area" className="bg-white text-black min-h-[297mm] flex flex-col p-8 max-w-[800px] mx-auto font-sans relative">
-          <div className="flex justify-between items-start border-b-2 border-gray-200 pb-4 mb-4">
-            <div className="flex items-center gap-4">
-              <img src="/uploads/prescription-logo.jpg" alt="Dent-O-Facial Logo" className="w-20 h-20 object-contain shrink-0" />
-              <div>
-                <h1 className="text-xl font-black text-gray-900 tracking-tight leading-tight max-w-[300px]">Premium Dental, Braces, Implants<br/>and Facial Trauma Centre</h1>
-              </div>
-            </div>
-            <div className="text-right mt-1 max-w-[250px]">
-              <p className="font-bold text-gray-800">{activeDoctor?.name || 'Dr. Hadi Raza'}</p>
-              <p className="text-xs text-gray-500 mt-0.5">{activeDoctor?.credentials ? activeDoctor.credentials.map((c: any) => c.label.split('—')[0].trim()).join(', ') : 'BDS, MDS (Oral & Maxillofacial)'}</p>
-            </div>
+          <div className="border-b-2 border-gray-200 pb-4 mb-4 text-center flex flex-col items-center">
+            <img src="/uploads/prescription-banner.png" alt="Dent-O-Facial Banner" className="w-[90%] max-w-[650px] h-auto object-contain mb-2 mx-auto" />
+            <p className="text-sm font-medium text-gray-700 tracking-wide mt-1">
+              Premium Dental, Braces, Implants and Facial Trauma Centre
+            </p>
           </div>
           
           <div className="bg-gray-50 rounded-xl p-4 mb-6 flex justify-between">
