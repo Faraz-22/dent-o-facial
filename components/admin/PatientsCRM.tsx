@@ -228,8 +228,9 @@ export function PatientsCRM() {
   }
 
   const openSlideOver = (patient: any) => {
-    setSelectedPatientIdentifier(patient.email)
-    const profile = JSON.parse(JSON.stringify(patientProfiles[patient.identifier] || { totalCost: 0, paymentHistory: [], dues: 0, sessionsRequired: 0, sessionsCompleted: 0 }))
+    setSelectedPatientIdentifier(patient.identifier)
+    const profile = JSON.parse(JSON.stringify(patientProfiles[patient.identifier] || { totalCost: 0, paymentHistory: [], dues: 0, sessionsRequired: 0, sessionsCompleted: 0, treatments: [] }))
+    if (!profile.treatments) profile.treatments = []
     
     if (profile.totalPayments > 0 && (!profile.paymentHistory || profile.paymentHistory.length === 0)) {
       profile.paymentHistory = [{
