@@ -218,7 +218,7 @@ export function PatientsCRM() {
     setActiveTab('overview')
   }
 
-  const addPayment = () => {
+  const addPayment = (treatmentId: string) => {
     if (!newPayment.amount || !newPayment.date) return
     const payment = {
       id: Math.random().toString(36).substring(7),
@@ -227,42 +227,63 @@ export function PatientsCRM() {
       method: newPayment.method,
       notes: newPayment.notes
     }
-    const currentHistory = Array.isArray(draftProfile?.paymentHistory) ? draftProfile.paymentHistory : []
-    const updatedHistory = [...currentHistory, payment]
     
-    const totalCost = draftProfile?.totalCost || 0
-    const sumPayments = updatedHistory.reduce((sum, p) => sum + p.amount, 0)
-    const newDues = Math.max(0, totalCost - sumPayments)
+    const treatments = [...(draftProfile?.treatments || [])]
+    const tIndex = treatments.findIndex(t => t.id === treatmentId)
+    if (tIndex === -1) return
     
-    setDraftProfile({
-      ...draftProfile,
-      paymentHistory: updatedHistory,
-      dues: newDues
-    })
+    const t = treatments[tIndex]
+    t.paymentHistory = [...(t.paymentHistory || []), payment]
+    
+    setDraftProfile({ ...draftProfile, treatments })
     setNewPayment({ amount: '', date: new Date().toISOString().split('T')[0], method: 'Cash', notes: '' })
   }
 
-  const removePayment = (id: string) => {
-    const updatedHistory = (draftProfile?.paymentHistory || []).filter((p: any) => p.id !== id)
-    const totalCost = draftProfile?.totalCost || 0
-    const sumPayments = updatedHistory.reduce((sum: number, p: any) => sum + p.amount, 0)
-    const newDues = Math.max(0, totalCost - sumPayments)
+  const removePayment = (treatmentId: string, paymentId: string) => {
+    const treatments = [...(draftProfile?.treatments || [])]
+    const tIndex = treatments.findIndex(t => t.id === treatmentId)
+    if (tIndex === -1) return
+
+    const t = treatments[tIndex]
+    t.paymentHistory = (t.paymentHistory || []).filter((p: any) => p.id !== paymentId)
     
-    setDraftProfile({
-      ...draftProfile,
-      paymentHistory: updatedHistory,
-      dues: newDues
-    })
+    setDraftProfile({ ...draftProfile, treatments })
   }
 
-  const handleCostChange = (val: number) => {
-    const history = draftProfile?.paymentHistory || []
-    const sumPayments = history.reduce((sum: number, p: any) => sum + p.amount, 0)
-    setDraftProfile({
-      ...draftProfile,
-      totalCost: val,
-      dues: Math.max(0, val - sumPayments)
+  const handleCostChange = (treatmentId: string, val: number) => {
+    const treatments = [...(draftProfile?.treatments || [])]
+    const tIndex = treatments.findIndex(t => t.id === treatmentId)
+    if (tIndex === -1) return
+
+    treatments[tIndex].totalCost = val
+    setDraftProfile({ ...draftProfile, treatments })
+  }
+
+  const handleSessionsChange = (treatmentId: string, field: 'completed' | 'required', val: number) => {
+    const treatments = [...(draftProfile?.treatments || [])]
+    const tIndex = treatments.findIndex(t => t.id === treatmentId)
+    if (tIndex === -1) return
+
+    if (field === 'completed') treatments[tIndex].sessionsCompleted = val
+    else treatments[tIndex].sessionsRequired = val
+    setDraftProfile({ ...draftProfile, treatments })
+  }
+
+  const createNewTreatment = () => {
+    const name = prompt("Enter the name of the new treatment (e.g. Skin Rejuvenation):")
+    if (!name) return
+    
+    const treatments = [...(draftProfile?.treatments || [])]
+    treatments.push({
+      id: 'treatment-' + Date.now(),
+      name,
+      totalCost: 0,
+      paymentHistory: [],
+      sessionsRequired: 0,
+      sessionsCompleted: 0,
+      createdAt: new Date().toISOString()
     })
+    setDraftProfile({ ...draftProfile, treatments })
   }
 
   const closeSlideOver = () => {
@@ -274,11 +295,16 @@ export function PatientsCRM() {
   const patientAppts = selectedPatient ? appointments.filter(a => a.email === selectedPatient.email) : []
   const patientRecords = selectedPatient ? records.filter(r => r.patientEmail === selectedPatient.email) : []
 
-  const currentCost = draftProfile?.totalCost || 0
-  const historySum = (draftProfile?.paymentHistory || []).reduce((sum: number, p: any) => sum + p.amount, 0)
-  const displayDues = Math.max(0, currentCost - historySum)
-  const pendingPayment = Number(newPayment.amount) || 0
-  const previewDues = Math.max(0, displayDues - pendingPayment)
+  const calculateSuperDues = () => {
+    if (!draftProfile?.treatments) return 0
+    return draftProfile.treatments.reduce((total: number, t: any) => {
+      const sumPayments = (t.paymentHistory || []).reduce((sum: number, p: any) => sum + p.amount, 0)
+      const dues = Math.max(0, (t.totalCost || 0) - sumPayments)
+      return total + dues
+    }, 0)
+  }
+  
+  const superDues = calculateSuperDues()
 
   if (loading) return <div className="p-8 text-center text-gray-500">Loading patients...</div>
 
@@ -410,154 +436,187 @@ export function PatientsCRM() {
               
               {activeTab === 'overview' && (
                 <div className="space-y-6 animate-fade-in">
-                  <div className="bg-white/[0.02] rounded-3xl border border-white/5 p-7 backdrop-blur-md">
-                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-                      <CreditCard size={14} className="text-amber-500" />
-                      Billing & Payments
-                    </h4>
+                  
+                  {/* Super Outstanding Dues */}
+                  <div className="bg-gradient-to-r from-red-900/40 to-black/40 border border-red-900/50 rounded-3xl p-6 flex items-center justify-between shadow-[0_0_30px_rgba(220,38,38,0.1)]">
+                    <div>
+                      <h3 className="text-red-400 font-bold text-lg mb-1 flex items-center gap-2">
+                        <Activity size={18} /> Total Outstanding Dues
+                      </h3>
+                      <p className="text-gray-400 text-sm">Combined dues across all active treatments.</p>
+                    </div>
+                    <div className="text-4xl font-black text-red-500 tracking-tight">
+                      ₹{superDues.toLocaleString()}
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-end border-b border-white/5 pb-4">
+                    <h3 className="text-lg font-bold text-white">Treatment Plans</h3>
+                    <button onClick={createNewTreatment} className="text-amber-500 text-sm font-semibold hover:text-amber-400 transition flex items-center gap-1">
+                      <Plus size={16} /> New Treatment
+                    </button>
+                  </div>
+
+                  {draftProfile?.treatments?.map((treatment: any) => {
+                    const tCost = treatment.totalCost || 0
+                    const tSum = (treatment.paymentHistory || []).reduce((sum: number, p: any) => sum + p.amount, 0)
+                    const tDues = Math.max(0, tCost - tSum)
                     
-                    <div className="grid grid-cols-2 gap-5 mb-8 bg-black/20 p-5 rounded-2xl border border-white/5">
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-500 mb-2">Total Treatment Cost (₹)</label>
-                        <input 
-                          type="number" 
-                          value={draftProfile?.totalCost || ''}
-                          onChange={e => handleCostChange(Number(e.target.value))}
-                          className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all placeholder-gray-700 font-medium"
-                          placeholder="0"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-500 mb-2">Outstanding Dues (₹) <span className="text-[10px] text-gray-600 font-normal ml-1">(Auto-calculated)</span></label>
-                        <div className="w-full px-4 py-3 rounded-xl bg-red-900/10 border border-red-900/30 text-red-400 text-sm font-bold flex items-center justify-between">
-                          <span>₹{displayDues.toLocaleString()}</span>
-                          {pendingPayment > 0 && (
-                            <span className="text-green-500 text-xs flex items-center gap-1 opacity-80">
-                              - ₹{pendingPayment.toLocaleString()} = ₹{previewDues.toLocaleString()}
-                            </span>
+                    return (
+                      <div key={treatment.id} className="bg-white/[0.02] rounded-3xl border border-white/5 p-7 backdrop-blur-md relative overflow-hidden group">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-amber-500/50 group-hover:bg-amber-500 transition-colors"></div>
+                        
+                        <div className="flex justify-between items-start mb-6">
+                          <div>
+                            <h4 className="text-xl font-bold text-white mb-1">{treatment.name}</h4>
+                            <p className="text-xs text-gray-500">Created: {new Date(treatment.createdAt).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-5 mb-8 bg-black/20 p-5 rounded-2xl border border-white/5">
+                          <div>
+                            <label className="block text-xs font-semibold text-gray-500 mb-2">Total Treatment Cost (₹)</label>
+                            <input 
+                              type="number" 
+                              value={treatment.totalCost || ''}
+                              onChange={e => handleCostChange(treatment.id, Number(e.target.value))}
+                              className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all placeholder-gray-700 font-medium"
+                              placeholder="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-gray-500 mb-2">Outstanding Dues (₹) <span className="text-[10px] text-gray-600 font-normal ml-1">(Auto-calculated)</span></label>
+                            <div className="w-full px-4 py-3 rounded-xl bg-red-900/10 border border-red-900/30 text-red-400 text-sm font-bold flex items-center justify-between">
+                              <span>₹{tDues.toLocaleString()}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Sessions */}
+                        <div className="mb-8">
+                          <h5 className="text-xs font-semibold text-gray-500 mb-3">Sessions Tracking</h5>
+                          <div className="grid grid-cols-2 gap-5">
+                            <div>
+                              <input 
+                                type="number" 
+                                value={treatment.sessionsCompleted || ''}
+                                onChange={e => handleSessionsChange(treatment.id, 'completed', Number(e.target.value))}
+                                className="w-full px-4 py-2.5 rounded-xl bg-black/20 border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500"
+                                placeholder="Completed (e.g. 1)"
+                              />
+                            </div>
+                            <div>
+                              <input 
+                                type="number" 
+                                value={treatment.sessionsRequired || ''}
+                                onChange={e => handleSessionsChange(treatment.id, 'required', Number(e.target.value))}
+                                className="w-full px-4 py-2.5 rounded-xl bg-black/20 border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500"
+                                placeholder="Total Required (e.g. 5)"
+                              />
+                            </div>
+                          </div>
+                          {treatment.sessionsRequired > 0 && (
+                            <div className="mt-3">
+                              <div className="flex justify-between text-xs mb-1">
+                                <span className="text-gray-400">Progress</span>
+                                <span className="text-amber-500 font-bold">{Math.round((treatment.sessionsCompleted / treatment.sessionsRequired) * 100)}%</span>
+                              </div>
+                              <div className="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                                <div 
+                                  className="h-full bg-amber-500 transition-all duration-500" 
+                                  style={{ width: `${Math.min((treatment.sessionsCompleted / treatment.sessionsRequired) * 100, 100)}%` }} 
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Payments */}
+                        <div>
+                          <h5 className="text-xs font-semibold text-white mb-3">Log Payment for {treatment.name}</h5>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-black/20 p-4 rounded-xl border border-white/5">
+                            <input 
+                              type="number" 
+                              placeholder="Amount (₹)"
+                              value={newPayment.amount}
+                              onChange={e => setNewPayment({...newPayment, amount: e.target.value})}
+                              className="px-4 py-2.5 rounded-lg bg-[#1a1a2e] border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500"
+                            />
+                            <input 
+                              type="date"
+                              style={{ colorScheme: 'dark' }}
+                              value={newPayment.date}
+                              onChange={e => setNewPayment({...newPayment, date: e.target.value})}
+                              className="px-4 py-2.5 rounded-lg bg-[#1a1a2e] border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500 cursor-pointer"
+                            />
+                            <select
+                              style={{ colorScheme: 'dark' }}
+                              value={newPayment.method}
+                              onChange={e => setNewPayment({...newPayment, method: e.target.value})}
+                              className="px-4 py-2.5 rounded-lg bg-[#1a1a2e] border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500 cursor-pointer"
+                            >
+                              <option value="Cash" className="bg-[#1a1a2e]">Cash</option>
+                              <option value="UPI" className="bg-[#1a1a2e]">UPI</option>
+                              <option value="Card" className="bg-[#1a1a2e]">Card</option>
+                              <option value="Bank Transfer" className="bg-[#1a1a2e]">Bank Transfer</option>
+                            </select>
+                            <input 
+                              type="text" 
+                              placeholder="Notes (Optional)"
+                              value={newPayment.notes}
+                              onChange={e => setNewPayment({...newPayment, notes: e.target.value})}
+                              className="px-4 py-2.5 rounded-lg bg-[#1a1a2e] border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500"
+                            />
+                            <div className="col-span-2 md:col-span-4 flex justify-end mt-2">
+                              <button onClick={() => addPayment(treatment.id)} type="button" className="px-5 py-2.5 bg-green-600 hover:bg-green-500 text-white text-xs font-bold rounded-lg transition-all flex items-center gap-1 shadow-lg shadow-green-900/20">
+                                <Plus size={14} /> Add Payment to Record
+                              </button>
+                            </div>
+                          </div>
+                          
+                          {treatment.paymentHistory?.length > 0 && (
+                            <div className="mt-4 border border-white/5 rounded-2xl overflow-hidden">
+                              <table className="w-full text-left text-sm text-gray-400">
+                                <thead className="bg-white/5 text-xs uppercase text-gray-500">
+                                  <tr>
+                                    <th className="px-4 py-3 font-semibold">Date</th>
+                                    <th className="px-4 py-3 font-semibold">Amount</th>
+                                    <th className="px-4 py-3 font-semibold">Method</th>
+                                    <th className="px-4 py-3 font-semibold">Notes</th>
+                                    <th className="px-4 py-3 text-right font-semibold">Action</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-white/5 bg-black/20">
+                                  {treatment.paymentHistory.map((p: any) => (
+                                    <tr key={p.id} className="hover:bg-white/[0.02] transition">
+                                      <td className="px-4 py-3 text-white">{new Date(p.date).toLocaleDateString()}</td>
+                                      <td className="px-4 py-3 font-bold text-green-500">₹{p.amount.toLocaleString()}</td>
+                                      <td className="px-4 py-3">{p.method}</td>
+                                      <td className="px-4 py-3 text-xs">{p.notes || '-'}</td>
+                                      <td className="px-4 py-3 text-right">
+                                        <button onClick={() => removePayment(treatment.id, p.id)} className="text-red-500/50 hover:text-red-500 transition">
+                                          <Trash2 size={14} />
+                                        </button>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
                           )}
                         </div>
                       </div>
+                    )
+                  })}
+                  
+                  {draftProfile?.treatments?.length === 0 && (
+                    <div className="text-center p-8 bg-white/5 rounded-3xl border border-white/5">
+                      <p className="text-gray-400 mb-4">No treatments found for this patient.</p>
+                      <button onClick={createNewTreatment} className="px-6 py-2 bg-amber-500 text-white text-sm font-bold rounded-full hover:bg-amber-400 transition">
+                        Create Treatment Plan
+                      </button>
                     </div>
-
-                    <div className="mb-4">
-                      <h5 className="text-xs font-semibold text-white mb-3">Log New Payment</h5>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-black/20 p-4 rounded-xl border border-white/5">
-                        <input 
-                          type="number" 
-                          placeholder="Amount (₹)"
-                          value={newPayment.amount}
-                          onChange={e => setNewPayment({...newPayment, amount: e.target.value})}
-                          className="px-4 py-2.5 rounded-lg bg-[#1a1a2e] border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500"
-                        />
-                        <input 
-                          type="date"
-                          style={{ colorScheme: 'dark' }}
-                          value={newPayment.date}
-                          onChange={e => setNewPayment({...newPayment, date: e.target.value})}
-                          className="px-4 py-2.5 rounded-lg bg-[#1a1a2e] border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500 cursor-pointer"
-                        />
-                        <select
-                          style={{ colorScheme: 'dark' }}
-                          value={newPayment.method}
-                          onChange={e => setNewPayment({...newPayment, method: e.target.value})}
-                          className="px-4 py-2.5 rounded-lg bg-[#1a1a2e] border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500 cursor-pointer"
-                        >
-                          <option value="Cash" className="bg-[#1a1a2e]">Cash</option>
-                          <option value="UPI" className="bg-[#1a1a2e]">UPI</option>
-                          <option value="Card" className="bg-[#1a1a2e]">Card</option>
-                          <option value="Bank Transfer" className="bg-[#1a1a2e]">Bank Transfer</option>
-                        </select>
-                        <input 
-                          type="text" 
-                          placeholder="Notes (Optional)"
-                          value={newPayment.notes}
-                          onChange={e => setNewPayment({...newPayment, notes: e.target.value})}
-                          className="px-4 py-2.5 rounded-lg bg-[#1a1a2e] border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500"
-                        />
-                        <div className="col-span-2 md:col-span-4 flex justify-end mt-2">
-                          <button onClick={addPayment} type="button" className="px-5 py-2.5 bg-green-600 hover:bg-green-500 text-white text-xs font-bold rounded-lg transition-all flex items-center gap-1 shadow-lg shadow-green-900/20">
-                            <Plus size={14} /> Add Payment to Record
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    {draftProfile?.paymentHistory?.length > 0 && (
-                      <div className="mt-6 border border-white/5 rounded-2xl overflow-hidden">
-                        <table className="w-full text-left text-sm text-gray-400">
-                          <thead className="bg-white/5 text-xs uppercase text-gray-500">
-                            <tr>
-                              <th className="px-4 py-3 font-semibold">Date</th>
-                              <th className="px-4 py-3 font-semibold">Amount</th>
-                              <th className="px-4 py-3 font-semibold">Method</th>
-                              <th className="px-4 py-3 font-semibold">Notes</th>
-                              <th className="px-4 py-3 text-right font-semibold">Action</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-white/5 bg-black/20">
-                            {draftProfile.paymentHistory.map((p: any) => (
-                              <tr key={p.id} className="hover:bg-white/[0.02] transition">
-                                <td className="px-4 py-3 text-white">{new Date(p.date).toLocaleDateString()}</td>
-                                <td className="px-4 py-3 font-bold text-green-500">₹{p.amount.toLocaleString()}</td>
-                                <td className="px-4 py-3">{p.method}</td>
-                                <td className="px-4 py-3 text-xs">{p.notes || '-'}</td>
-                                <td className="px-4 py-3 text-right">
-                                  <button onClick={() => removePayment(p.id)} className="text-red-500/50 hover:text-red-500 transition">
-                                    <Trash2 size={14} />
-                                  </button>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="bg-white/[0.02] rounded-3xl border border-white/5 p-7 backdrop-blur-md">
-                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-                      <Activity size={14} className="text-amber-500" />
-                      Treatment Sessions
-                    </h4>
-                    <div className="grid grid-cols-2 gap-5 mb-2">
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-500 mb-2">Sessions Completed</label>
-                        <input 
-                          type="number" 
-                          value={draftProfile?.sessionsCompleted || ''}
-                          onChange={e => setDraftProfile({...draftProfile, sessionsCompleted: Number(e.target.value)})}
-                          className="w-full px-4 py-3 rounded-xl bg-black/20 border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all placeholder-gray-700"
-                          placeholder="0"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-500 mb-2">Total Sessions Required</label>
-                        <input 
-                          type="number" 
-                          value={draftProfile?.sessionsRequired || ''}
-                          onChange={e => setDraftProfile({...draftProfile, sessionsRequired: Number(e.target.value)})}
-                          className="w-full px-4 py-3 rounded-xl bg-black/20 border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all placeholder-gray-700"
-                          placeholder="0"
-                        />
-                      </div>
-                    </div>
-                    {/* Progress Bar */}
-                    {draftProfile?.sessionsRequired > 0 && (
-                      <div className="mt-2">
-                        <div className="flex justify-between text-xs mb-1">
-                          <span className="text-gray-400">Progress</span>
-                          <span className="text-amber-500 font-bold">{Math.round((draftProfile.sessionsCompleted / draftProfile.sessionsRequired) * 100)}%</span>
-                        </div>
-                        <div className="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-amber-500 transition-all duration-500" 
-                            style={{ width: `${Math.min((draftProfile.sessionsCompleted / draftProfile.sessionsRequired) * 100, 100)}%` }} 
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  )}
 
                   <div className="flex justify-end pt-2">
                     <button

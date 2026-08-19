@@ -42,14 +42,34 @@ export async function GET(request: Request) {
       
       const allProfiles = await PatientProfile.find({}).lean()
       const profileMap: Record<string, any> = {}
-      allProfiles.forEach(item => {
+      
+      const migrateLegacyToTreatments = (item: any) => {
+        if (item.treatments && item.treatments.length > 0) return item.treatments;
+        
+        // If no treatments array but has legacy data
+        if (item.totalCost > 0 || item.totalPayments > 0 || item.sessionsRequired > 0 || item.paymentHistory?.length > 0) {
+          return [{
+            id: 'general-' + Date.now(),
+            name: 'General Treatment (Legacy)',
+            totalCost: item.totalCost || 0,
+            paymentHistory: item.paymentHistory || [],
+            sessionsRequired: item.sessionsRequired || 0,
+            sessionsCompleted: item.sessionsCompleted || 0,
+            createdAt: item.updatedAt || new Date().toISOString()
+          }];
+        }
+        return [];
+      };
+
+      allProfiles.forEach((item: any) => {
         profileMap[item.email] = {
           totalCost: item.totalCost || 0,
           paymentHistory: item.paymentHistory || [],
-          totalPayments: item.totalPayments,
-          dues: item.dues,
-          sessionsRequired: item.sessionsRequired,
-          sessionsCompleted: item.sessionsCompleted,
+          totalPayments: item.totalPayments || 0,
+          dues: item.dues || 0,
+          sessionsRequired: item.sessionsRequired || 0,
+          sessionsCompleted: item.sessionsCompleted || 0,
+          treatments: migrateLegacyToTreatments(item)
         }
       })
       return NextResponse.json(profileMap)
@@ -65,7 +85,18 @@ export async function GET(request: Request) {
       if (email) {
         return NextResponse.json({ profile: profiles[email] || {} })
       }
-      return NextResponse.json(profiles)
+      
+      // We don't migrate JSON fallback dynamically right now as it's just a fallback, but we can do a simple map
+      const mappedProfiles: any = {}
+      Object.keys(profiles).forEach(k => {
+        const item = profiles[k]
+        mappedProfiles[k] = {
+           ...item,
+           treatments: item.treatments || []
+        }
+      })
+      
+      return NextResponse.json(mappedProfiles)
     }
   } catch (error) {
     return NextResponse.json({})
@@ -81,7 +112,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { email, totalPayments, dues, totalCost, paymentHistory, sessionsRequired, sessionsCompleted } = body
+    const { email, totalPayments, dues, totalCost, paymentHistory, sessionsRequired, sessionsCompleted, treatments } = body
 
     if (!email) {
       return NextResponse.json({ error: 'Missing email' }, { status: 400 })
@@ -98,6 +129,7 @@ export async function POST(request: Request) {
           dues: Number(dues) || 0, 
           sessionsRequired: Number(sessionsRequired) || 0, 
           sessionsCompleted: Number(sessionsCompleted) || 0,
+          treatments: Array.isArray(treatments) ? treatments : [],
           updatedAt: new Date() 
         },
         { upsert: true, new: true }
@@ -120,6 +152,7 @@ export async function POST(request: Request) {
         dues: Number(dues) || 0,
         sessionsRequired: Number(sessionsRequired) || 0,
         sessionsCompleted: Number(sessionsCompleted) || 0,
+        treatments: Array.isArray(treatments) ? treatments : [],
         updatedAt: new Date().toISOString()
       }
       

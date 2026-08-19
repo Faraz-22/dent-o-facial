@@ -123,18 +123,38 @@ const UserTestimonialSchema = new mongoose.Schema({
 
 const PatientProfileSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
-  totalPayments: { type: Number, default: 0 }, // Legacy/derived
-  dues: { type: Number, default: 0 }, // Legacy/derived
+  
+  // Legacy global fields (kept for migration fallback, will be phased out)
+  totalPayments: { type: Number, default: 0 },
+  dues: { type: Number, default: 0 },
   totalCost: { type: Number, default: 0 },
   paymentHistory: [{
-    id: { type: String, required: true },
-    amount: { type: Number, required: true },
-    date: { type: String, required: true },
-    method: { type: String, required: true },
+    id: { type: String },
+    amount: { type: Number },
+    date: { type: String },
+    method: { type: String },
     notes: { type: String }
   }],
   sessionsRequired: { type: Number, default: 0 },
   sessionsCompleted: { type: Number, default: 0 },
+  
+  // New per-treatment architecture
+  treatments: [{
+    id: { type: String, required: true },
+    name: { type: String, required: true },
+    totalCost: { type: Number, default: 0 },
+    paymentHistory: [{
+      id: { type: String, required: true },
+      amount: { type: Number, required: true },
+      date: { type: String, required: true },
+      method: { type: String, required: true },
+      notes: { type: String }
+    }],
+    sessionsRequired: { type: Number, default: 0 },
+    sessionsCompleted: { type: Number, default: 0 },
+    createdAt: { type: Date, default: Date.now }
+  }],
+  
   updatedAt: { type: Date, default: Date.now }
 });
 

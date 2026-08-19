@@ -138,63 +138,101 @@ export default function PatientDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2 space-y-6">
             
-            {profile && (profile.sessionsRequired > 0 || profile.dues > 0) && (
-              <div className="bg-white p-8 rounded-3xl border border-cream shadow-sm mb-8">
-                <h2 className="font-playfair text-2xl text-charcoal mb-6 border-b border-cream-dark pb-4">Treatment Progress & Billing</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {profile.sessionsRequired > 0 && (
-                    <div>
-                      <span className="text-xs font-semibold text-charcoal-muted uppercase tracking-widest block mb-3">Treatment Sessions</span>
-                      <div className="flex justify-between text-sm mb-2 font-medium text-charcoal">
-                        <span>{profile.sessionsCompleted} Completed</span>
-                        <span>{profile.sessionsRequired} Total</span>
+            {profile && profile.treatments && profile.treatments.length > 0 && (
+              <div className="space-y-6 mb-8">
+                {/* Super Outstanding Dues */}
+                {(() => {
+                  const superDues = profile.treatments.reduce((total: number, t: any) => {
+                    const sumPayments = (t.paymentHistory || []).reduce((sum: number, p: any) => sum + p.amount, 0)
+                    return total + Math.max(0, (t.totalCost || 0) - sumPayments)
+                  }, 0)
+                  
+                  if (superDues > 0) {
+                    return (
+                      <div className="bg-red-50 border border-red-200 p-6 rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                          <h2 className="font-playfair text-xl text-red-700 mb-1">Total Outstanding Dues</h2>
+                          <p className="text-red-500 text-sm">Combined dues across all your active treatments.</p>
+                        </div>
+                        <div className="text-3xl font-bold text-red-600 shrink-0">
+                          ₹{superDues.toLocaleString()}
+                        </div>
                       </div>
-                      <div className="w-full h-3 bg-cream-dark rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-gold transition-all duration-1000 ease-out" 
-                          style={{ width: `${Math.min((profile.sessionsCompleted / profile.sessionsRequired) * 100, 100)}%` }} 
-                        />
+                    )
+                  }
+                  return null
+                })()}
+
+                {/* Treatment Plans */}
+                {profile.treatments.map((treatment: any) => {
+                  const tCost = treatment.totalCost || 0
+                  const tSum = (treatment.paymentHistory || []).reduce((sum: number, p: any) => sum + p.amount, 0)
+                  const tDues = Math.max(0, tCost - tSum)
+                  
+                  return (
+                    <div key={treatment.id} className="bg-white p-8 rounded-3xl border border-cream shadow-sm hover:shadow-md transition-shadow">
+                      <h2 className="font-playfair text-2xl text-charcoal mb-2">{treatment.name}</h2>
+                      <p className="text-xs text-charcoal-muted mb-6 pb-4 border-b border-cream-dark">
+                        Started on {new Date(treatment.createdAt).toLocaleDateString()}
+                      </p>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {treatment.sessionsRequired > 0 && (
+                          <div>
+                            <span className="text-xs font-semibold text-charcoal-muted uppercase tracking-widest block mb-3">Treatment Sessions</span>
+                            <div className="flex justify-between text-sm mb-2 font-medium text-charcoal">
+                              <span>{treatment.sessionsCompleted} Completed</span>
+                              <span>{treatment.sessionsRequired} Total</span>
+                            </div>
+                            <div className="w-full h-3 bg-cream-dark rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-gold transition-all duration-1000 ease-out" 
+                                style={{ width: `${Math.min((treatment.sessionsCompleted / treatment.sessionsRequired) * 100, 100)}%` }} 
+                              />
+                            </div>
+                          </div>
+                        )}
+                        {tDues > 0 && (
+                          <div>
+                            <span className="text-xs font-semibold text-charcoal-muted uppercase tracking-widest block mb-3">Outstanding Dues</span>
+                            <div className="text-3xl font-bold text-red-500">
+                              ₹{tDues.toLocaleString()}
+                            </div>
+                            <p className="text-xs text-charcoal-muted mt-2">Please clear your dues at the clinic during your next visit.</p>
+                          </div>
+                        )}
                       </div>
+                      
+                      {treatment.paymentHistory && treatment.paymentHistory.length > 0 && (
+                        <div className="mt-8 pt-6 border-t border-cream-dark">
+                          <h3 className="font-playfair text-xl text-charcoal mb-4">Payment History</h3>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-left text-sm text-charcoal">
+                              <thead className="bg-cream border-b border-cream-dark">
+                                <tr>
+                                  <th className="px-4 py-3 font-semibold text-charcoal-muted uppercase tracking-wider text-xs whitespace-nowrap">Date</th>
+                                  <th className="px-4 py-3 font-semibold text-charcoal-muted uppercase tracking-wider text-xs whitespace-nowrap">Amount</th>
+                                  <th className="px-4 py-3 font-semibold text-charcoal-muted uppercase tracking-wider text-xs whitespace-nowrap">Method</th>
+                                  <th className="px-4 py-3 font-semibold text-charcoal-muted uppercase tracking-wider text-xs whitespace-nowrap">Notes</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-cream-dark">
+                                {treatment.paymentHistory.map((p: any) => (
+                                  <tr key={p.id} className="hover:bg-cream/30 transition">
+                                    <td className="px-4 py-3 font-medium whitespace-nowrap">{new Date(p.date).toLocaleDateString()}</td>
+                                    <td className="px-4 py-3 font-bold text-green-600 whitespace-nowrap">₹{p.amount.toLocaleString()}</td>
+                                    <td className="px-4 py-3 whitespace-nowrap">{p.method}</td>
+                                    <td className="px-4 py-3 text-xs text-charcoal-muted">{p.notes || '-'}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
-                  {profile.dues > 0 && (
-                    <div>
-                      <span className="text-xs font-semibold text-charcoal-muted uppercase tracking-widest block mb-3">Outstanding Dues</span>
-                      <div className="text-3xl font-bold text-red-500">
-                        ₹{profile.dues.toLocaleString()}
-                      </div>
-                      <p className="text-xs text-charcoal-muted mt-2">Please clear your dues at the clinic during your next visit.</p>
-                    </div>
-                  )}
-                </div>
-                
-                {profile.paymentHistory && profile.paymentHistory.length > 0 && (
-                  <div className="mt-8 pt-6 border-t border-cream-dark">
-                    <h3 className="font-playfair text-xl text-charcoal mb-4">Payment History</h3>
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left text-sm text-charcoal">
-                        <thead className="bg-cream border-b border-cream-dark">
-                          <tr>
-                            <th className="px-4 py-3 font-semibold text-charcoal-muted uppercase tracking-wider text-xs">Date</th>
-                            <th className="px-4 py-3 font-semibold text-charcoal-muted uppercase tracking-wider text-xs">Amount</th>
-                            <th className="px-4 py-3 font-semibold text-charcoal-muted uppercase tracking-wider text-xs">Method</th>
-                            <th className="px-4 py-3 font-semibold text-charcoal-muted uppercase tracking-wider text-xs">Notes</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-cream-dark">
-                          {profile.paymentHistory.map((p: any) => (
-                            <tr key={p.id} className="hover:bg-cream/30 transition">
-                              <td className="px-4 py-3 font-medium">{new Date(p.date).toLocaleDateString()}</td>
-                              <td className="px-4 py-3 font-bold text-green-600">₹{p.amount.toLocaleString()}</td>
-                              <td className="px-4 py-3">{p.method}</td>
-                              <td className="px-4 py-3 text-xs text-charcoal-muted">{p.notes || '-'}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                )}
+                  )
+                })}
               </div>
             )}
 

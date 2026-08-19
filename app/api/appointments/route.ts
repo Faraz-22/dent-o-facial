@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getAppointments, saveAppointment, Appointment as JSONAppointment, createNotification } from '@/lib/db'
 import { connectToDatabase } from '@/lib/mongodb'
-import { Appointment as AppointmentModel, Notification as NotificationModel } from '@/lib/models'
+import { Appointment as AppointmentModel, Notification as NotificationModel, PatientProfile } from '@/lib/models'
 import { sendEmail } from '@/lib/email'
 
 export async function GET() {
@@ -46,6 +46,46 @@ export async function POST(request: Request) {
         type: 'Appointment',
         read: false
       })
+
+      if (data.email) {
+        // Auto-create treatment plan
+        const profile = await PatientProfile.findOne({ email: data.email })
+        if (profile) {
+          const hasTreatment = profile.treatments?.some((t: any) => t.name === data.treatment)
+          if (!hasTreatment) {
+            await PatientProfile.updateOne(
+              { email: data.email },
+              {
+                $push: {
+                  treatments: {
+                    id: 'treatment-' + Date.now(),
+                    name: data.treatment,
+                    totalCost: 0,
+                    paymentHistory: [],
+                    sessionsRequired: 0,
+                    sessionsCompleted: 0,
+                    createdAt: new Date()
+                  }
+                }
+              }
+            )
+          }
+        } else {
+          // Create new profile with this treatment
+          await PatientProfile.create({
+             email: data.email,
+             treatments: [{
+                id: 'treatment-' + Date.now(),
+                name: data.treatment,
+                totalCost: 0,
+                paymentHistory: [],
+                sessionsRequired: 0,
+                sessionsCompleted: 0,
+                createdAt: new Date()
+             }]
+          })
+        }
+      }
 
       if (data.email) {
         await sendEmail({
