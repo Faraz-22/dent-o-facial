@@ -302,86 +302,99 @@ export function PatientsCRM() {
         <div className="fixed inset-0 z-50 flex justify-end">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={closeSlideOver} />
           
-          <div className="relative w-full max-w-xl bg-[#12122a] h-full shadow-2xl flex flex-col border-l border-gray-800 animate-slide-in-right">
+          <div className="relative w-full max-w-xl bg-[#0f111a]/95 h-full shadow-[0_0_40px_rgba(0,0,0,0.5)] flex flex-col border-l border-white/10 animate-slide-in-right backdrop-blur-2xl">
             {/* Header */}
-            <div className="p-6 border-b border-gray-800 bg-[#1a1a2e] flex items-start justify-between shrink-0">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-amber-600 to-amber-800 flex items-center justify-center text-white font-bold text-xl shadow-lg">
+            <div className="p-8 border-b border-white/5 bg-white/[0.02] flex items-start justify-between shrink-0">
+              <div className="flex items-center gap-5">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-700/20 border border-amber-500/30 flex items-center justify-center text-amber-500 font-bold text-2xl shadow-lg">
                   {selectedPatient.name.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-white mb-1">{selectedPatient.name}</h2>
+                  <h2 className="text-2xl font-bold text-white mb-1">{selectedPatient.name}</h2>
                   <p className="text-sm text-gray-400">{selectedPatient.email}</p>
-                  {selectedPatient.phone && <p className="text-xs text-gray-500 mt-0.5">{selectedPatient.phone}</p>}
+                  {selectedPatient.phone && <p className="text-xs text-gray-500 mt-1">{selectedPatient.phone}</p>}
                 </div>
               </div>
-              <button onClick={closeSlideOver} className="p-2 text-gray-500 hover:text-white bg-gray-800/50 hover:bg-gray-800 rounded-full transition">
+              <button onClick={closeSlideOver} className="p-2 text-gray-500 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-all">
                 <X size={20} />
               </button>
             </div>
 
             {/* Tabs */}
-            <div className="flex border-b border-gray-800 px-6 shrink-0 overflow-x-auto no-scrollbar">
-              <button onClick={() => setActiveTab('overview')} className={`px-4 py-4 text-sm font-semibold border-b-2 whitespace-nowrap transition ${activeTab === 'overview' ? 'border-amber-500 text-amber-500' : 'border-transparent text-gray-400 hover:text-gray-200'}`}>Profile & Billing</button>
-              <button onClick={() => setActiveTab('records')} className={`px-4 py-4 text-sm font-semibold border-b-2 whitespace-nowrap transition ${activeTab === 'records' ? 'border-amber-500 text-amber-500' : 'border-transparent text-gray-400 hover:text-gray-200'}`}>Records & Medicines</button>
-              <button onClick={() => setActiveTab('appointments')} className={`px-4 py-4 text-sm font-semibold border-b-2 whitespace-nowrap transition ${activeTab === 'appointments' ? 'border-amber-500 text-amber-500' : 'border-transparent text-gray-400 hover:text-gray-200'}`}>Appointments</button>
-              <button onClick={() => setActiveTab('aftercare')} className={`px-4 py-4 text-sm font-semibold border-b-2 whitespace-nowrap transition ${activeTab === 'aftercare' ? 'border-amber-500 text-amber-500' : 'border-transparent text-gray-400 hover:text-gray-200'}`}>Custom Aftercare</button>
+            <div className="flex px-8 py-5 gap-2 border-b border-white/5 shrink-0 overflow-x-auto no-scrollbar">
+              {['overview', 'records', 'appointments', 'aftercare'].map(tab => (
+                <button 
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-5 py-2.5 text-sm font-semibold rounded-full whitespace-nowrap transition-all duration-300 ${
+                    activeTab === tab 
+                      ? 'bg-amber-500 text-white shadow-lg shadow-amber-900/20' 
+                      : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  {tab === 'overview' ? 'Profile & Billing' : tab === 'records' ? 'Records & Medicines' : tab === 'appointments' ? 'Appointments' : 'Custom Aftercare'}
+                </button>
+              ))}
             </div>
 
             {/* Scrollable Content */}
-            <div className="p-6 overflow-y-auto flex-1 space-y-8">
+            <div className="p-8 overflow-y-auto flex-1 space-y-8 no-scrollbar">
               
               {activeTab === 'overview' && (
                 <div className="space-y-6 animate-fade-in">
-                  <div className="bg-[#1a1a2e] rounded-2xl border border-gray-800 p-5">
-                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <div className="bg-white/[0.02] rounded-3xl border border-white/5 p-7 backdrop-blur-md">
+                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
                       <CreditCard size={14} className="text-amber-500" />
                       Billing & Payments
                     </h4>
-                    <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="grid grid-cols-2 gap-5 mb-2">
                       <div>
-                        <label className="block text-xs text-gray-500 mb-1">Total Paid (₹)</label>
+                        <label className="block text-xs font-semibold text-gray-500 mb-2">Total Paid (₹)</label>
                         <input 
                           type="number" 
                           value={draftProfile?.totalPayments || ''}
                           onChange={e => setDraftProfile({...draftProfile, totalPayments: Number(e.target.value)})}
-                          className="w-full px-3 py-2 rounded-lg bg-[#12122a] border border-gray-700 text-white text-sm focus:outline-none focus:border-amber-500"
+                          className="w-full px-4 py-3 rounded-xl bg-black/20 border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all placeholder-gray-700"
+                          placeholder="0"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-500 mb-1">Dues Outstanding (₹)</label>
+                        <label className="block text-xs font-semibold text-gray-500 mb-2">Dues Outstanding (₹)</label>
                         <input 
                           type="number" 
                           value={draftProfile?.dues || ''}
                           onChange={e => setDraftProfile({...draftProfile, dues: Number(e.target.value)})}
-                          className="w-full px-3 py-2 rounded-lg bg-[#12122a] border border-red-900/50 text-red-400 text-sm focus:outline-none focus:border-red-500"
+                          className="w-full px-4 py-3 rounded-xl bg-black/20 border border-red-900/30 text-red-400 text-sm focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all placeholder-red-900/50"
+                          placeholder="0"
                         />
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-[#1a1a2e] rounded-2xl border border-gray-800 p-5">
-                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <div className="bg-white/[0.02] rounded-3xl border border-white/5 p-7 backdrop-blur-md">
+                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
                       <Activity size={14} className="text-amber-500" />
                       Treatment Sessions
                     </h4>
-                    <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="grid grid-cols-2 gap-5 mb-2">
                       <div>
-                        <label className="block text-xs text-gray-500 mb-1">Sessions Completed</label>
+                        <label className="block text-xs font-semibold text-gray-500 mb-2">Sessions Completed</label>
                         <input 
                           type="number" 
                           value={draftProfile?.sessionsCompleted || ''}
                           onChange={e => setDraftProfile({...draftProfile, sessionsCompleted: Number(e.target.value)})}
-                          className="w-full px-3 py-2 rounded-lg bg-[#12122a] border border-gray-700 text-white text-sm focus:outline-none focus:border-amber-500"
+                          className="w-full px-4 py-3 rounded-xl bg-black/20 border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all placeholder-gray-700"
+                          placeholder="0"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-500 mb-1">Total Sessions Required</label>
+                        <label className="block text-xs font-semibold text-gray-500 mb-2">Total Sessions Required</label>
                         <input 
                           type="number" 
                           value={draftProfile?.sessionsRequired || ''}
                           onChange={e => setDraftProfile({...draftProfile, sessionsRequired: Number(e.target.value)})}
-                          className="w-full px-3 py-2 rounded-lg bg-[#12122a] border border-gray-700 text-white text-sm focus:outline-none focus:border-amber-500"
+                          className="w-full px-4 py-3 rounded-xl bg-black/20 border border-white/5 text-white text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all placeholder-gray-700"
+                          placeholder="0"
                         />
                       </div>
                     </div>
@@ -406,8 +419,8 @@ export function PatientsCRM() {
                     <button
                       onClick={() => savePatientProfile(selectedPatient.email)}
                       disabled={profileSaveStatus === 'saving'}
-                      className={`px-5 py-2.5 rounded-xl disabled:opacity-50 text-white text-sm font-bold transition flex items-center gap-2
-                        ${profileSaveStatus === 'saved' ? 'bg-green-600 hover:bg-green-500' : 'bg-amber-600 hover:bg-amber-500'}`}
+                      className={`px-8 py-3.5 rounded-full disabled:opacity-50 text-white text-sm font-bold transition-all duration-300 flex items-center gap-2 shadow-lg
+                        ${profileSaveStatus === 'saved' ? 'bg-green-600 hover:bg-green-500 shadow-green-900/20' : 'bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 shadow-amber-900/20'}`}
                     >
                       {profileSaveStatus === 'saving' && 'Saving Profile...'}
                       {profileSaveStatus === 'saved' && <><Check size={16} /> Saved Successfully!</>}
