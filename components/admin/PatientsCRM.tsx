@@ -14,8 +14,8 @@ export function PatientsCRM() {
   const [dateFilter, setDateFilter] = useState('')
   
   const [uploading, setUploading] = useState<{ email: string } | null>(null)
-  const [selectedPatientEmail, setSelectedPatientEmail] = useState<string | null>(null)
-  const [uploadModal, setUploadModal] = useState<{ isOpen: boolean; email: string }>({ isOpen: false, email: '' })
+  const [selectedPatientIdentifier, setSelectedPatientIdentifier] = useState<string | null>(null)
+  const [uploadModal, setUploadModal] = useState<{ isOpen: boolean; identifier: string }>({ isOpen: false, identifier: '' })
   const [uploadForm, setUploadForm] = useState({ type: 'prescription', fileUrl: '', notes: '', date: new Date().toISOString().split('T')[0] })
   
   const [saveStatus, setSaveStatus] = useState<Record<string, 'saving' | 'saved' | 'error'>>({})
@@ -66,17 +66,19 @@ export function PatientsCRM() {
       
       const patientMap = new Map()
       apptList.forEach((appt: any) => {
-        if (appt.email && !patientMap.has(appt.email)) {
-          patientMap.set(appt.email, {
-            name: appt.patientName || appt.email.split('@')[0],
-            email: appt.email,
-            phone: appt.phone || ''
+        const identifier = appt.email || appt.phone
+        if (identifier && !patientMap.has(identifier)) {
+          patientMap.set(identifier, {
+            name: appt.patientName || (appt.email ? appt.email.split('@')[0] : 'Unknown'),
+            email: appt.email || '',
+            phone: appt.phone || '',
+            identifier: identifier
           })
         }
       })
       
       userList.forEach((user: any) => {
-        if (patientMap.has(user.email)) {
+        if (user.email && patientMap.has(user.email)) {
           patientMap.set(user.email, { ...patientMap.get(user.email), name: user.name })
         }
       })
@@ -91,10 +93,10 @@ export function PatientsCRM() {
   }, [])
 
   const filteredPatients = patients.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.email.toLowerCase().includes(search.toLowerCase())
+    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || (p.email && p.email.toLowerCase().includes(search.toLowerCase())) || (p.phone && p.phone.includes(search))
     if (!dateFilter) return matchesSearch
     
-    const patientAppts = appointments.filter(a => a.email === p.email)
+    const patientAppts = appointments.filter(a => (a.email || a.phone) === p.identifier)
     const hasApptOnDate = patientAppts.some(a => a.preferredDate === dateFilter)
     return matchesSearch && hasApptOnDate
   })
@@ -102,7 +104,7 @@ export function PatientsCRM() {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    setUploading({ email: uploadModal.email })
+    setUploading({ email: uploadModal.identifier })
     
     try {
       const compressedFile = await compressImage(file)
@@ -161,7 +163,7 @@ export function PatientsCRM() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          patientEmail: uploadModal.email,
+          patientEmail: uploadModal.identifier,
           ...uploadForm
         })
       })
@@ -171,7 +173,7 @@ export function PatientsCRM() {
         setRecords([...records, data.record])
         setRecordSaveStatus('saved')
         setTimeout(() => {
-          setUploadModal({ isOpen: false, email: '' })
+          setUploadModal({ isOpen: false, identifier: '' })
           setUploadForm({ type: 'prescription', fileUrl: '', notes: '', date: new Date().toISOString().split('T')[0] })
           setRecordSaveStatus('idle')
         }, 1500)
@@ -200,7 +202,7 @@ export function PatientsCRM() {
     }
   }
 
-  const savePatientProfile = async (email: string) => {
+  const savePatientProfile = async (identifier: string) => {
     if (!draftProfile) return
     setProfileSaveStatus('saving')
     
@@ -208,11 +210,11 @@ export function PatientsCRM() {
       const res = await fetch('/api/patient-profiles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, ...draftProfile })
+        body: JSON.stringify({ email: selectedPatient?.email || '', phone: selectedPatient?.phone || '', ...draftProfile })
       })
       
       if (res.ok) {
-        setPatientProfiles(prev => ({ ...prev, [email]: draftProfile }))
+        setPatientProfiles(prev => ({ ...prev, [identifier]: draftProfile }))
         setProfileSaveStatus('saved')
         setTimeout(() => setProfileSaveStatus('idle'), 2000)
       } else {
@@ -226,8 +228,8 @@ export function PatientsCRM() {
   }
 
   const openSlideOver = (patient: any) => {
-    setSelectedPatientEmail(patient.email)
-    const profile = JSON.parse(JSON.stringify(patientProfiles[patient.email] || { totalCost: 0, paymentHistory: [], dues: 0, sessionsRequired: 0, sessionsCompleted: 0 }))
+    setSelectedPatientIdentifier(patient.email)
+    const profile = JSON.parse(JSON.stringify(patientProfiles[patient.identifier] || { totalCost: 0, paymentHistory: [], dues: 0, sessionsRequired: 0, sessionsCompleted: 0 }))
     
     if (profile.totalPayments > 0 && (!profile.paymentHistory || profile.paymentHistory.length === 0)) {
       profile.paymentHistory = [{
@@ -315,13 +317,13 @@ export function PatientsCRM() {
   }
 
   const closeSlideOver = () => {
-    setSelectedPatientEmail(null)
+    setSelectedPatientIdentifier(null)
     setDraftProfile(null)
   }
 
-  const selectedPatient = patients.find(p => p.email === selectedPatientEmail)
-  const patientAppts = selectedPatient ? appointments.filter(a => a.email === selectedPatient.email) : []
-  const patientRecords = selectedPatient ? records.filter(r => r.patientEmail === selectedPatient.email) : []
+  const selectedPatient = patients.find(p => p.identifier === selectedPatientIdentifier)
+  const patientAppts = selectedPatient ? appointments.filter(a => (a.email || a.phone) === selectedPatient.identifier) : []
+  const patientRecords = selectedPatient ? records.filter(r => (r.patientEmail || r.phone) === selectedPatient.identifier) : []
 
   const calculateSuperDues = () => {
     if (!draftProfile?.treatments) return 0
@@ -394,7 +396,7 @@ export function PatientsCRM() {
             </div>
             <div>
               <p className="text-xs text-gray-500 uppercase font-bold tracking-widest mb-1">Email</p>
-              <p className="font-semibold text-gray-900">{selectedPatient?.email}</p>
+              <p className="font-semibold text-gray-900">{selectedPatient?.email || selectedPatient?.phone}</p>
             </div>
             <div className="text-right">
               <p className="text-xs text-gray-500 uppercase font-bold tracking-widest mb-1">Date</p>
@@ -455,13 +457,13 @@ export function PatientsCRM() {
           </div>
         ) : (
           filteredPatients.map(patient => {
-            const appts = appointments.filter(a => a.email === patient.email)
-            const recs = records.filter(r => r.patientEmail === patient.email)
-            const dues = patientProfiles[patient.email]?.dues || 0
+            const appts = appointments.filter(a => (a.email || a.phone) === patient.identifier)
+            const recs = records.filter(r => (r.patientEmail || r.phone) === patient.identifier)
+            const dues = patientProfiles[patient.identifier]?.dues || 0
 
             return (
               <div 
-                key={patient.email} 
+                key={patient.identifier} 
                 onClick={() => openSlideOver(patient)}
                 className="bg-[#1a1a2e] border border-gray-800 rounded-2xl overflow-hidden hover:border-amber-900/50 transition-all duration-300 cursor-pointer group"
               >
@@ -472,7 +474,7 @@ export function PatientsCRM() {
                     </div>
                     <div>
                       <h3 className="text-white font-semibold group-hover:text-amber-500 transition">{patient.name}</h3>
-                      <p className="text-xs text-gray-500">{patient.email}</p>
+                      <p className="text-xs text-gray-500">{patient.email || patient.phone}</p>
                     </div>
                   </div>
                   
@@ -514,7 +516,7 @@ export function PatientsCRM() {
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-white mb-1">{selectedPatient.name}</h2>
-                  <p className="text-sm text-gray-400">{selectedPatient.email}</p>
+                  <p className="text-sm text-gray-400">{selectedPatient.email || selectedPatient.phone}</p>
                   {selectedPatient.phone && <p className="text-xs text-gray-500 mt-1">{selectedPatient.phone}</p>}
                 </div>
               </div>
@@ -729,7 +731,7 @@ export function PatientsCRM() {
 
                   <div className="flex justify-end pt-2">
                     <button
-                      onClick={() => savePatientProfile(selectedPatient.email)}
+                      onClick={() => savePatientProfile(selectedPatient.identifier)}
                       disabled={profileSaveStatus === 'saving'}
                       className={`px-8 py-3.5 rounded-full disabled:opacity-50 text-white text-sm font-bold transition-all duration-300 flex items-center gap-2 shadow-lg
                         ${profileSaveStatus === 'saved' ? 'bg-green-600 hover:bg-green-500 shadow-green-900/20' : 'bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 shadow-amber-900/20'}`}
@@ -762,7 +764,7 @@ export function PatientsCRM() {
                         </select>
                       )}
                       <button 
-                        onClick={() => setUploadModal({ isOpen: true, email: selectedPatient.email })}
+                        onClick={() => setUploadModal({ isOpen: true, identifier: selectedPatient.identifier })}
                         className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-white text-xs font-semibold transition border border-gray-700"
                       >
                         <Plus size={12} /> Add New
@@ -812,7 +814,7 @@ export function PatientsCRM() {
                       <FileText size={32} className="text-gray-700 mb-3" />
                       <p className="text-sm mb-4">No medical records or medicines attached.</p>
                       <button 
-                        onClick={() => setUploadModal({ isOpen: true, email: selectedPatient.email })}
+                        onClick={() => setUploadModal({ isOpen: true, identifier: selectedPatient.identifier })}
                         className="px-4 py-2 rounded-lg bg-amber-600/10 text-amber-500 text-sm font-semibold transition border border-amber-600/20 hover:bg-amber-600/20"
                       >
                         Upload First Document
@@ -864,16 +866,16 @@ export function PatientsCRM() {
                   
                   <div className="relative">
                     <textarea
-                      value={draftAftercare[selectedPatient.email] ?? aftercare[selectedPatient.email] ?? ''}
+                      value={draftAftercare[selectedPatient.identifier] ?? aftercare[selectedPatient.identifier] ?? ''}
                       onChange={(e) => setDraftAftercare(prev => ({ ...prev, [selectedPatient.email]: e.target.value }))}
-                      onBlur={(e) => saveAftercare(selectedPatient.email, e.target.value)}
+                      onBlur={(e) => saveAftercare(selectedPatient.identifier, e.target.value)}
                       placeholder="Type personalized aftercare instructions here..."
                       className="w-full px-4 py-4 rounded-xl bg-[#1a1a2e] border border-gray-800 text-sm text-white focus:outline-none focus:border-amber-500 resize-none h-64 pr-10 shadow-inner"
                     />
                     <div className="absolute right-4 top-4">
-                      {saveStatus[selectedPatient.email] === 'saving' && <span className="text-xs text-amber-500 animate-pulse">Saving...</span>}
-                      {saveStatus[selectedPatient.email] === 'saved' && <Check size={16} className="text-green-500" />}
-                      {saveStatus[selectedPatient.email] === 'error' && <X size={16} className="text-red-500" />}
+                      {saveStatus[selectedPatient.identifier] === 'saving' && <span className="text-xs text-amber-500 animate-pulse">Saving...</span>}
+                      {saveStatus[selectedPatient.identifier] === 'saved' && <Check size={16} className="text-green-500" />}
+                      {saveStatus[selectedPatient.identifier] === 'error' && <X size={16} className="text-red-500" />}
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
@@ -881,16 +883,16 @@ export function PatientsCRM() {
                       Auto-saves when you click outside, or click Save.
                     </p>
                     <button
-                      onClick={() => saveAftercare(selectedPatient.email, draftAftercare[selectedPatient.email] ?? aftercare[selectedPatient.email] ?? '')}
-                      disabled={saveStatus[selectedPatient.email] === 'saving'}
+                      onClick={() => saveAftercare(selectedPatient.identifier, draftAftercare[selectedPatient.identifier] ?? aftercare[selectedPatient.identifier] ?? '')}
+                      disabled={saveStatus[selectedPatient.identifier] === 'saving'}
                       className={`px-5 py-2 rounded-xl disabled:opacity-50 text-white text-sm font-bold transition flex items-center gap-2
-                        ${saveStatus[selectedPatient.email] === 'saved' 
+                        ${saveStatus[selectedPatient.identifier] === 'saved' 
                           ? 'bg-green-600 hover:bg-green-500' 
                           : 'bg-amber-600 hover:bg-amber-500'}`}
                     >
-                      {saveStatus[selectedPatient.email] === 'saving' && 'Saving...'}
-                      {saveStatus[selectedPatient.email] === 'saved' && <><Check size={16} /> Saved!</>}
-                      {saveStatus[selectedPatient.email] !== 'saving' && saveStatus[selectedPatient.email] !== 'saved' && 'Save Instructions'}
+                      {saveStatus[selectedPatient.identifier] === 'saving' && 'Saving...'}
+                      {saveStatus[selectedPatient.identifier] === 'saved' && <><Check size={16} /> Saved!</>}
+                      {saveStatus[selectedPatient.identifier] !== 'saving' && saveStatus[selectedPatient.identifier] !== 'saved' && 'Save Instructions'}
                     </button>
                   </div>
                 </div>
@@ -906,7 +908,7 @@ export function PatientsCRM() {
           <div className="bg-[#1a1a2e] rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border border-gray-800">
             <div className="p-6 border-b border-gray-800 flex items-center justify-between">
               <h3 className="text-lg font-bold text-white">Upload Medical Record</h3>
-              <button onClick={() => setUploadModal({ isOpen: false, email: '' })} className="text-gray-500 hover:text-white transition bg-gray-800/50 hover:bg-gray-800 p-2 rounded-full">
+              <button onClick={() => setUploadModal({ isOpen: false, identifier: '' })} className="text-gray-500 hover:text-white transition bg-gray-800/50 hover:bg-gray-800 p-2 rounded-full">
                 <X size={16} />
               </button>
             </div>
@@ -960,7 +962,7 @@ export function PatientsCRM() {
               </div>
 
               <div className="pt-4 flex gap-3">
-                <button type="button" onClick={() => setUploadModal({ isOpen: false, email: '' })} className="flex-1 py-3 rounded-xl border border-gray-700 text-sm font-semibold text-gray-300 hover:bg-gray-800 transition">Cancel</button>
+                <button type="button" onClick={() => setUploadModal({ isOpen: false, identifier: '' })} className="flex-1 py-3 rounded-xl border border-gray-700 text-sm font-semibold text-gray-300 hover:bg-gray-800 transition">Cancel</button>
                 <button 
                   type="submit" 
                   disabled={!uploadForm.fileUrl || !!uploading || recordSaveStatus === 'saving' || recordSaveStatus === 'saved'} 

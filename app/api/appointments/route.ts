@@ -47,44 +47,46 @@ export async function POST(request: Request) {
         read: false
       })
 
-      if (data.email) {
-        // Auto-create treatment plan
-        const profile = await PatientProfile.findOne({ email: data.email })
-        if (profile) {
-          const hasTreatment = profile.treatments?.some((t: any) => t.name === data.treatment)
-          if (!hasTreatment) {
-            await PatientProfile.updateOne(
-              { email: data.email },
-              {
-                $push: {
-                  treatments: {
-                    id: 'treatment-' + Date.now(),
-                    name: data.treatment,
-                    totalCost: 0,
-                    paymentHistory: [],
-                    sessionsRequired: 0,
-                    sessionsCompleted: 0,
-                    createdAt: new Date()
-                  }
+      // Auto-create treatment plan based on email or phone
+      const identifier = data.email ? { email: data.email } : { phone: data.phone }
+      const profile = await PatientProfile.findOne(identifier)
+      
+      if (profile) {
+        const hasTreatment = profile.treatments?.some((t: any) => t.name === data.treatment)
+        if (!hasTreatment) {
+          await PatientProfile.updateOne(
+            identifier,
+            {
+              $push: {
+                treatments: {
+                  id: 'treatment-' + Date.now(),
+                  name: data.treatment,
+                  totalCost: 0,
+                  paymentHistory: [],
+                  sessionsRequired: 0,
+                  sessionsCompleted: 0,
+                  createdAt: new Date()
                 }
               }
-            )
-          }
-        } else {
-          // Create new profile with this treatment
-          await PatientProfile.create({
-             email: data.email,
-             treatments: [{
-                id: 'treatment-' + Date.now(),
-                name: data.treatment,
-                totalCost: 0,
-                paymentHistory: [],
-                sessionsRequired: 0,
-                sessionsCompleted: 0,
-                createdAt: new Date()
-             }]
-          })
+            }
+          )
         }
+      } else {
+        // Create new profile with this treatment
+        await PatientProfile.create({
+           ...(data.email ? { email: data.email } : {}),
+           phone: data.phone,
+           name: data.patientName,
+           treatments: [{
+              id: 'treatment-' + Date.now(),
+              name: data.treatment,
+              totalCost: 0,
+              paymentHistory: [],
+              sessionsRequired: 0,
+              sessionsCompleted: 0,
+              createdAt: new Date()
+           }]
+        })
       }
 
       if (data.email) {

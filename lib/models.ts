@@ -122,8 +122,9 @@ const UserTestimonialSchema = new mongoose.Schema({
 });
 
 const PatientProfileSchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true },
-  
+  email: { type: String, sparse: true },
+  phone: { type: String, sparse: true },
+  name: { type: String },
   // Legacy global fields (kept for migration fallback, will be phased out)
   totalPayments: { type: Number, default: 0 },
   dues: { type: Number, default: 0 },

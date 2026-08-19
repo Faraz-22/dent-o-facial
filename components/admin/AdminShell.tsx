@@ -1275,11 +1275,11 @@ export default function AdminShell() {
   const [adminRole, setAdminRole] = useState<'admin' | 'staff' | null>(null)
 
   const visibleSections = adminRole === 'staff'
-    ? SECTIONS.filter(s => s.key === 'appointments' || s.key === 'dashboard')
+    ? SECTIONS.filter(s => ['dashboard', 'patient-records', 'appointments', 'leads'].includes(s.key))
     : SECTIONS
 
   // Fallback if staff tries to access a non-allowed section
-  if (adminRole === 'staff' && section !== 'appointments' && section !== 'dashboard') {
+  if (adminRole === 'staff' && !['dashboard', 'patient-records', 'appointments', 'leads'].includes(section)) {
     section = 'appointments'
   }
 

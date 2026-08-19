@@ -11,6 +11,8 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const email = searchParams.get('email')
+    const phone = searchParams.get('phone')
+    const identifier = email ? { email } : (phone ? { phone } : null)
     
     // Auth Check
     const cookieStore = await cookies()
@@ -18,12 +20,12 @@ export async function GET(request: Request) {
     const userAuth = cookieStore.get('user-auth')
     
     let isAuthorized = false
-    if (adminAuth?.value === 'true') {
+    if (adminAuth?.value === 'true' || adminAuth?.value === 'staff') {
       isAuthorized = true
     } else if (userAuth?.value) {
       try {
         const user = JSON.parse(userAuth.value)
-        if (user.email === email || !email) {
+        if ((email && user.email === email) || !email) {
           isAuthorized = true
         }
       } catch (e) {}
@@ -35,8 +37,8 @@ export async function GET(request: Request) {
 
     try {
       await connectToDatabase()
-      if (email) {
-        const profile = await PatientProfile.findOne({ email }).lean()
+      if (identifier) {
+        const profile = await PatientProfile.findOne(identifier).lean()
         return NextResponse.json({ profile: profile || {} })
       }
       
@@ -62,14 +64,17 @@ export async function GET(request: Request) {
       };
 
       allProfiles.forEach((item: any) => {
-        profileMap[item.email] = {
-          totalCost: item.totalCost || 0,
-          paymentHistory: item.paymentHistory || [],
-          totalPayments: item.totalPayments || 0,
-          dues: item.dues || 0,
-          sessionsRequired: item.sessionsRequired || 0,
-          sessionsCompleted: item.sessionsCompleted || 0,
-          treatments: migrateLegacyToTreatments(item)
+        const key = item.email || item.phone
+        if (key) {
+          profileMap[key] = {
+            totalCost: item.totalCost || 0,
+            paymentHistory: item.paymentHistory || [],
+            totalPayments: item.totalPayments || 0,
+            dues: item.dues || 0,
+            sessionsRequired: item.sessionsRequired || 0,
+            sessionsCompleted: item.sessionsCompleted || 0,
+            treatments: migrateLegacyToTreatments(item)
+          }
         }
       })
       return NextResponse.json(profileMap)
@@ -82,8 +87,8 @@ export async function GET(request: Request) {
       
       const profiles = JSON.parse(data)
       
-      if (email) {
-        return NextResponse.json({ profile: profiles[email] || {} })
+      if (email || phone) {
+        return NextResponse.json({ profile: profiles[email || phone || ''] || {} })
       }
       
       // We don't migrate JSON fallback dynamically right now as it's just a fallback, but we can do a simple map
@@ -107,21 +112,22 @@ export async function POST(request: Request) {
   try {
     const cookieStore = await cookies()
     const adminAuth = cookieStore.get('admin-auth')
-    if (adminAuth?.value !== 'true') {
+    if (adminAuth?.value !== 'true' && adminAuth?.value !== 'staff') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await request.json()
-    const { email, totalPayments, dues, totalCost, paymentHistory, sessionsRequired, sessionsCompleted, treatments } = body
+    const { email, phone, totalPayments, dues, totalCost, paymentHistory, sessionsRequired, sessionsCompleted, treatments } = body
 
-    if (!email) {
-      return NextResponse.json({ error: 'Missing email' }, { status: 400 })
+    if (!email && !phone) {
+      return NextResponse.json({ error: 'Missing email or phone' }, { status: 400 })
     }
 
     try {
       await connectToDatabase()
+      const identifier = email ? { email } : { phone }
       await PatientProfile.findOneAndUpdate(
-        { email },
+        identifier,
         { 
           totalCost: Number(totalCost) || 0,
           paymentHistory: Array.isArray(paymentHistory) ? paymentHistory : [],
