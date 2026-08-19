@@ -25,6 +25,7 @@ module.exports = {
       animation: {
         'fade-up': 'fadeUp 0.6s ease-out forwards',
         'fade-in': 'fadeIn 0.8s ease-out forwards',
+        'slide-in-right': 'slideInRight 0.3s ease-out forwards',
         'shimmer': 'shimmer 2s infinite',
         'float': 'float 3s ease-in-out infinite',
         'marquee': 'marquee 25s linear infinite',
@@ -37,6 +38,10 @@ module.exports = {
         fadeIn: {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
+        },
+        slideInRight: {
+          '0%': { transform: 'translateX(100%)' },
+          '100%': { transform: 'translateX(0)' },
         },
         shimmer: {
           '0%': { backgroundPosition: '-200% 0' },

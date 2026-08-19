@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Search, Filter, Calendar, FileText, Upload, Plus, X, Check, Eye, Trash2, RefreshCw } from 'lucide-react'
+import { Search, Filter, Calendar, FileText, Upload, Plus, X, Check, Eye, Trash2, IndianRupee, Activity, CreditCard, ChevronRight } from 'lucide-react'
 import { compressImage } from '@/lib/imageUtils'
 
 export function PatientsCRM() {
@@ -8,28 +8,33 @@ export function PatientsCRM() {
   const [records, setRecords] = useState<any[]>([])
   const [aftercare, setAftercare] = useState<Record<string, string>>({})
   const [draftAftercare, setDraftAftercare] = useState<Record<string, string>>({})
+  const [patientProfiles, setPatientProfiles] = useState<Record<string, any>>({})
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [dateFilter, setDateFilter] = useState('')
   
   const [uploading, setUploading] = useState<{ email: string } | null>(null)
-  const [selectedPatient, setSelectedPatient] = useState<any>(null)
+  const [selectedPatientEmail, setSelectedPatientEmail] = useState<string | null>(null)
   const [uploadModal, setUploadModal] = useState<{ isOpen: boolean; email: string }>({ isOpen: false, email: '' })
   const [uploadForm, setUploadForm] = useState({ type: 'prescription', fileUrl: '', notes: '', date: new Date().toISOString().split('T')[0] })
+  
   const [saveStatus, setSaveStatus] = useState<Record<string, 'saving' | 'saved' | 'error'>>({})
   const [recordSaveStatus, setRecordSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [profileSaveStatus, setProfileSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [draftProfile, setDraftProfile] = useState<any>(null)
+  const [activeTab, setActiveTab] = useState('overview')
 
   useEffect(() => {
     Promise.all([
       fetch('/api/auth/users', { cache: 'no-store' }).then(r => r.json()),
       fetch('/api/appointments', { cache: 'no-store' }).then(r => r.json()),
       fetch('/api/records', { cache: 'no-store' }).then(r => r.json()),
-      fetch('/api/aftercare', { cache: 'no-store' }).then(r => r.json())
-    ]).then(([u, a, r, af]) => {
+      fetch('/api/aftercare', { cache: 'no-store' }).then(r => r.json()),
+      fetch('/api/patient-profiles', { cache: 'no-store' }).then(r => r.json())
+    ]).then(([u, a, r, af, prof]) => {
       const userList = u.users || u || []
       const apptList = a || []
       
-      // Build patients list strictly from people who have appointments
       const patientMap = new Map()
       apptList.forEach((appt: any) => {
         if (appt.email && !patientMap.has(appt.email)) {
@@ -41,7 +46,6 @@ export function PatientsCRM() {
         }
       })
       
-      // Update names for those who have officially registered
       userList.forEach((user: any) => {
         if (patientMap.has(user.email)) {
           patientMap.set(user.email, { ...patientMap.get(user.email), name: user.name })
@@ -52,6 +56,7 @@ export function PatientsCRM() {
       setAppointments(apptList)
       setRecords(r || [])
       setAftercare(af || {})
+      setPatientProfiles(prof || {})
       setLoading(false)
     }).catch(console.error)
   }, [])
@@ -60,7 +65,6 @@ export function PatientsCRM() {
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.email.toLowerCase().includes(search.toLowerCase())
     if (!dateFilter) return matchesSearch
     
-    // Check if patient has any appointment on the selected date
     const patientAppts = appointments.filter(a => a.email === p.email)
     const hasApptOnDate = patientAppts.some(a => a.preferredDate === dateFilter)
     return matchesSearch && hasApptOnDate
@@ -88,7 +92,7 @@ export function PatientsCRM() {
   }
 
   const saveAftercare = async (email: string, text: string) => {
-    if (aftercare[email] === text) return // No changes
+    if (aftercare[email] === text) return
 
     setSaveStatus(prev => ({ ...prev, [email]: 'saving' }))
     try {
@@ -167,6 +171,47 @@ export function PatientsCRM() {
     }
   }
 
+  const savePatientProfile = async (email: string) => {
+    if (!draftProfile) return
+    setProfileSaveStatus('saving')
+    
+    try {
+      const res = await fetch('/api/patient-profiles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, ...draftProfile })
+      })
+      
+      if (res.ok) {
+        setPatientProfiles(prev => ({ ...prev, [email]: draftProfile }))
+        setProfileSaveStatus('saved')
+        setTimeout(() => setProfileSaveStatus('idle'), 2000)
+      } else {
+        setProfileSaveStatus('error')
+        setTimeout(() => setProfileSaveStatus('idle'), 3000)
+      }
+    } catch (e) {
+      setProfileSaveStatus('error')
+      setTimeout(() => setProfileSaveStatus('idle'), 3000)
+    }
+  }
+
+  const openSlideOver = (patient: any) => {
+    setSelectedPatientEmail(patient.email)
+    const profile = patientProfiles[patient.email] || { totalPayments: 0, dues: 0, sessionsRequired: 0, sessionsCompleted: 0 }
+    setDraftProfile(profile)
+    setActiveTab('overview')
+  }
+
+  const closeSlideOver = () => {
+    setSelectedPatientEmail(null)
+    setDraftProfile(null)
+  }
+
+  const selectedPatient = patients.find(p => p.email === selectedPatientEmail)
+  const patientAppts = selectedPatient ? appointments.filter(a => a.email === selectedPatient.email) : []
+  const patientRecords = selectedPatient ? records.filter(r => r.patientEmail === selectedPatient.email) : []
+
   if (loading) return <div className="p-8 text-center text-gray-500">Loading patients...</div>
 
   return (
@@ -207,146 +252,43 @@ export function PatientsCRM() {
           </div>
         ) : (
           filteredPatients.map(patient => {
-            const patientAppts = appointments.filter(a => a.email === patient.email)
-            const patientRecords = records.filter(r => r.patientEmail === patient.email)
-            const isExpanded = selectedPatient === patient.email
+            const appts = appointments.filter(a => a.email === patient.email)
+            const recs = records.filter(r => r.patientEmail === patient.email)
+            const dues = patientProfiles[patient.email]?.dues || 0
 
             return (
-              <div key={patient.email} className={`bg-[#1a1a2e] border ${isExpanded ? 'border-amber-900/50' : 'border-gray-800'} rounded-2xl overflow-hidden transition-all duration-300`}>
-                <div 
-                  className="p-5 flex flex-wrap items-center justify-between gap-4 cursor-pointer hover:bg-gray-800/30"
-                  onClick={() => setSelectedPatient(isExpanded ? null : patient.email)}
-                >
+              <div 
+                key={patient.email} 
+                onClick={() => openSlideOver(patient)}
+                className="bg-[#1a1a2e] border border-gray-800 rounded-2xl overflow-hidden hover:border-amber-900/50 transition-all duration-300 cursor-pointer group"
+              >
+                <div className="p-5 flex flex-wrap items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-600 to-amber-800 flex items-center justify-center text-white font-bold text-sm">
                       {patient.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <h3 className="text-white font-semibold">{patient.name}</h3>
+                      <h3 className="text-white font-semibold group-hover:text-amber-500 transition">{patient.name}</h3>
                       <p className="text-xs text-gray-500">{patient.email}</p>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-6">
-                    <div className="text-center">
-                      <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Appointments</p>
-                      <p className="text-sm font-semibold text-white">{patientAppts.length}</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Records</p>
-                      <p className="text-sm font-semibold text-white">{patientRecords.length}</p>
-                    </div>
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); setUploadModal({ isOpen: true, email: patient.email }) }}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold transition"
-                    >
-                      <Upload size={12} /> Upload
-                    </button>
-                  </div>
-                </div>
-
-                <div className={`p-5 border-t border-gray-800 bg-gray-900/30 grid-cols-1 md:grid-cols-2 gap-6 ${isExpanded ? 'grid' : 'hidden'}`}>
-                  {/* Appointments Column */}
-                  <div>
-                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                      <Calendar size={14} className="text-amber-500" />
-                      Appointment History
-                    </h4>
-                    {patientAppts.length > 0 ? (
-                      <div className="space-y-2">
-                        {patientAppts.map(a => (
-                          <div key={a.id} className="p-3 rounded-xl bg-[#12122a] border border-gray-800 text-sm flex items-center justify-between">
-                            <div>
-                              <p className="text-white font-medium">{a.treatment}</p>
-                              <p className="text-xs text-gray-500">{a.preferredDate} • {a.clinic}</p>
-                            </div>
-                            <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                              a.status === 'Completed' ? 'bg-green-900/30 text-green-400' : 
-                              a.status === 'Confirmed' ? 'bg-blue-900/30 text-blue-400' : 'bg-gray-800 text-gray-400'
-                            }`}>
-                              {a.status}
-                            </span>
-                          </div>
-                        ))}
+                    {dues > 0 && (
+                      <div className="text-center px-3 py-1 bg-red-900/20 rounded-lg">
+                        <p className="text-[10px] text-red-500 uppercase tracking-widest mb-0.5">Dues</p>
+                        <p className="text-sm font-semibold text-red-400">₹{dues.toLocaleString()}</p>
                       </div>
-                    ) : (
-                      <p className="text-xs text-gray-500 italic">No appointments found.</p>
                     )}
-                  </div>
-
-                  {/* Records Column */}
-                  <div className="flex flex-col gap-6">
-                    <div>
-                      <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                        <FileText size={14} className="text-amber-500" />
-                        Medical Records
-                      </h4>
-                      {patientRecords.length > 0 ? (
-                        <div className="space-y-2">
-                          {patientRecords.map(r => (
-                            <div key={r.id} className="p-3 rounded-xl bg-[#12122a] border border-gray-800 text-sm">
-                              <div className="flex items-center justify-between mb-1">
-                                <p className="text-white font-medium capitalize">{r.type}</p>
-                                <p className="text-xs text-gray-500">{new Date(r.date).toLocaleDateString()}</p>
-                              </div>
-                              {r.notes && <p className="text-xs text-gray-400 mb-2">{r.notes}</p>}
-                              <div className="flex items-center justify-between mt-2">
-                                <a href={`/api/records/${r.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs text-amber-500 hover:text-amber-400 transition">
-                                  <Eye size={12} /> View Document
-                                </a>
-                                <button 
-                                  onClick={() => deleteRecord(r.id)}
-                                  className="text-gray-500 hover:text-red-500 transition"
-                                  title="Delete record"
-                                >
-                                  <Trash2 size={14} />
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-xs text-gray-500 italic">No records uploaded yet.</p>
-                      )}
+                    <div className="text-center">
+                      <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-0.5">Appts</p>
+                      <p className="text-sm font-semibold text-white">{appts.length}</p>
                     </div>
-
-                    <div>
-                      <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                        <FileText size={14} className="text-amber-500" />
-                        Custom Aftercare Instructions
-                      </h4>
-                      <div className="relative">
-                        <textarea
-                          value={draftAftercare[patient.email] ?? aftercare[patient.email] ?? ''}
-                          onChange={(e) => setDraftAftercare(prev => ({ ...prev, [patient.email]: e.target.value }))}
-                          onBlur={(e) => saveAftercare(patient.email, e.target.value)}
-                          placeholder="Type personalized aftercare instructions here. These will appear on the patient's dashboard..."
-                          className="w-full px-4 py-3 rounded-xl bg-[#12122a] border border-gray-800 text-sm text-white focus:outline-none focus:border-amber-500 resize-none h-32 pr-10"
-                        />
-                        <div className="absolute right-3 top-3">
-                          {saveStatus[patient.email] === 'saving' && <span className="text-xs text-amber-500 animate-pulse">Saving...</span>}
-                          {saveStatus[patient.email] === 'saved' && <Check size={16} className="text-green-500" />}
-                          {saveStatus[patient.email] === 'error' && <X size={16} className="text-red-500" />}
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between mt-2">
-                        <p className="text-[10px] text-gray-500 flex items-center gap-1">
-                          Auto-saves when you click outside, or click Save.
-                        </p>
-                        <button
-                          onClick={() => saveAftercare(patient.email, draftAftercare[patient.email] ?? aftercare[patient.email] ?? '')}
-                          disabled={saveStatus[patient.email] === 'saving'}
-                          className={`px-4 py-1.5 rounded-lg disabled:opacity-50 text-white text-xs font-semibold transition flex items-center gap-1.5
-                            ${saveStatus[patient.email] === 'saved' 
-                              ? 'bg-green-600 hover:bg-green-500' 
-                              : 'bg-amber-600 hover:bg-amber-500'}`}
-                        >
-                          {saveStatus[patient.email] === 'saving' && 'Saving...'}
-                          {saveStatus[patient.email] === 'saved' && <><Check size={14} /> Saved!</>}
-                          {saveStatus[patient.email] !== 'saving' && saveStatus[patient.email] !== 'saved' && 'Save Instructions'}
-                        </button>
-                      </div>
+                    <div className="text-center">
+                      <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-0.5">Records</p>
+                      <p className="text-sm font-semibold text-white">{recs.length}</p>
                     </div>
+                    <ChevronRight size={20} className="text-gray-600 group-hover:text-amber-500 transition" />
                   </div>
                 </div>
               </div>
@@ -355,14 +297,269 @@ export function PatientsCRM() {
         )}
       </div>
 
-      {/* Upload Modal */}
+      {/* Slide-over UI */}
+      {selectedPatient && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={closeSlideOver} />
+          
+          <div className="relative w-full max-w-xl bg-[#12122a] h-full shadow-2xl flex flex-col border-l border-gray-800 animate-slide-in-right">
+            {/* Header */}
+            <div className="p-6 border-b border-gray-800 bg-[#1a1a2e] flex items-start justify-between shrink-0">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-amber-600 to-amber-800 flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                  {selectedPatient.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white mb-1">{selectedPatient.name}</h2>
+                  <p className="text-sm text-gray-400">{selectedPatient.email}</p>
+                  {selectedPatient.phone && <p className="text-xs text-gray-500 mt-0.5">{selectedPatient.phone}</p>}
+                </div>
+              </div>
+              <button onClick={closeSlideOver} className="p-2 text-gray-500 hover:text-white bg-gray-800/50 hover:bg-gray-800 rounded-full transition">
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex border-b border-gray-800 px-6 shrink-0 overflow-x-auto no-scrollbar">
+              <button onClick={() => setActiveTab('overview')} className={`px-4 py-4 text-sm font-semibold border-b-2 whitespace-nowrap transition ${activeTab === 'overview' ? 'border-amber-500 text-amber-500' : 'border-transparent text-gray-400 hover:text-gray-200'}`}>Profile & Billing</button>
+              <button onClick={() => setActiveTab('records')} className={`px-4 py-4 text-sm font-semibold border-b-2 whitespace-nowrap transition ${activeTab === 'records' ? 'border-amber-500 text-amber-500' : 'border-transparent text-gray-400 hover:text-gray-200'}`}>Records & Medicines</button>
+              <button onClick={() => setActiveTab('appointments')} className={`px-4 py-4 text-sm font-semibold border-b-2 whitespace-nowrap transition ${activeTab === 'appointments' ? 'border-amber-500 text-amber-500' : 'border-transparent text-gray-400 hover:text-gray-200'}`}>Appointments</button>
+              <button onClick={() => setActiveTab('aftercare')} className={`px-4 py-4 text-sm font-semibold border-b-2 whitespace-nowrap transition ${activeTab === 'aftercare' ? 'border-amber-500 text-amber-500' : 'border-transparent text-gray-400 hover:text-gray-200'}`}>Custom Aftercare</button>
+            </div>
+
+            {/* Scrollable Content */}
+            <div className="p-6 overflow-y-auto flex-1 space-y-8">
+              
+              {activeTab === 'overview' && (
+                <div className="space-y-6 animate-fade-in">
+                  <div className="bg-[#1a1a2e] rounded-2xl border border-gray-800 p-5">
+                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                      <CreditCard size={14} className="text-amber-500" />
+                      Billing & Payments
+                    </h4>
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Total Paid (₹)</label>
+                        <input 
+                          type="number" 
+                          value={draftProfile?.totalPayments || ''}
+                          onChange={e => setDraftProfile({...draftProfile, totalPayments: Number(e.target.value)})}
+                          className="w-full px-3 py-2 rounded-lg bg-[#12122a] border border-gray-700 text-white text-sm focus:outline-none focus:border-amber-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Dues Outstanding (₹)</label>
+                        <input 
+                          type="number" 
+                          value={draftProfile?.dues || ''}
+                          onChange={e => setDraftProfile({...draftProfile, dues: Number(e.target.value)})}
+                          className="w-full px-3 py-2 rounded-lg bg-[#12122a] border border-red-900/50 text-red-400 text-sm focus:outline-none focus:border-red-500"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-[#1a1a2e] rounded-2xl border border-gray-800 p-5">
+                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                      <Activity size={14} className="text-amber-500" />
+                      Treatment Sessions
+                    </h4>
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Sessions Completed</label>
+                        <input 
+                          type="number" 
+                          value={draftProfile?.sessionsCompleted || ''}
+                          onChange={e => setDraftProfile({...draftProfile, sessionsCompleted: Number(e.target.value)})}
+                          className="w-full px-3 py-2 rounded-lg bg-[#12122a] border border-gray-700 text-white text-sm focus:outline-none focus:border-amber-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Total Sessions Required</label>
+                        <input 
+                          type="number" 
+                          value={draftProfile?.sessionsRequired || ''}
+                          onChange={e => setDraftProfile({...draftProfile, sessionsRequired: Number(e.target.value)})}
+                          className="w-full px-3 py-2 rounded-lg bg-[#12122a] border border-gray-700 text-white text-sm focus:outline-none focus:border-amber-500"
+                        />
+                      </div>
+                    </div>
+                    {/* Progress Bar */}
+                    {draftProfile?.sessionsRequired > 0 && (
+                      <div className="mt-2">
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className="text-gray-400">Progress</span>
+                          <span className="text-amber-500 font-bold">{Math.round((draftProfile.sessionsCompleted / draftProfile.sessionsRequired) * 100)}%</span>
+                        </div>
+                        <div className="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-amber-500 transition-all duration-500" 
+                            style={{ width: `${Math.min((draftProfile.sessionsCompleted / draftProfile.sessionsRequired) * 100, 100)}%` }} 
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex justify-end pt-2">
+                    <button
+                      onClick={() => savePatientProfile(selectedPatient.email)}
+                      disabled={profileSaveStatus === 'saving'}
+                      className={`px-5 py-2.5 rounded-xl disabled:opacity-50 text-white text-sm font-bold transition flex items-center gap-2
+                        ${profileSaveStatus === 'saved' ? 'bg-green-600 hover:bg-green-500' : 'bg-amber-600 hover:bg-amber-500'}`}
+                    >
+                      {profileSaveStatus === 'saving' && 'Saving Profile...'}
+                      {profileSaveStatus === 'saved' && <><Check size={16} /> Saved Successfully!</>}
+                      {profileSaveStatus !== 'saving' && profileSaveStatus !== 'saved' && 'Save Changes'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'records' && (
+                <div className="space-y-6 animate-fade-in">
+                  <div className="flex justify-between items-center">
+                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                      <FileText size={14} className="text-amber-500" />
+                      Prescriptions & Reports
+                    </h4>
+                    <button 
+                      onClick={() => setUploadModal({ isOpen: true, email: selectedPatient.email })}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-white text-xs font-semibold transition border border-gray-700"
+                    >
+                      <Plus size={12} /> Add New
+                    </button>
+                  </div>
+                  
+                  {patientRecords.length > 0 ? (
+                    <div className="space-y-3">
+                      {patientRecords.map(r => (
+                        <div key={r.id} className="p-4 rounded-xl bg-[#1a1a2e] border border-gray-800">
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <p className="text-white font-medium capitalize text-sm">{r.type}</p>
+                              <p className="text-xs text-gray-500">{new Date(r.date).toLocaleDateString()}</p>
+                            </div>
+                            <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-gray-800 text-gray-400 border border-gray-700">{r.type}</span>
+                          </div>
+                          {r.notes && <p className="text-sm text-gray-400 mb-3 bg-[#12122a] p-3 rounded-lg border border-gray-800/50">{r.notes}</p>}
+                          <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-800/50">
+                            <a href={`/api/records/${r.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-500 hover:text-amber-400 transition bg-amber-500/10 hover:bg-amber-500/20 px-3 py-1.5 rounded-md">
+                              <Eye size={12} /> View Document
+                            </a>
+                            <button 
+                              onClick={() => deleteRecord(r.id)}
+                              className="text-gray-500 hover:text-red-500 transition p-1.5 rounded hover:bg-red-500/10"
+                              title="Delete record"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-8 text-center bg-[#1a1a2e] rounded-xl border border-dashed border-gray-700 text-gray-500 flex flex-col items-center">
+                      <FileText size={32} className="text-gray-700 mb-3" />
+                      <p className="text-sm mb-4">No medical records or medicines attached.</p>
+                      <button 
+                        onClick={() => setUploadModal({ isOpen: true, email: selectedPatient.email })}
+                        className="px-4 py-2 rounded-lg bg-amber-600/10 text-amber-500 text-sm font-semibold transition border border-amber-600/20 hover:bg-amber-600/20"
+                      >
+                        Upload First Document
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'appointments' && (
+                <div className="space-y-4 animate-fade-in">
+                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2 mb-4">
+                    <Calendar size={14} className="text-amber-500" />
+                    Appointment History
+                  </h4>
+                  {patientAppts.length > 0 ? (
+                    <div className="space-y-3">
+                      {patientAppts.map(a => (
+                        <div key={a.id} className="p-4 rounded-xl bg-[#1a1a2e] border border-gray-800 flex items-center justify-between">
+                          <div>
+                            <p className="text-white font-medium">{a.treatment}</p>
+                            <p className="text-sm text-gray-500 mt-1 flex items-center gap-2">
+                              <Calendar size={12} /> {a.preferredDate} at {a.preferredTime}
+                            </p>
+                            <p className="text-xs text-gray-600 mt-1">{a.clinic}</p>
+                          </div>
+                          <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+                            a.status === 'Completed' ? 'bg-green-900/30 text-green-400 border border-green-900/50' : 
+                            a.status === 'Confirmed' ? 'bg-blue-900/30 text-blue-400 border border-blue-900/50' : 'bg-gray-800 text-gray-400 border border-gray-700'
+                          }`}>
+                            {a.status}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500 italic p-6 text-center bg-[#1a1a2e] rounded-xl border border-gray-800">No appointments found.</p>
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'aftercare' && (
+                <div className="space-y-4 animate-fade-in">
+                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2 mb-2">
+                    <FileText size={14} className="text-amber-500" />
+                    Custom Aftercare Instructions
+                  </h4>
+                  <p className="text-xs text-gray-500 mb-4">These instructions will be securely displayed on the patient's personal dashboard.</p>
+                  
+                  <div className="relative">
+                    <textarea
+                      value={draftAftercare[selectedPatient.email] ?? aftercare[selectedPatient.email] ?? ''}
+                      onChange={(e) => setDraftAftercare(prev => ({ ...prev, [selectedPatient.email]: e.target.value }))}
+                      onBlur={(e) => saveAftercare(selectedPatient.email, e.target.value)}
+                      placeholder="Type personalized aftercare instructions here..."
+                      className="w-full px-4 py-4 rounded-xl bg-[#1a1a2e] border border-gray-800 text-sm text-white focus:outline-none focus:border-amber-500 resize-none h-64 pr-10 shadow-inner"
+                    />
+                    <div className="absolute right-4 top-4">
+                      {saveStatus[selectedPatient.email] === 'saving' && <span className="text-xs text-amber-500 animate-pulse">Saving...</span>}
+                      {saveStatus[selectedPatient.email] === 'saved' && <Check size={16} className="text-green-500" />}
+                      {saveStatus[selectedPatient.email] === 'error' && <X size={16} className="text-red-500" />}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-gray-500 flex items-center gap-1">
+                      Auto-saves when you click outside, or click Save.
+                    </p>
+                    <button
+                      onClick={() => saveAftercare(selectedPatient.email, draftAftercare[selectedPatient.email] ?? aftercare[selectedPatient.email] ?? '')}
+                      disabled={saveStatus[selectedPatient.email] === 'saving'}
+                      className={`px-5 py-2 rounded-xl disabled:opacity-50 text-white text-sm font-bold transition flex items-center gap-2
+                        ${saveStatus[selectedPatient.email] === 'saved' 
+                          ? 'bg-green-600 hover:bg-green-500' 
+                          : 'bg-amber-600 hover:bg-amber-500'}`}
+                    >
+                      {saveStatus[selectedPatient.email] === 'saving' && 'Saving...'}
+                      {saveStatus[selectedPatient.email] === 'saved' && <><Check size={16} /> Saved!</>}
+                      {saveStatus[selectedPatient.email] !== 'saving' && saveStatus[selectedPatient.email] !== 'saved' && 'Save Instructions'}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Upload Modal (Overlaps everything) */}
       {uploadModal.isOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
           <div className="bg-[#1a1a2e] rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border border-gray-800">
             <div className="p-6 border-b border-gray-800 flex items-center justify-between">
               <h3 className="text-lg font-bold text-white">Upload Medical Record</h3>
-              <button onClick={() => setUploadModal({ isOpen: false, email: '' })} className="text-gray-500 hover:text-white transition">
-                <X size={20} />
+              <button onClick={() => setUploadModal({ isOpen: false, email: '' })} className="text-gray-500 hover:text-white transition bg-gray-800/50 hover:bg-gray-800 p-2 rounded-full">
+                <X size={16} />
               </button>
             </div>
             <form onSubmit={submitRecord} className="p-6 space-y-4">
@@ -373,7 +570,7 @@ export function PatientsCRM() {
                   onChange={e => setUploadForm({ ...uploadForm, type: e.target.value })}
                   className="w-full px-4 py-3 rounded-xl bg-[#12122a] border border-gray-700 text-white text-sm focus:outline-none focus:border-amber-500"
                 >
-                  <option value="prescription">Prescription</option>
+                  <option value="prescription">Prescription / Medicine</option>
                   <option value="report">Lab Report</option>
                   <option value="xray">X-Ray / Scan</option>
                   <option value="other">Other Medical Record</option>
@@ -392,16 +589,16 @@ export function PatientsCRM() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-400 uppercase mb-2">Notes (Optional)</label>
+                <label className="block text-xs font-semibold text-gray-400 uppercase mb-2">Notes & Medicines (Optional)</label>
                 <textarea 
                   value={uploadForm.notes}
                   onChange={e => setUploadForm({ ...uploadForm, notes: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl bg-[#12122a] border border-gray-700 text-white text-sm focus:outline-none focus:border-amber-500 resize-none h-20"
-                  placeholder="Additional observations..."
+                  className="w-full px-4 py-3 rounded-xl bg-[#12122a] border border-gray-700 text-white text-sm focus:outline-none focus:border-amber-500 resize-none h-24"
+                  placeholder="e.g. Prescribed Amoxicillin 500mg, review in 1 week..."
                 ></textarea>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-400 uppercase mb-2">File (Image/PDF)</label>
+                <label className="block text-xs font-semibold text-gray-400 uppercase mb-2">Attach Document (Image/PDF)</label>
                 <div className="relative">
                   <input 
                     type="file" 
@@ -409,8 +606,8 @@ export function PatientsCRM() {
                     disabled={!!uploading}
                     className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-amber-900/30 file:text-amber-400 hover:file:bg-amber-900/50 transition cursor-pointer"
                   />
-                  {uploading && <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-amber-500 animate-pulse">Uploading...</span>}
-                  {uploadForm.fileUrl && !uploading && <Check size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500" />}
+                  {uploading && <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-amber-500 animate-pulse">Uploading...</span>}
+                  {uploadForm.fileUrl && !uploading && <Check size={20} className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500" />}
                 </div>
               </div>
 
