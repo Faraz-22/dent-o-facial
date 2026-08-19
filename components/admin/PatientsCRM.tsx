@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Search, Filter, Calendar, FileText, Upload, Plus, X, Check, Eye, Trash2, IndianRupee, Activity, CreditCard, ChevronRight, Printer } from 'lucide-react'
+import { Search, Filter, Calendar, FileText, Upload, Plus, X, Check, Eye, Trash2, IndianRupee, Activity, CreditCard, ChevronRight, Printer, Phone } from 'lucide-react'
 import { compressImage } from '@/lib/imageUtils'
 
 export function PatientsCRM() {
@@ -366,11 +366,25 @@ export function PatientsCRM() {
       {/* Hidden Printable Area */}
       {printingRecord && (
         <div id="print-prescription-area" className="bg-white text-black min-h-[297mm] flex flex-col p-8 max-w-[800px] mx-auto font-sans relative">
-          <div className="border-b-2 border-gray-200 pb-4 mb-4 text-center flex flex-col items-center">
-            <img src="/uploads/prescription-banner.png" alt="Dent-O-Facial Banner" className="w-[90%] max-w-[650px] h-auto object-contain mb-2 mx-auto" />
-            <p className="text-sm font-medium text-gray-700 tracking-wide mt-1">
-              Premium Dental, Braces, Implants and Facial Trauma Centre
-            </p>
+          <div className="border-b-2 border-gray-200 pb-4 mb-4 flex justify-between items-start">
+            {/* Left Side: Banner and Subtitle */}
+            <div className="flex flex-col items-start max-w-[60%]">
+              <img src="/uploads/prescription-banner.png" alt="Dent-O-Facial Banner" className="w-[350px] md:w-[450px] h-auto object-contain mb-2 -ml-2" style={{ mixBlendMode: 'multiply' }} />
+              <p className="text-sm font-medium text-gray-700 tracking-wide mt-1 pl-2">
+                Premium Dental, Braces, Implants and Facial Trauma Centre
+              </p>
+            </div>
+            
+            {/* Right Side: Doctor Info */}
+            <div className="text-right mt-2 flex flex-col items-end max-w-[40%]">
+              <p className="font-bold text-gray-900 text-lg">{activeDoctor?.name || 'Dr. Hadi Raza'}</p>
+              <p className="text-xs text-gray-600 font-bold mt-1 text-right">{activeDoctor?.title || (activeDoctor?.name === 'Dr. Nahid Raza' ? 'Senior Dental Surgeon' : 'Dermatology & Dental Surgery Specialist')}</p>
+              <p className="text-xs text-gray-500 mt-0.5 text-right">{activeDoctor?.credentials ? activeDoctor.credentials.map((c: any) => c.label.split('—')[0].trim()).join(', ') : 'BDS, MDS (Oral & Maxillofacial)'}</p>
+              <div className="mt-3 flex items-center justify-end gap-1.5 text-gray-800">
+                <Phone size={14} />
+                <p className="text-sm font-bold tracking-wider">+91 7007276542</p>
+              </div>
+            </div>
           </div>
           
           <div className="bg-gray-50 rounded-xl p-4 mb-6 flex justify-between">
