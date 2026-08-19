@@ -7,7 +7,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import { useLanguage } from '@/components/providers/LanguageProvider'
 
 type LoginResult = {
-  role: 'admin' | 'user'
+  role: 'admin' | 'staff' | 'user'
   name: string
 } | null
 

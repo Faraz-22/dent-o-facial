@@ -14,7 +14,7 @@ export async function POST(request: Request) {
 
     // 1. Check Admin Credentials
     // In production, ADMIN_PASSWORD should be set as an env var.
-    if (adminPassword && password === adminPassword && (email.toLowerCase() === adminEmail.toLowerCase() || email === 'admin')) {
+    if (adminPassword && password === adminPassword && (email.trim().toLowerCase() === adminEmail.toLowerCase() || email.trim() === 'admin')) {
       const cookieStore = await cookies()
       cookieStore.set('admin-auth', 'true', {
         httpOnly: true,
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     }
 
     // 1.5 Check Staff Credentials
-    if (email.toLowerCase() === 'staff@dentofacial.com' && password === 'staff123') {
+    if (email.trim().toLowerCase() === 'staff@dentofacial.com' && password === 'staff123') {
       const cookieStore = await cookies()
       cookieStore.set('admin-auth', 'staff', {
         httpOnly: true,
