@@ -321,6 +321,7 @@ export function PatientsCRM() {
     <>
       <style>{`
         @media print {
+          @page { margin: 0; }
           body * {
             visibility: hidden;
           }
@@ -332,7 +333,7 @@ export function PatientsCRM() {
             left: 0;
             top: 0;
             width: 100%;
-            padding: 20px;
+            padding: 40px;
           }
           /* Hide scrollbars during print */
           ::-webkit-scrollbar {
@@ -344,7 +345,7 @@ export function PatientsCRM() {
       {/* Hidden Printable Area */}
       {printingRecord && (
         <div id="print-prescription-area" className="bg-white text-black min-h-screen p-8 max-w-[800px] mx-auto font-sans">
-          <div className="flex justify-between items-start border-b-2 border-gray-200 pb-6 mb-8">
+          <div className="flex justify-between items-start border-b-2 border-gray-200 pb-6 mb-8 mt-8">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center border-2 border-blue-600">
                 <span className="text-2xl font-black text-blue-600">D</span>
@@ -354,10 +355,9 @@ export function PatientsCRM() {
                 <p className="text-sm text-gray-500 font-medium tracking-widest uppercase">Luxury Dental & Dermatology</p>
               </div>
             </div>
-            <div className="text-right">
+            <div className="text-right mt-2">
               <p className="font-bold text-gray-800">Dr. Hadi Raza</p>
               <p className="text-xs text-gray-500">BDS, MDS (Oral & Maxillofacial)</p>
-              <p className="text-xs text-gray-500 mt-1">Ph: +91 7488404161</p>
             </div>
           </div>
           

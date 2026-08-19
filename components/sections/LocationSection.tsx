@@ -20,7 +20,7 @@ export default function LocationSection() {
   // Reverse the array so the second location (e.g., Banmankhi) shows up first
   const reversedLocations = [...locations].reverse()
   const cta = data?.cta as Record<string, unknown> | undefined
-  const whatsappNumber = cta?.whatsappNumber as string || (data?.hero as any)?.whatsappNumber || '917488404161'
+  const whatsappNumber = cta?.whatsappNumber as string || (data?.hero as any)?.whatsappNumber || ''
 
   const defaultLocations: Location[] = [
     {

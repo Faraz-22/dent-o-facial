@@ -35,8 +35,8 @@ export default function BookingSuccessPage() {
     )
   }
 
-  // Choose phone number based on clinic
-  const clinicPhone = bookingData.clinic.includes('Banmankhi') ? '7488404161' : '6201231060'
+  // Get dynamic phone numbers if available from sessionStorage or fallback to empty string
+  const clinicPhone = bookingData.clinic.includes('Banmankhi') ? '' : ''
   const waMessage = WA_MESSAGES.bookingConfirmation(
     bookingData.patientName,
     bookingData.clinic,

@@ -6,7 +6,7 @@ import { useSiteContent } from '@/hooks/useSiteContent'
 export default function FloatingButtons() {
   const { data } = useSiteContent()
   const cta = data?.cta as Record<string, unknown> | undefined
-  const whatsappNumber = cta?.whatsappNumber as string || (data?.hero as any)?.whatsappNumber || '917488404161'
+  const whatsappNumber = cta?.whatsappNumber as string || (data?.hero as any)?.whatsappNumber || ''
   const whatsappMessage = cta?.whatsappMessage as string || 'Hello, I would like to book an appointment.'
   const phoneNumber = cta?.phoneNumber as string || '+91 98765 43210'
 

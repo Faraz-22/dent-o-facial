@@ -86,7 +86,7 @@ export default function HeroSection() {
 
             <div className="flex flex-wrap gap-4 mb-12">
               <a
-                href={`https://wa.me/${(data?.cta as any)?.whatsappNumber || hero?.whatsappNumber || '917488404161'}?text=${encodeURIComponent(hero?.whatsappMessage || 'Hello, I want to book an appointment.')}`}
+                href={`https://wa.me/${(data?.cta as any)?.whatsappNumber || hero?.whatsappNumber || ''}?text=${encodeURIComponent(hero?.whatsappMessage || 'Hello, I want to book an appointment.')}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-gold px-8 py-4 rounded-full text-sm font-medium tracking-wide flex items-center gap-2"

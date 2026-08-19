@@ -9,7 +9,7 @@ export default function CTASection() {
 
   const headline = cta?.headline as string || 'Book Your Consultation'
   const subHeadline = cta?.subHeadline as string || 'Take the first step toward your transformation. Consult with Dr. Hadi Raza and discover what premium dermatology and dental care can do for you.'
-  const whatsappNumber = cta?.whatsappNumber as string || (data?.hero as any)?.whatsappNumber || '917488404161'
+  const whatsappNumber = cta?.whatsappNumber as string || (data?.hero as any)?.whatsappNumber || ''
   const whatsappMessage = cta?.whatsappMessage as string || 'Hello, I would like to book a consultation with Dr. Hadi Raza.'
   const phoneNumber = cta?.phoneNumber as string || '+91 98765 43210'
   const trustIndicators = (cta?.trustIndicators as string[]) || ['Free Initial Consultation', 'Personalized Treatment Plans', 'EMI Available', '2 Clinic Locations']
