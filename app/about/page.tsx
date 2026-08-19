@@ -215,7 +215,7 @@ export default function AboutPage() {
         const imageKey = doctor.imageKey || 'aboutImage'
         const imageUrl = (data?.images as Record<string, string>)?.[imageKey]
         const aboutCredentials = doctor.aboutCredentials || []
-        const bioParagraphs = longBio.split('\n\n').filter(Boolean)
+        const bioParagraphs = longBio.split(/\\n\\n|\\n|\n\n|\n/).filter(Boolean)
         const isEven = index % 2 === 0
 
         return (
