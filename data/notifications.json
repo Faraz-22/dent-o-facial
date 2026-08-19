@@ -14,5 +14,13 @@
     "type": "Lead",
     "read": true,
     "createdAt": "2026-07-28T17:47:26.065Z"
+  },
+  {
+    "id": "1787131911197",
+    "title": "New Appointment",
+    "message": "sazia booked an appointment for Consultation at Banmankhi.",
+    "type": "Appointment",
+    "read": false,
+    "createdAt": "2026-08-19T09:31:51.197Z"
   }
 ]

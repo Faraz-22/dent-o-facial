@@ -13,7 +13,7 @@ const UserSchema = new mongoose.Schema({
 const AppointmentSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
   patientName: { type: String, required: true },
-  email: { type: String, required: true },
+  email: { type: String },
   phone: { type: String, required: true },
   treatment: { type: String, required: true },
   clinic: { type: String, required: true },
