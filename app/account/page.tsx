@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Calendar, User, Clock, MapPin, Sparkles, LogOut, FileText, Phone, MessageCircle, Star } from 'lucide-react'
+import { Calendar, User, Clock, MapPin, Sparkles, LogOut, FileText, Phone, MessageCircle, Star, ChevronDown, ChevronUp } from 'lucide-react'
 import { useLanguage } from '@/components/providers/LanguageProvider'
 import { useSiteContent } from '@/hooks/useSiteContent'
 
@@ -25,6 +25,7 @@ export default function PatientDashboard() {
   const [reviewText, setReviewText] = useState('')
   const [reviewTreatment, setReviewTreatment] = useState('')
   const [reviewStatus, setReviewStatus] = useState<'idle' | 'submitting' | 'success'>('idle')
+  const [expandedTreatmentId, setExpandedTreatmentId] = useState<string | null>(null)
 
   const { t } = useLanguage()
 
@@ -168,66 +169,88 @@ export default function PatientDashboard() {
                   const tCost = treatment.totalCost || 0
                   const tSum = (treatment.paymentHistory || []).reduce((sum: number, p: any) => sum + p.amount, 0)
                   const tDues = Math.max(0, tCost - tSum)
+                  const isExpanded = expandedTreatmentId === treatment.id
                   
                   return (
-                    <div key={treatment.id} className="bg-white p-8 rounded-3xl border border-cream shadow-sm hover:shadow-md transition-shadow">
-                      <h2 className="font-playfair text-2xl text-charcoal mb-2">{treatment.name}</h2>
-                      <p className="text-xs text-charcoal-muted mb-6 pb-4 border-b border-cream-dark">
-                        Started on {new Date(treatment.createdAt).toLocaleDateString()}
-                      </p>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {treatment.sessionsRequired > 0 && (
-                          <div>
-                            <span className="text-xs font-semibold text-charcoal-muted uppercase tracking-widest block mb-3">Treatment Sessions</span>
-                            <div className="flex justify-between text-sm mb-2 font-medium text-charcoal">
-                              <span>{treatment.sessionsCompleted} Completed</span>
-                              <span>{treatment.sessionsRequired} Total</span>
-                            </div>
-                            <div className="w-full h-3 bg-cream-dark rounded-full overflow-hidden">
-                              <div 
-                                className="h-full bg-gold transition-all duration-1000 ease-out" 
-                                style={{ width: `${Math.min((treatment.sessionsCompleted / treatment.sessionsRequired) * 100, 100)}%` }} 
-                              />
-                            </div>
+                    <div key={treatment.id} className="bg-white rounded-3xl border border-cream shadow-sm hover:shadow-md transition-all overflow-hidden">
+                      {/* Header (Clickable) */}
+                      <div 
+                        className="p-8 cursor-pointer flex items-center justify-between group"
+                        onClick={() => setExpandedTreatmentId(isExpanded ? null : treatment.id)}
+                      >
+                        <div>
+                          <h2 className="font-playfair text-2xl text-charcoal mb-1 group-hover:text-gold transition-colors">{treatment.name}</h2>
+                          <p className="text-xs text-charcoal-muted">
+                            Started on {new Date(treatment.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          {tDues > 0 && !isExpanded && (
+                            <span className="text-sm font-bold text-red-500 bg-red-50 px-3 py-1 rounded-full">Dues: ₹{tDues.toLocaleString()}</span>
+                          )}
+                          <div className="w-10 h-10 rounded-full bg-cream flex items-center justify-center text-charcoal-muted group-hover:bg-gold/10 group-hover:text-gold transition-colors">
+                            {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                           </div>
-                        )}
-                        {tDues > 0 && (
-                          <div>
-                            <span className="text-xs font-semibold text-charcoal-muted uppercase tracking-widest block mb-3">Outstanding Dues</span>
-                            <div className="text-3xl font-bold text-red-500">
-                              ₹{tDues.toLocaleString()}
-                            </div>
-                            <p className="text-xs text-charcoal-muted mt-2">Please clear your dues at the clinic during your next visit.</p>
-                          </div>
-                        )}
+                        </div>
                       </div>
                       
-                      {treatment.paymentHistory && treatment.paymentHistory.length > 0 && (
-                        <div className="mt-8 pt-6 border-t border-cream-dark">
-                          <h3 className="font-playfair text-xl text-charcoal mb-4">Payment History</h3>
-                          <div className="overflow-x-auto">
-                            <table className="w-full text-left text-sm text-charcoal">
-                              <thead className="bg-cream border-b border-cream-dark">
-                                <tr>
-                                  <th className="px-4 py-3 font-semibold text-charcoal-muted uppercase tracking-wider text-xs whitespace-nowrap">Date</th>
-                                  <th className="px-4 py-3 font-semibold text-charcoal-muted uppercase tracking-wider text-xs whitespace-nowrap">Amount</th>
-                                  <th className="px-4 py-3 font-semibold text-charcoal-muted uppercase tracking-wider text-xs whitespace-nowrap">Method</th>
-                                  <th className="px-4 py-3 font-semibold text-charcoal-muted uppercase tracking-wider text-xs whitespace-nowrap">Notes</th>
-                                </tr>
-                              </thead>
-                              <tbody className="divide-y divide-cream-dark">
-                                {treatment.paymentHistory.map((p: any) => (
-                                  <tr key={p.id} className="hover:bg-cream/30 transition">
-                                    <td className="px-4 py-3 font-medium whitespace-nowrap">{new Date(p.date).toLocaleDateString()}</td>
-                                    <td className="px-4 py-3 font-bold text-green-600 whitespace-nowrap">₹{p.amount.toLocaleString()}</td>
-                                    <td className="px-4 py-3 whitespace-nowrap">{p.method}</td>
-                                    <td className="px-4 py-3 text-xs text-charcoal-muted">{p.notes || '-'}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
+                      {/* Collapsible Content */}
+                      {isExpanded && (
+                        <div className="px-8 pb-8 animate-fade-in border-t border-cream-dark pt-6 mt-2">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            {treatment.sessionsRequired > 0 && (
+                              <div>
+                                <span className="text-xs font-semibold text-charcoal-muted uppercase tracking-widest block mb-3">Treatment Sessions</span>
+                                <div className="flex justify-between text-sm mb-2 font-medium text-charcoal">
+                                  <span>{treatment.sessionsCompleted} Completed</span>
+                                  <span>{treatment.sessionsRequired} Total</span>
+                                </div>
+                                <div className="w-full h-3 bg-cream-dark rounded-full overflow-hidden">
+                                  <div 
+                                    className="h-full bg-gold transition-all duration-1000 ease-out" 
+                                    style={{ width: `${Math.min((treatment.sessionsCompleted / treatment.sessionsRequired) * 100, 100)}%` }} 
+                                  />
+                                </div>
+                              </div>
+                            )}
+                            {tDues > 0 && (
+                              <div>
+                                <span className="text-xs font-semibold text-charcoal-muted uppercase tracking-widest block mb-3">Outstanding Dues</span>
+                                <div className="text-3xl font-bold text-red-500">
+                                  ₹{tDues.toLocaleString()}
+                                </div>
+                                <p className="text-xs text-charcoal-muted mt-2">Please clear your dues at the clinic during your next visit.</p>
+                              </div>
+                            )}
                           </div>
+                          
+                          {treatment.paymentHistory && treatment.paymentHistory.length > 0 && (
+                            <div className="mt-8 pt-6 border-t border-cream-dark">
+                              <h3 className="font-playfair text-xl text-charcoal mb-4">Payment History</h3>
+                              <div className="overflow-x-auto">
+                                <table className="w-full text-left text-sm text-charcoal">
+                                  <thead className="bg-cream border-b border-cream-dark">
+                                    <tr>
+                                      <th className="px-4 py-3 font-semibold text-charcoal-muted uppercase tracking-wider text-xs whitespace-nowrap">Date</th>
+                                      <th className="px-4 py-3 font-semibold text-charcoal-muted uppercase tracking-wider text-xs whitespace-nowrap">Amount</th>
+                                      <th className="px-4 py-3 font-semibold text-charcoal-muted uppercase tracking-wider text-xs whitespace-nowrap">Method</th>
+                                      <th className="px-4 py-3 font-semibold text-charcoal-muted uppercase tracking-wider text-xs whitespace-nowrap">Notes</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-cream-dark">
+                                    {treatment.paymentHistory.map((p: any) => (
+                                      <tr key={p.id} className="hover:bg-cream/30 transition">
+                                        <td className="px-4 py-3 font-medium whitespace-nowrap">{new Date(p.date).toLocaleDateString()}</td>
+                                        <td className="px-4 py-3 font-bold text-green-600 whitespace-nowrap">₹{p.amount.toLocaleString()}</td>
+                                        <td className="px-4 py-3 whitespace-nowrap">{p.method}</td>
+                                        <td className="px-4 py-3 text-xs text-charcoal-muted">{p.notes || '-'}</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
