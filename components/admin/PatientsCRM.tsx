@@ -302,7 +302,7 @@ export function PatientsCRM() {
         <div className="fixed inset-0 z-50 flex justify-end">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={closeSlideOver} />
           
-          <div className="relative w-full max-w-xl bg-[#0f111a]/95 h-full shadow-[0_0_40px_rgba(0,0,0,0.5)] flex flex-col border-l border-white/10 animate-slide-in-right backdrop-blur-2xl">
+          <div className="relative w-full max-w-4xl bg-[#0f111a]/95 h-full shadow-[0_0_40px_rgba(0,0,0,0.5)] flex flex-col border-l border-white/10 animate-slide-in-right backdrop-blur-2xl">
             {/* Header */}
             <div className="p-8 border-b border-white/5 bg-white/[0.02] flex items-start justify-between shrink-0">
               <div className="flex items-center gap-5">
