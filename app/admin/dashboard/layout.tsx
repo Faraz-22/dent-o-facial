@@ -9,7 +9,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     fetch('/api/auth/check', { cache: 'no-store' })
       .then(r => r.json())
-      .then(data => data.ok && data.role === 'admin' ? null : router.push('/admin'))
+      .then(data => data.ok && (data.role === 'admin' || data.role === 'staff') ? null : router.push('/admin'))
       .catch(() => router.push('/admin'))
   }, [router])
 
