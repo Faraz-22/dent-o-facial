@@ -356,12 +356,10 @@ export function PatientsCRM() {
 
       {/* Hidden Printable Area */}
       {printingRecord && (
-        <div id="print-prescription-area" className="bg-white text-black min-h-screen p-8 max-w-[800px] mx-auto font-sans">
+        <div id="print-prescription-area" className="bg-white text-black min-h-[297mm] flex flex-col p-8 max-w-[800px] mx-auto font-sans relative">
           <div className="flex justify-between items-start border-b-2 border-gray-200 pb-4 mb-4">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center border-2 border-blue-600 shrink-0">
-                <span className="text-2xl font-black text-blue-600">D</span>
-              </div>
+              <img src="/uploads/prescription-logo.jpg" alt="Dent-O-Facial Logo" className="w-20 h-20 object-contain shrink-0" />
               <div>
                 <h1 className="text-xl font-black text-gray-900 tracking-tight leading-tight max-w-[300px]">Premium Dental, Braces, Implants<br/>and Facial Trauma Centre</h1>
               </div>
