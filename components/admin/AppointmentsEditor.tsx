@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Calendar, Phone, Check, X, Clock, MessageCircle } from 'lucide-react'
+import { Calendar, Phone, Check, X, Clock, MessageCircle, Search, Filter } from 'lucide-react'
 import { buildWhatsAppUrl, WA_MESSAGES } from '@/lib/whatsapp'
 
 export function AppointmentsEditor() {
@@ -12,6 +12,8 @@ export function AppointmentsEditor() {
   const [bookingForm, setBookingForm] = useState({
     patientName: '', phone: '', email: '', treatment: 'Consultation', clinic: 'Purnea', preferredDate: new Date().toISOString().split('T')[0], preferredTime: '10:00'
   })
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState('All')
 
   useEffect(() => {
     fetchAppointments()
@@ -64,6 +66,20 @@ export function AppointmentsEditor() {
     }
   }
 
+  const filteredAppointments = appointments.filter(appt => {
+    const searchString = searchTerm.toLowerCase();
+    const matchesSearch = 
+      !searchTerm ||
+      appt.patientName?.toLowerCase().includes(searchString) ||
+      appt.phone?.includes(searchTerm) ||
+      appt.opdNumber?.toString() === searchTerm ||
+      appt.patientSerialCode?.toLowerCase().includes(searchString);
+      
+    const matchesStatus = statusFilter === 'All' || appt.status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
+
   if (loading) return <div className="p-4 text-gray-400">Loading appointments...</div>
 
   if (appointments.length === 0) {
@@ -81,20 +97,61 @@ export function AppointmentsEditor() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <h2 className="text-xl font-bold text-white">Appointments</h2>
-        <button onClick={() => setShowBookingModal(true)} className="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg transition flex items-center gap-2">
-          <span className="text-lg leading-none">+</span> Book Walk-in
-        </button>
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+          <div className="relative w-full sm:w-64">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+            <input 
+              type="text" 
+              placeholder="Search name, phone, OPD or ID..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="w-full bg-[#1a1a2e] border border-gray-700 rounded-xl pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
+            />
+          </div>
+          <select 
+            value={statusFilter}
+            onChange={e => setStatusFilter(e.target.value)}
+            className="w-full sm:w-auto bg-[#1a1a2e] border border-gray-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
+          >
+            <option value="All">All Status</option>
+            <option value="New">New</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Visited">Visited</option>
+            <option value="Cancelled">Cancelled</option>
+            <option value="Follow-up Needed">Follow-up Needed</option>
+          </select>
+          <button onClick={() => setShowBookingModal(true)} className="w-full sm:w-auto bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg transition flex items-center justify-center gap-2 whitespace-nowrap">
+            <span className="text-lg leading-none">+</span> Book
+          </button>
+        </div>
       </div>
-      {appointments.map(appt => {
+      {filteredAppointments.length === 0 && (
+        <div className="p-8 text-center text-gray-500 border border-gray-800 rounded-2xl bg-[#1a1a2e]">
+          No appointments found matching your filters.
+        </div>
+      )}
+      {filteredAppointments.map(appt => {
         const waUrl = buildWhatsAppUrl(appt.phone, WA_MESSAGES.adminFollowUp(appt.patientName, appt.treatment))
         return (
           <div key={appt.id} className="p-5 rounded-2xl bg-[#1a1a2e] border border-gray-800">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
               <div>
-                <h3 className="text-white font-medium text-lg">{appt.patientName}</h3>
-                <p className="text-gray-400 text-sm flex items-center gap-2 mt-1">
+                <div className="flex items-center flex-wrap gap-2 mb-1">
+                  <h3 className="text-white font-medium text-lg">{appt.patientName}</h3>
+                  {appt.opdNumber && (
+                    <span className="bg-amber-600/20 text-amber-500 px-2 py-0.5 rounded text-xs font-bold border border-amber-600/30">
+                      OPD: {appt.opdNumber}
+                    </span>
+                  )}
+                  {appt.patientSerialCode && (
+                    <span className="bg-blue-600/20 text-blue-400 px-2 py-0.5 rounded text-xs font-medium border border-blue-600/30">
+                      ID: #{appt.patientSerialCode}
+                    </span>
+                  )}
+                </div>
+                <p className="text-gray-400 text-sm flex items-center gap-2">
                   <Phone size={14} /> {appt.phone}
                 </p>
               </div>

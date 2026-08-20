@@ -21,6 +21,8 @@ const AppointmentSchema = new mongoose.Schema({
   preferredTime: { type: String, required: true },
   notes: { type: String },
   status: { type: String, default: 'New' }, // New, Confirmed, Cancelled, Visited
+  opdNumber: { type: Number },
+  patientSerialCode: { type: String },
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -125,6 +127,7 @@ const PatientProfileSchema = new mongoose.Schema({
   email: { type: String, sparse: true },
   phone: { type: String, sparse: true },
   name: { type: String },
+  serialCode: { type: String, sparse: true },
   // Legacy global fields (kept for migration fallback, will be phased out)
   totalPayments: { type: Number, default: 0 },
   dues: { type: Number, default: 0 },
@@ -159,6 +162,11 @@ const PatientProfileSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 
+const CounterSchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true }, // e.g. "patientSerial"
+  seq: { type: Number, default: 0 }
+});
+
 export const User = mongoose.models.User || mongoose.model('User', UserSchema);
 export const Appointment = mongoose.models.Appointment || mongoose.model('Appointment', AppointmentSchema);
 export const RecordModel = mongoose.models.Record || mongoose.model('Record', RecordSchema);
@@ -170,3 +178,4 @@ export const Aftercare = mongoose.models.Aftercare || mongoose.model('Aftercare'
 export const ImageModel = mongoose.models.Image || mongoose.model('Image', ImageSchema);
 export const UserTestimonial = mongoose.models.UserTestimonial || mongoose.model('UserTestimonial', UserTestimonialSchema);
 export const PatientProfile = mongoose.models.PatientProfile || mongoose.model('PatientProfile', PatientProfileSchema);
+export const Counter = mongoose.models.Counter || mongoose.model('Counter', CounterSchema);

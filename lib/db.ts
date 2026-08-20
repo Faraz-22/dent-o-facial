@@ -15,6 +15,8 @@ export interface Appointment {
   message?: string
   status: 'New' | 'Confirmed' | 'Visited' | 'Cancelled' | 'Follow-up Needed'
   adminNotes?: string
+  opdNumber?: number
+  patientSerialCode?: string
   createdAt: string
   userId?: string // Link to logged-in user if applicable
 }
